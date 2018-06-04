@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+    <meta charset="utf-8">
+    <head>
+        <title>360 Giving Dashboard - timeline</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.1/semantic.min.css" integrity="sha256-oDCP2dNW17Y1QhBwQ+u2kLaKxoauWvIGks3a4as9QKs="
+            crossorigin="anonymous" />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.13.0/d3.js" integrity="sha256-j2LsvgOlQFIb2Mphb+tX7d5pNmFdpsJU+s5GNo3z63g="
+            crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+            crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.1/semantic.min.js" integrity="sha256-RKNmL9+6j/3jB72OcIg8OQr91Bi4OgFPnKQOFS1O+fo="
+            crossorigin="anonymous"></script>
+    </head>
+    <body>
+        <div class="ui container">
+            <h1 class="ui header">360 Giving - data dashboard</h1>
+            <div class="ui pointing secondary menu" id="tab-menu">
+                <a class="item active" data-tab="overview">Overview</a>
+                <a class="item" data-tab="timeline">Timeline</a>
+                <a class="item" data-tab="identifiers">Identifiers</a>
+            </div>
+            <div class="ui bottom attached tab active" data-tab="overview">
+                <table class="ui very basic table">
+                    <thead>
+                        <tr>
+                            <th rowspan="2" class="four wide">Fund</th>
+                            <th colspan="3">Fields</th>
+                            <th rowspan="2">Grants</th>
+                            <th rowspan="2">Licence</th>
+                        </tr>
+                        <tr>
+                            <th>Required</th>
+                            <th>Recommended</th>
+                            <th>Optional</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Big Foundation<br>
+                                <small style="padding-left: 40px;">our_grants_2000_2017.csv</small>
+                            </td>
+                            <td><span class="ui horizontal circular label green">6 / 6</span></td>
+                            <td><span class="ui horizontal circular label red">0 / 4</span></td>
+                            <td><span class="ui horizontal circular label grey">5 / 12</span></td>
+                            <td class="right aligned">50,355</td>
+                            <td><span class="ui horizontal label green">Open Government Licence</span></td>
+                        </tr>
+                        <tr>
+                            <td>Little Foundation</td>
+                            <td class="positive"><i class="large green checkmark icon"></i>6 / 6</td>
+                            <td class="warning"><i class="large attention icon"></i>1 / 4</td>
+                            <td class="positive"><i class="large green checkmark icon"></i>12 / 12</td>
+                            <td class="right aligned">450</td>
+                            <td><span class="ui horizontal label orange">CC-BY-NC</span></td>
+                        </tr>
+                        <tr>
+                            <td style="border-top: 0px;"><small style="padding-left: 40px;">our_grants_2015.csv</small></td>
+                            <td style="border-top: 0px;"><span class="ui horizontal label green">6 / 6</span></td>
+                            <td style="border-top: 0px;"><span class="ui horizontal label orange">1 / 4</span></td>
+                            <td style="border-top: 0px;"><span class="ui horizontal label grey">5 / 12</span></td>
+                            <td style="border-top: 0px;" class="right aligned">150</td>
+                            <td style="border-top: 0px;"><span class="ui horizontal label orange">CC-BY-NC</span></td>
+                        </tr>
+                        <tr>
+                            <td style="border-top: 0px;"><small style="padding-left: 40px;">our_grants_2016.csv</small></td>
+                            <td style="border-top: 0px;"><span class="ui horizontal label green">6 / 6</span></td>
+                            <td style="border-top: 0px;"><span class="ui horizontal label orange">1 / 4</span></td>
+                            <td style="border-top: 0px;"><span class="ui horizontal label grey">5 / 12</span></td>
+                            <td style="border-top: 0px;" class="right aligned">300</td>
+                            <td style="border-top: 0px;"><span class="ui horizontal label orange">CC-BY-NC</span></td>
+                        </tr>
+                        <tr>
+                            <td>Purple Foundation</td>
+                            <td class="positive"><i class="large green checkmark icon"></i>6 / 6</td>
+                            <td class="error"><i class="large red attention icon"></i>0 / 4</td>
+                            <td class="warning"><i class="large attention icon"></i>5 / 12</td>
+                            <td class="right aligned">1,400</td>
+                            <td><span class="ui horizontal label green">Open Government Licence</span></td>
+                        </tr>
+                        <tr>
+                            <td>Hello Trust</td>
+                            <td><span class="ui horizontal label red">5 / 6</span></td>
+                            <td><span class="ui horizontal label red">0 / 4</span></td>
+                            <td><span class="ui horizontal label grey">5 / 12</span></td>
+                            <td class="right aligned">12</td>
+                            <td><span class="ui horizontal label green">Open Government Licence</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="ui bottom attached tab" data-tab="timeline">
+                <table class="ui very basic table">
+                    <thead>
+                        <tr>
+                            <th rowspan="1" class="four wide">Fund</th>
+                            <th style="width:400px;">Timescale<br>
+                                <div class="timeline-axis"></div></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Big Foundation<br>
+                                <small style="padding-left: 40px;">our_grants_2000_2017.csv</small>
+                            </td>
+                            <td>
+                                <div class="timeline" data-startdate="1996" data-enddate="2018"></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Little Foundation</td>
+                            <td>
+                                <div class="timeline" data-startdate="2015" data-enddate="2017"></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="border-top: 0px;"><small style="padding-left: 40px;">our_grants_2015.csv</small></td>
+                            <td style="border-top: 0px;">
+                                <div class="timeline" data-startdate="2015" data-enddate="2016"></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="border-top: 0px;"><small style="padding-left: 40px;">our_grants_2015.csv</small></td>
+                            <td style="border-top: 0px;">
+                                <div class="timeline" data-startdate="2016" data-enddate="2017"></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Purple Foundation</td>
+                            <td>
+                                <div class="timeline" data-startdate="2004" data-enddate="2012"></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Hello Trust</td>
+                            <td>
+                                <div class="timeline" data-startdate="2016" data-enddate="2018"></div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <script>
+            $('#tab-menu .item').tab();
+        </script>
+        <script>
+            var minstartdate = 1996;
+            var maxstartdate = 2018;
+            var divwidth = 800;
+            var divmargin = 20;
+            var divcolor = "rgb(156, 32, 97)";
+            var get_position = function(d){
+                var div = divwidth - (divmargin * 2)
+                return divmargin + Math.round(((d - minstartdate) / (maxstartdate - minstartdate) ) * div);
+            }
+            var datadivs = d3.selectAll(".timeline")
+                .datum(function () { return this.dataset; })
+                .append("svg").attr("width", divwidth).attr("height", 30);
+
+            datadivs.append("circle").attr("cx", function(d){
+                    return get_position(d.startdate);
+                }).attr("cy", 15).attr("r", 5).style("fill", divcolor);
+            datadivs.append("circle").attr("cx", function(d){
+                    return get_position(d.enddate);
+                }).attr("cy", 15).attr("r", 5).style("fill", divcolor);
+            datadivs.append("line").attr("x1", function (d) {
+                    return get_position(d.startdate);
+                }).attr("y1", 15).attr("x2", function(d){
+                    return get_position(d.enddate);
+                }).attr("y2", 15).style("stroke", divcolor).attr("stroke-width", 5);
+
+            var timeline_axis = d3.selectAll(".timeline-axis")
+                .append("svg").attr("width", divwidth).attr("height", 50);
+            timeline_axis.append("circle").attr("cx", function (d) {
+                    return get_position(minstartdate);
+                }).attr("cy", 15).attr("r", 2).style("fill", "grey");
+            timeline_axis.append("circle").attr("cx", function (d) {
+                    return get_position(maxstartdate);
+                }).attr("cy", 15).attr("r", 2).style("fill", "grey");
+            timeline_axis.append("line").attr("x1", function (d) {
+                    return get_position(minstartdate);
+                }).attr("y1", 15).attr("x2", function(d){
+                    return get_position(maxstartdate);
+                }).attr("y2", 15).style("stroke", "grey").attr("stroke-width", 2);
+            timeline_axis.append("text").attr("x", function (d) {
+                    return get_position(minstartdate);
+                }).attr("y", 30).text(minstartdate).style("fill", "grey");
+            timeline_axis.append("text").attr("x", function (d) {
+                    return get_position(maxstartdate);
+                }).attr("y", 30).attr("text-anchor", "end").text(maxstartdate).style("fill", "grey");
+        </script>
+    </body>
+</html>
