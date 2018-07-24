@@ -20,6 +20,7 @@ from charts import *
 from prepare_data import prepare_data, fetch_geocodes
 
 app = dash.Dash(__name__)
+server = app.server
 
 REDIS_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
 r = redis.StrictRedis.from_url(REDIS_URL)
