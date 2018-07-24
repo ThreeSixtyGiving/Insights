@@ -43,6 +43,15 @@ def prepare_data(df, cache={}):
     # ensure correct column types
     df.loc[:, "Award Date"] = pd.to_datetime(df["Award Date"])
 
+    # check column names for typos
+    wrongly_spelled = ['Amount Awarded', 'Funding Org:Name']
+    renames = {}
+    for c in df.columns:
+        for w in wrongly_spelled:
+            if c.lower() == w.lower() and c != w:
+                renames[c] = w
+    df = df.rename(columns=renames)
+
     # add additional columns
     df.loc[:, "Award Date:Year"] = df["Award Date"].dt.year
     df.loc[:, "Recipient Org:Identifier:Scheme"] = df["Recipient Org:Identifier"].apply(
