@@ -136,13 +136,13 @@ def get_dataframe(contents, filename, date):
 
 def save_to_cache(fileid, df):
     r.set(fileid, pickle.dumps(df))
-    print("Dataframe [{}] saved to redis".format(fileid))
+    app.server.logger.info("Dataframe [{}] saved to redis".format(fileid))
 
 
 def get_from_cache(fileid):
     df = r.get(fileid)
     if df:
-        print("Retrieved dataframe [{}] from redis".format(fileid))
+        app.server.logger.info("Retrieved dataframe [{}] from redis".format(fileid))
         return pickle.loads(df)
 
 def get_fileid(contents, filename, date):
