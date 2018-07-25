@@ -6,6 +6,10 @@ import inflect
 import humanize
 
 
+DEFAULT_TABLE_FIELDS = ["Title", "Description", "Amount Awarded", 
+                        "Award Date", "Recipient Org:Name", 
+                        "Grant Programme:Title"]
+
 
 def get_bar_data(values, name="Grants", chart_type='bar'):
     titles = [i[0] for i in values.iteritems()]
@@ -115,9 +119,10 @@ def organisation_age_chart(df):
         } 
     )
 
-def dataframe_datatable(df):
+def dataframe_datatable(df, max_length=50, fields=DEFAULT_TABLE_FIELDS):
+    rows = df.sample(max_length) if len(df)>max_length else df
     return dt.DataTable(
-        rows=df.reset_index()[["Title", "Description", "Amount Awarded", "Award Date", "Recipient Org:Name", "Grant Programme:Title"]].to_dict('records'), 
+        rows=rows.reset_index()[fields].to_dict('records'), 
         id="df-datatable",
         editable=False,
         row_selectable=False
