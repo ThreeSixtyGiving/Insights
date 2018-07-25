@@ -10,6 +10,7 @@ from app import app
 from apps import data_display, file_load
 from load_data import get_cache
 
+server = app.server
 
 # Append an externally hosted CSS stylesheet
 app.css.append_css({
