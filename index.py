@@ -9,6 +9,7 @@ import dash_resumable_upload
 from app import app
 from apps import data_display, file_load
 from load_data import get_cache
+from prepare_data import fetch_geocodes
 
 server = app.server
 

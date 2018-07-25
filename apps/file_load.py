@@ -11,7 +11,7 @@ import pandas as pd
 
 from app import app
 from load_data import get_cache, get_from_cache, save_to_cache
-from prepare_data import prepare_data
+from prepare_data import prepare_data, fetch_geocodes
 from charts import list_to_string
 
 dash_resumable_upload.decorate_server(app.server, "uploads")
