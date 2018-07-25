@@ -57,6 +57,8 @@ def refresh_lookup_cache():
     return json.dumps(cache["geocodes"])
 
 app.layout = html.Div(className='ui container', children=[
+    dcc.Location(id='url', refresh=False),
+
     html.H1(children='360 Giving data explorer', className='ui dividing header'),
 
     html.Div(id="dashboard-container", className='ui grid', children=[
@@ -100,25 +102,6 @@ app.layout = html.Div(className='ui container', children=[
                             textLabel="Drag and Drop Here to upload!",
                             startButton=False
                         ),
-                        # dcc.Upload(
-                        #     id='upload-data',
-                        #     children=html.Div([
-                        #         'Drag and Drop or ',
-                        #         html.A('Select Files')
-                        #     ]),
-                        #     style={
-                        #         'width': '100%',
-                        #         'height': '60px',
-                        #         'lineHeight': '60px',
-                        #         'borderWidth': '1px',
-                        #         'borderStyle': 'dashed',
-                        #         'borderRadius': '5px',
-                        #         'textAlign': 'center',
-                        #         'margin': '10px'
-                        #     },
-                        #     # Allow multiple files to be uploaded
-                        #     multiple=True
-                        # ),
                     ]),
                     
                     html.Div(children=dt.DataTable(rows=[{}], id="df-datatable"), style={"display": "none"}),
@@ -171,7 +154,7 @@ def get_dataframe(filename, contents=None, date_=None):
         }
     else:
         cache = json.loads(cache.decode("utf8"))
-    if "geocodes" not in cache:
+    if "geocodes" not in cache or len(cache["geocodes"])==0:
         cache["geocodes"] = fetch_geocodes()
 
     # prepare the data
@@ -219,13 +202,15 @@ def parse_contents(contents, filename, date):
         html.H5(filename),
         (html.H6(datetime.datetime.fromtimestamp(date)) if date else ""),
         html.Hr(),  # horizontal line
-        # For debugging, display the raw contents provided by the web browser
     ])
 
 
 @app.callback(Output('output-data-id', 'children'),
-              [Input('upload-data', 'fileNames')])
-def update_file_id(fileNames):
+              [Input('upload-data', 'fileNames'),
+               Input('url', 'pathname')])
+def update_file_id(fileNames, pathname):
+    if pathname is not None and pathname.startswith("/file/"):
+        return pathname.replace("/file/", "")
     if fileNames is not None:
         return get_fileid(None, fileNames[-1], None)
 
