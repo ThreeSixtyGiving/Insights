@@ -12,6 +12,7 @@ from dash.dependencies import Input, Output, State
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_table_experiments as dt
+import dash_resumable_upload
 
 import pandas as pd
 import redis
@@ -20,6 +21,7 @@ from charts import *
 from prepare_data import prepare_data, fetch_geocodes
 
 app = dash.Dash(__name__)
+dash_resumable_upload.decorate_server(app.server, "uploads")
 server = app.server
 
 REDIS_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
@@ -65,25 +67,34 @@ app.layout = html.Div(className='ui container', children=[
 
                     html.Div(className='field', children=[
                         html.Label(children='Select file'),
-                        dcc.Upload(
+                        dash_resumable_upload.Upload(
                             id='upload-data',
-                            children=html.Div([
-                                'Drag and Drop or ',
-                                html.A('Select Files')
-                            ]),
-                            style={
-                                'width': '100%',
-                                'height': '60px',
-                                'lineHeight': '60px',
-                                'borderWidth': '1px',
-                                'borderStyle': 'dashed',
-                                'borderRadius': '5px',
-                                'textAlign': 'center',
-                                'margin': '10px'
-                            },
-                            # Allow multiple files to be uploaded
-                            multiple=True
+                            maxFiles=1,
+                            maxFileSize=1024*1024*1000,  # 100 MB
+                            filetypes=['csv', 'xlsx'],
+                            service="/upload_resumable",
+                            textLabel="Drag and Drop Here to upload!",
+                            startButton=False
                         ),
+                        # dcc.Upload(
+                        #     id='upload-data',
+                        #     children=html.Div([
+                        #         'Drag and Drop or ',
+                        #         html.A('Select Files')
+                        #     ]),
+                        #     style={
+                        #         'width': '100%',
+                        #         'height': '60px',
+                        #         'lineHeight': '60px',
+                        #         'borderWidth': '1px',
+                        #         'borderStyle': 'dashed',
+                        #         'borderRadius': '5px',
+                        #         'textAlign': 'center',
+                        #         'margin': '10px'
+                        #     },
+                        #     # Allow multiple files to be uploaded
+                        #     multiple=True
+                        # ),
                     ]),
                     
                     html.Div(children=dt.DataTable(rows=[{}], id="df-datatable"), style={"display": "none"}),
@@ -97,21 +108,32 @@ app.layout = html.Div(className='ui container', children=[
     ]),
 ])
 
-def get_dataframe(contents, filename, date):
-    content_type, content_string = contents.split(',')
+def get_dataframe(filename, contents=None, date_=None):
+    if contents:
+        content_type, content_string = contents.split(',')
 
-    decoded = base64.b64decode(content_string)
-    if filename.endswith("csv"):
-        # Assume that the user uploaded a CSV file
-        df = pd.read_csv(
-            io.StringIO(decoded.decode('utf-8')))
-    elif filename.endswith("xls") or filename.endswith("xlsx"):
-        # Assume that the user uploaded an excel file
-        df = pd.read_excel(io.BytesIO(decoded))
-    # elif filename.endswith("pkl"):
-    #     # Assume that the user uploaded an pickle file
-    #     # @TODO: switch off in production - very unsafe
-    #     df = pd.read_pickle(io.BytesIO(decoded))
+        decoded = base64.b64decode(content_string)
+        if filename.endswith("csv"):
+            # Assume that the user uploaded a CSV file
+            df = pd.read_csv(
+                io.StringIO(decoded.decode('utf-8')))
+        elif filename.endswith("xls") or filename.endswith("xlsx"):
+            # Assume that the user uploaded an excel file
+            df = pd.read_excel(io.BytesIO(decoded))
+        # elif filename.endswith("pkl"):
+        #     # Assume that the user uploaded an pickle file
+        #     # @TODO: switch off in production - very unsafe
+        #     df = pd.read_pickle(io.BytesIO(decoded))
+    elif os.path.exists(os.path.join("uploads", filename)):
+        if filename.endswith("csv"):
+            # Assume that the user uploaded a CSV file
+            df = pd.read_csv(os.path.join("uploads", filename))
+        elif filename.endswith("xls") or filename.endswith("xlsx"):
+            # Assume that the user uploaded an excel file
+            df = pd.read_excel(os.path.join("uploads", filename))
+
+    if df is None:
+        raise ValueError("No dataframe loaded")
 
     # prepare the cache
     cache = r.get("lookup_cache")
@@ -156,9 +178,9 @@ def parse_contents(contents, filename, date):
     fileid = get_fileid(contents, filename, date)
     df = get_from_cache(fileid)
     if df is None:
-        df = get_dataframe(contents, filename, date)
+        df = get_dataframe(filename, contents, date)
         # try:
-        #     df = get_dataframe(contents, filename, date)
+        #     df = get_dataframe(filename, contents, date)
         # except Exception as e:
         #     print(e)
         #     print(traceback.format_exc())
@@ -171,38 +193,26 @@ def parse_contents(contents, filename, date):
 
     return html.Div([
         html.H5(filename),
-        html.H6(datetime.datetime.fromtimestamp(date)),
+        (html.H6(datetime.datetime.fromtimestamp(date)) if date else ""),
         html.Hr(),  # horizontal line
         # For debugging, display the raw contents provided by the web browser
-        html.Div('Raw Content'),
-        html.Pre(contents[0:200] + '...', style={
-            'whiteSpace': 'pre-wrap',
-            'wordBreak': 'break-all'
-        })
     ])
 
 
-@app.callback(Output('output-data-upload', 'children'),
-              [Input('upload-data', 'contents'),
-               Input('upload-data', 'filename'),
-               Input('upload-data', 'last_modified')])
-def update_output(list_of_contents, list_of_names, list_of_dates):
-    if list_of_contents is not None:
-        children = [
-            parse_contents(c, n, d) for c, n, d in
-            zip(list_of_contents, list_of_names, list_of_dates)]
-        return children
-
 @app.callback(Output('output-data-id', 'children'),
-              [Input('upload-data', 'contents'),
-               Input('upload-data', 'filename'),
-               Input('upload-data', 'last_modified')])
-def update_file_id(list_of_contents, list_of_names, list_of_dates):
-    if list_of_contents is not None:
+              [Input('upload-data', 'fileNames')])
+def update_file_id(fileNames):
+    if fileNames is not None:
+        return get_fileid(None, fileNames[-1], None)
+
+
+@app.callback(Output('output-data-upload', 'children'),
+              [Input('upload-data', 'fileNames')])
+def update_output(fileNames):
+    if fileNames is not None:
         children = [
-            get_fileid(c, n, d) for c, n, d in
-            zip(list_of_contents, list_of_names, list_of_dates)]
-        return children[0]
+            parse_contents(None, fileNames[-1], None)]
+        return children
 
 
 @app.callback(Output('df-change-grant-programme', 'options'),
