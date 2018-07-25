@@ -32,6 +32,30 @@ app.css.append_css({
     "external_url": "https://cdn.jsdelivr.net/npm/semantic-ui@2.3.3/dist/semantic.min.css"
 })
 
+@app.server.route('/redis_cache')
+def check_redis_cache():
+    return json.dumps({"keys": {x.decode('utf8'): len(r.get(x)) for x in r.keys()}})
+
+@app.server.route('/refresh_lookup_cache')
+def refresh_lookup_cache():
+    # prepare the cache
+    cache = r.get("lookup_cache")
+
+    if cache is None:
+        cache = {
+            "charity": {},
+            "company": {},
+            "postcode": {},
+            "geocodes": {}
+        }
+    else:
+        cache = json.loads(cache.decode("utf8"))
+    
+    cache["geocodes"] = fetch_geocodes()
+
+    r.set("lookup_cache", json.dumps(cache))
+    return json.dumps(cache["geocodes"])
+
 app.layout = html.Div(className='ui container', children=[
     html.H1(children='360 Giving data explorer', className='ui dividing header'),
 
