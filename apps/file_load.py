@@ -1,16 +1,17 @@
 import hashlib
 import os
 import json
+import io
 
 import dash_core_components as dcc
 import dash_html_components as html
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 import dash_resumable_upload
 
 import pandas as pd
 
 from app import app
-from load_data import get_cache, get_from_cache, save_to_cache
+from load_data import get_cache, get_from_cache, save_to_cache, get_registry, fetch_reg_file
 from prepare_data import prepare_data, fetch_geocodes
 from charts import list_to_string
 
@@ -39,7 +40,12 @@ layout = html.Div(id="upload-container", className='ui grid', children=[
                 ]),
             ]),
             html.Div(className='row', children=[
-                html.H2('Use existing uploads'),
+                html.H2('Select file from registry'),
+                dcc.Dropdown(id='registry-list', options=[]),
+                html.Button('Fetch file', id='import-registry'),
+            ]),
+            html.Div(className='row', children=[
+                html.H2('View existing dashboards'),
                 html.Ul(id="files-list", children=[])
             ]),
         ])
@@ -47,18 +53,20 @@ layout = html.Div(id="upload-container", className='ui grid', children=[
 ])
 
 
-def get_dataframe(filename, contents=None, date_=None):
+def get_dataframe(filename, contents=None, date_=None, fileid=None):
     if contents:
-        content_type, content_string = contents.split(',')
+        if isinstance(contents, str):
+            # if it's a string we assume it's dataurl/base64 encoded
+            content_type, content_string = contents.split(',')
+            contents = base64.b64decode(content_string)
 
-        decoded = base64.b64decode(content_string)
         if filename.endswith("csv"):
             # Assume that the user uploaded a CSV file
             df = pd.read_csv(
-                io.StringIO(decoded.decode('utf-8')))
+                io.StringIO(contents.decode('utf-8')))
         elif filename.endswith("xls") or filename.endswith("xlsx"):
             # Assume that the user uploaded an excel file
-            df = pd.read_excel(io.BytesIO(decoded))
+            df = pd.read_excel(io.BytesIO(contents))
             
     elif os.path.exists(os.path.join("uploads", filename)):
         if filename.endswith("csv"):
@@ -123,13 +131,24 @@ def get_existing_files():
 
 
 @app.callback(Output('output-data-upload', 'children'),
-              [Input('upload-data', 'fileNames')])
-def update_output(fileNames):
-    print("update_output", fileNames)
+              [Input('upload-data', 'fileNames'),
+               Input('import-registry', 'n_clicks')],
+              [State('registry-list', 'value')])
+def update_output(fileNames, n_clicks, regid):
+    print("update_output", fileNames, n_clicks, regid)
+    if n_clicks is not None and regid is not None:
+        reg = get_registry()
+        regentry = [x for x in reg if x["identifier"]==regid]
+        if len(regentry)==1:
+            regentry = regentry[0]
+            url = regentry.get("distribution", [{}])[0].get("downloadURL")
+            filetype = regentry.get("datagetter_metadata", {}).get("file_type")
+            contents = fetch_reg_file(url)
+            filename = url if url.endswith(filetype) else "{}.{}".format(url, filetype)
+            return parse_contents(contents, filename, None)
+
     if fileNames is not None:
-        children = [
-            parse_contents(None, fileNames[-1], None)]
-        return children
+        return parse_contents(None, fileNames[-1], None)
 
 
 @app.callback(Output('files-list', 'children'),
@@ -140,4 +159,21 @@ def update_files_list(_):
         html.Li([
             dcc.Link(href='/file/{}'.format(k), children=list_to_string(v["funders"]))
         ]) for k, v in get_existing_files().items()
+    ]
+
+
+@app.callback(Output('registry-list', 'options'),
+              [Input('output-data-upload', 'children')])
+def update_registry_list(_):
+    print("update_registry_list", _)
+    reg = get_registry()
+    return [
+        {
+            'label': '{} ({}) [{:,.0f} grants]'.format(
+                v.get("publisher", {}).get("name", ""), 
+                v.get("title", ""),
+                v.get("datagetter_aggregates", {}).get("count", 0)
+            ),
+            'value': v.get('identifier')
+        } for v in reg if v.get("datagetter_metadata", {}).get("file_type") in ["xlsx", "csv"]
     ]

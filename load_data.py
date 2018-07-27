@@ -7,7 +7,9 @@ from flask import g
 from redis import StrictRedis
 
 import pandas as pd
+import requests
 
+THREESIXTY_STATUS_JSON = 'https://storage.googleapis.com/datagetter-360giving-output/branch/master/status.json'
 REDIS_DEFAULT_URL = 'redis://localhost:6379/0'
 DEFAULT_PREFIX    = 'file_'
 
@@ -44,6 +46,24 @@ def get_from_cache(fileid, prefix=DEFAULT_PREFIX):
     if df:
         logging.info("Retrieved dataframe [{}] from redis".format(fileid))
         return pickle.loads(df)
+
+
+# fetch the 360 giving registry
+def get_registry(reg_url=THREESIXTY_STATUS_JSON, cache_expire=60*60*24):
+    reg_key = "threesixty_status"
+    r = get_cache()
+    reg = r.get(reg_key)
+    if reg: 
+        return json.loads(reg.decode('utf8'))
+
+    reg = requests.get(reg_url).json()
+    r.set(reg_key, json.dumps(reg), ex=cache_expire)
+    return reg
+
+
+def fetch_reg_file(url):
+    reg_file = requests.get(url)
+    return reg_file.content
 
 
 def get_filtered_df(fileid, **filters):
