@@ -4,6 +4,7 @@ import dash_table_experiments as dt
 import plotly.graph_objs as go
 import inflect
 import humanize
+import babel.numbers
 
 
 DEFAULT_TABLE_FIELDS = ["Title", "Description", "Amount Awarded", 
@@ -129,10 +130,9 @@ def dataframe_datatable(df, max_length=50, fields=DEFAULT_TABLE_FIELDS):
     )
 
 def get_statistics(df):
-    amount_awarded = df["Amount Awarded"].sum()
-    amount_awarded_str = humanize.intword(amount_awarded).split(" ")
-    if len(amount_awarded_str) == 1:
-        amount_awarded_str = [humanize.intcomma(amount_awarded), ""]
+    amount_awarded = df.groupby("Currency").sum()["Amount Awarded"]
+    amount_awarded = [format_currency(amount, currency) for currency, amount in amount_awarded.items()]
+
     return html.Div(
         className='ui statistics',
         children=[
@@ -143,12 +143,28 @@ def get_statistics(df):
             html.Div(className='statistic', children=[
                 html.Div(className='value', children="{:,.0f}".format(df["Recipient Org:Identifier"].unique().size)),
                 html.Div(className='label', children=pluralize("recipient", df["Recipient Org:Identifier"].unique().size))
-            ]),
+            ])
+        ] + [
             html.Div(className='statistic', children=[
-                html.Div(className='value', children="£{}".format(amount_awarded_str[0])),
-                html.Div(className='label', children=amount_awarded_str[1])
-            ]),
+                html.Div(className='value', children=i[0]),
+                html.Div(className='label', children=i[1])
+            ]) for i in amount_awarded
         ]
+    )
+
+def format_currency(amount, currency='GBP', humanize_=True, int_format="{:,.0f}"):
+    currency="JPN"
+    if humanize_:
+        amount_str = humanize.intword(amount).split(" ")
+        if len(amount_str) == 2:
+            return (
+                babel.numbers.format_currency(float(amount_str[0]), currency, format="¤#,##0.0", currency_digits=False), 
+                amount_str[1]
+            )
+
+    return (
+        babel.numbers.format_currency(amount, currency, format="¤#,##0", currency_digits=False), 
+        ""
     )
 
 
