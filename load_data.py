@@ -61,6 +61,21 @@ def get_registry(reg_url=THREESIXTY_STATUS_JSON, cache_expire=60*60*24):
     return reg
 
 
+def get_registry_by_publisher(**kwargs):
+    reg = get_registry(**kwargs)
+
+    reg_ = {}
+    for r in reg:
+        p = r.get("publisher", {}).get("name")
+        if p not in reg_:
+            reg_[p] = []
+
+        reg_[p].append(r)
+
+    return reg_
+
+
+
 def fetch_reg_file(url):
     reg_file = requests.get(url)
     return reg_file.content

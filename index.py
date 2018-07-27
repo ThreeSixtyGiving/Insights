@@ -7,7 +7,7 @@ import dash_table_experiments as dt
 import dash_resumable_upload
 
 from app import app
-from apps import data_display, file_load
+from apps import data_display, file_load, status
 from load_data import get_cache
 from prepare_data import fetch_geocodes
 
@@ -67,9 +67,11 @@ app.layout = html.Div(className='ui container', children=[
               [Input('url', 'pathname')])
 def display_page(pathname):
     if pathname is None or pathname == '/':
-         return file_load.layout
+        return file_load.layout
     elif pathname.startswith('/file/'):
-         return data_display.layout
+        return data_display.layout
+    elif pathname == '/status':
+        return status.layout
     else:
         return '404'
     

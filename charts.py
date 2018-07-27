@@ -153,7 +153,6 @@ def get_statistics(df):
     )
 
 def format_currency(amount, currency='GBP', humanize_=True, int_format="{:,.0f}"):
-    currency="JPN"
     if humanize_:
         amount_str = humanize.intword(amount).split(" ")
         if len(amount_str) == 2:
