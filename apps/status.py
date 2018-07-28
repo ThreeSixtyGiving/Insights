@@ -15,7 +15,7 @@ import babel.numbers
 import humanize
 
 from app import app
-from load_data import get_registry_by_publisher
+from load_data import get_registry_by_publisher, get_registry
 from charts import pluralize, format_currency
 
 FILE_TYPES = {
@@ -26,15 +26,50 @@ FILE_TYPES = {
 }
 
 layout = html.Div(id="status-container", className='', children=[
-    html.Div(id='status-rows', children=[], className='ui very relaxed items')
+    html.Form(className='', children=[
+        html.Div(className='ui input', children=[
+            dcc.Input(id='status-search', placeholder='Search', type='text')
+        ]),
+        dcc.Dropdown(id='status-licence', multi=True, options=[]),
+        html.Div(className='field', children=[
+            html.Label('Last updated'),
+            dcc.Dropdown(id='status-last-modified', options=[
+                {'label': 'All publishers', 'value': '__all'},
+                {'label': 'In the last month', 'value': 'lastmonth'},
+                {'label': 'In the last 6 months', 'value': '6month'},
+                {'label': 'In the last year', 'value': '12month'},
+            ]),
+        ]),
+    ]),
+    html.Div(id='status-rows', children=[], className='ui very relaxed items'),
 ])
+
+@app.callback(Output('status-licence', 'options'),
+              [Input('status-container', 'children')])
+def get_status_options(_):
+    reg = get_registry()
+    licenses = {}
+    for r in reg:
+        if r.get('license') and r.get('license') in licenses:
+            continue
+        licenses[r.get('license')] = r.get('license_name')
+    return [{
+        "label": v,
+        "value": k
+    } for k, v in licenses.items()]
 
 
 @app.callback(Output('status-rows', 'children'),
-              [Input('status-container', 'children')])
-def update_status_container(_):
-    print("update_status_container", _)
-    reg = get_registry_by_publisher()
+              [Input('status-search', 'value'),
+               Input('status-licence', 'value'),
+               Input('status-last-modified', 'value')])
+def update_status_container(search, licence, last_modified):
+    print("update_status_container", search, licence, last_modified)
+    reg = get_registry_by_publisher(filters={
+        "search": search,
+        "licence": licence,
+        "last_modified": last_modified
+    })
     rows = []
     for pub, pub_reg in reg.items():
         rows.append(
@@ -218,8 +253,6 @@ def get_publisher_stats(pub_reg, **kwargs):
             if c not in data["currencies"]:
                 data["currencies"][c] = {"total_amount": 0}
             data["currencies"][c]["total_amount"] += cagg.get("total_amount", 0)
-
-    print(data)
 
     return get_file_stats({"datagetter_aggregates": data}, **kwargs)
 

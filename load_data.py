@@ -2,6 +2,8 @@ import pickle
 import logging
 import os
 import json
+import datetime
+import dateutil
 
 from flask import g
 from redis import StrictRedis
@@ -61,12 +63,35 @@ def get_registry(reg_url=THREESIXTY_STATUS_JSON, cache_expire=60*60*24):
     return reg
 
 
-def get_registry_by_publisher(**kwargs):
+def get_registry_by_publisher(filters={}, **kwargs):
     reg = get_registry(**kwargs)
 
     reg_ = {}
     for r in reg:
+        
         p = r.get("publisher", {}).get("name")
+
+        # filter
+        if filters.get("licence"):
+            if r.get("license", "") not in filters["licence"]:
+                continue
+
+        if filters.get("search"):
+            if filters.get("search", "").lower() not in p.lower():
+                continue
+
+        if filters.get("last_modified"):
+            last_modified_poss = {
+                "lastmonth": datetime.datetime.now() - datetime.timedelta(days=30),
+                "6month": datetime.datetime.now() - datetime.timedelta(days=30*6),
+                "12month": datetime.datetime.now() - datetime.timedelta(days=365),
+            }
+            if last_modified_poss.get(filters.get("last_modified")):
+                last_modified = dateutil.parser.parse(r.get("modified"), ignoretz=True)
+                if last_modified < last_modified_poss.get(filters.get("last_modified")):
+                    continue
+
+
         if p not in reg_:
             reg_[p] = []
 
