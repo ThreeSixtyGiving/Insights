@@ -3,6 +3,7 @@ import os
 import json
 import io
 import datetime
+import dateutil.parser
 
 import dash_core_components as dcc
 import dash_html_components as html
@@ -25,18 +26,7 @@ FILE_TYPES = {
 }
 
 layout = html.Div(id="status-container", className='', children=[
-    html.Table(className="ui padded table", children=[
-        html.Thead([
-            html.Tr([
-                html.Th([]),
-                html.Th('Publisher'),
-                html.Th('Summary'),
-                html.Th('Licence'),
-                html.Th('Currencies'),
-            ])
-        ]),
-        html.Tbody(id='status-rows', children=[])
-    ])
+    html.Div(id='status-rows', children=[], className='ui very relaxed items')
 ])
 
 
@@ -47,32 +37,30 @@ def update_status_container(_):
     reg = get_registry_by_publisher()
     rows = []
     for pub, pub_reg in reg.items():
-        if len(pub_reg) == 1:
-            rows.append(file_row(pub_reg[0], len(pub_reg)))
-        else:
-            rows.append(html.Tr([
-                html.Td(
-                    html.Img(
-                        src=pub_reg[0].get("publisher", {}).get("logo"),
-                        style={"max-width": '100px'}
+        rows.append(
+            html.Div(className='item', children=[
+                html.Div(className='ui small image', children=[
+                    html.Img(src=pub_reg[0].get("publisher", {}).get("logo")),
+                ]),
+                html.Div(className='content', children=[
+                    html.A(className='header', 
+                        href=pub_reg[0].get("publisher", {}).get("website"),
+                        target='_blank', children=[
+                        pub_reg[0].get("publisher", {}).get("name")
+                    ]),
+                    html.Div(className='meta', children=([
+                        html.Span(className="", children=[
+                            "{} {}".format(len(pub_reg), pluralize("file", len(pub_reg)))
+                        ]),
+                        html.Span('·'),
+                    ] + get_publisher_stats(pub_reg, separator=html.Span('·')) if len(pub_reg)>1 else [])
                     ),
-                    rowSpan=(len(pub_reg)+1)
-                ),
-                html.Td(
-                    html.H3([
-                        html.A(
-                            pub_reg[0].get("publisher", {}).get("name"),
-                            href=pub_reg[0].get("publisher", {}).get("website"),
-                            target='_blank'
-                        ),
-                        html.Span("{} {}".format(len(pub_reg), pluralize("file", len(pub_reg))), className="ui label")
-                    ], className="ui header"),
-                    colSpan=4,
-                    style={'padding-bottom': '0'}
-                )
-            ]))
-            for v in pub_reg:
-                rows.append(file_row(v, len(pub_reg)))
+                    html.Div(className='description ui cards', children=[
+                        file_row(v, len(pub_reg)) for v in pub_reg
+                    ])
+                ])
+            ], style={"margin-bottom": "48px"})
+        )
     return rows
 
 def file_row(v, files=1):
@@ -104,119 +92,102 @@ def file_row(v, files=1):
     file_type = v.get("datagetter_metadata", {}).get("file_type", "")
     file_type = FILE_TYPES.get(file_type.lower(), file_type)
 
-    return html.Tr(([
-            html.Td(
-                html.Img(
-                    src=v.get("publisher", {}).get("logo"),
-                    style={"max-width": '100px'}
-                )
-            )
-        ] if files == 1 else []) + [
-        html.Td([
-                html.H3(([
-                        html.A(
-                            v.get("publisher", {}).get("name"),
-                            href=v.get("publisher", {}).get("website"),
-                            target='_blank'
-                        ),
-                        html.Br(),
-                    ] if files == 1 else []) + [
-                        html.Span(v.get("title"), className='sub header')
-                    ], 
-                    className="ui header"
-                ),
-                html.A(
-                    'Publisher page',
-                    href=v.get('distribution', [{}])[0].get('accessURL'),
-                    target="_blank",
-                    className='ui tiny primary basic button'
-                ),
-                html.A(
-                    [
-                        validity['downloads']['icon'],
-                        'Download {}'.format(file_type[0]),
-                    ],
-                    href=v.get('distribution', [{}])[0].get('downloadURL'),
-                    className='ui tiny basic button ' + validity['downloads']['class'],
-                    title=file_type[1],
-                ),
-                html.Br(),
-                html.Div(
-                    [
-                        html.Span(
-                            [
-                                validity[i]['icon'],
-                                validity[i]['message']
-                            ],
-                            className=validity[i]['class'],
-                            style={
-                                "margin-right": "4px", 
-                                "color": validity[i].get('color'),
-                                "font-size": '90%'
-                            }
-                        )
-                        for i in validity
-                    ],
-                    style={"margin-top": "8px"}
-                )
-                
-            ], 
-            style=style
-        ),
-        html.Td(
-            html.Div(
-                get_file_stats(v), 
-                className='ui mini horizontal statistics'
-            ),
-            className='',
-            style=style
-        ),
-        html.Td(
+    return html.Div(className='ui fluid card', children=[
+        html.Div(className='content', children=[
             html.A(
-                children=get_license_badge(v.get('license'), v.get("license_name")), 
+                children=get_license_badge(v.get('license'), v.get("license_name")) + [' licence'], 
                 href=v.get('license'), 
-                target='_blank'
-            ), 
-            style=style
-        ),
-        html.Td(
+                target='_blank',
+                className='ui basic label right floated',
+                style={"position": "absolute !important", "left": 'calc(100% + 1rem) !important'}
+            ),
+            html.A(
+                v.get("title"),
+                href=v.get('distribution', [{}])[0].get('accessURL'),
+                target="_blank",
+                className='header'
+            ),
+            html.Div(className='meta', children=[
+                html.Span(get_date_range(v)),
+                html.Span('·'),
+                html.Span(', '.join(
+                    [babel.numbers.get_currency_name(k) for k in v.get("datagetter_aggregates", {}).get("currencies", {})]
+                )),
+                html.Span('·'),
+                html.Span([
+                    'Last modified ',
+                    html.Time(dateTime=v.get("modified"), children=[
+                    humanize.naturaldelta(
+                        datetime.datetime.now() - dateutil.parser.parse(v.get("modified"), ignoretz=True)
+                    )]),
+                    ' ago'
+                ]),
+            ]),
+            html.Div(className='description', children=[
+                html.Div(className='ui small statistics', children=get_file_stats(v, as_statistic=True), 
+                style={"margin-top": "24px"})
+            ]),
+        ]),
+        html.Div(className='extra content', children=[
+            html.Span(
+                [
+                    validity[i]['icon'],
+                    validity[i]['message']
+                ],
+                className=validity[i]['class'],
+                style={
+                    "color": validity[i].get('color')
+                }
+            )
+            for i in validity
+        ], style={"padding": ".75em 1em"}),
+        html.A(
             [
-                html.Div(babel.numbers.get_currency_symbol(k), className='ui label') 
-                for k, v in v.get("datagetter_aggregates", {}).get("currencies", {}).items()
-            ], 
-            style=style
+                html.I(className='download icon'),
+                'Download from publisher (in {} format)'.format(file_type[0]),
+            ],
+            href=v.get('distribution', [{}])[0].get('downloadURL'),
+            className='ui button ',
+            title=file_type[1],
         ),
     ])
 
 
-def get_file_stats(v):
+def get_file_stats(v, separator=None, as_statistic=True):
     stats = []
     agg = v.get("datagetter_aggregates")
     if agg is None:
         return stats
 
     def to_statistic(val, label):
-        return html.Div([
-            html.Strong(val, className='value detail', style={"min-width": "20px"}),
-            html.Span(" " + label, className='label'),
-        ], className='', style={"margin-bottom": "8px"})
+        if as_statistic:
+            return html.Span([
+                html.Strong(val, className='value detail', style={}),
+                html.Span(label, className='label'),
+            ], className='statistic', style={})
+
+        return html.Span([
+            html.Strong(val, className='value detail', style={}),
+            html.Span(label, className='label'),
+        ], className='', style={})
 
     count = agg.get("count", 0)
     stats.append(to_statistic(
-        humanize.intword(count), 
+        humanize.intcomma(count), 
         pluralize("grant", count)
     ))
 
     recip = agg.get("distinct_recipient_org_identifier_count", 0)
-    stats.append(to_statistic(
-        humanize.intword(recip),
-        pluralize("recipient", recip),
-    ))
+    if recip > 0:
+        stats.append(to_statistic(
+            humanize.intcomma(recip),
+            pluralize("recipient", recip),
+        ))
 
     funders = agg.get("distinct_funding_org_identifier_count", 0)
     if funders > 1:
         stats.append(to_statistic(
-            humanize.intword(funders),
+            humanize.intcomma(funders),
             pluralize("funder", funders),
         ))
         
@@ -227,18 +198,45 @@ def get_file_stats(v):
             stats.append(to_statistic(cur[0], cur[1]))
             
 
+    if separator:
+        result = [separator] * (len(stats) * 2 - 1)
+        result[0::2] = stats
+        return result
+    
+    return stats
+
+
+def get_publisher_stats(pub_reg, **kwargs):
+    data = {
+        "count": 0,
+        "currencies": {}
+    }
+
+    for r in pub_reg:
+        data["count"] += r.get("datagetter_aggregates", {}).get("count", 0)
+        for c, cagg in r.get("datagetter_aggregates", {}).get("currencies", {}).items():
+            if c not in data["currencies"]:
+                data["currencies"][c] = {"total_amount": 0}
+            data["currencies"][c]["total_amount"] += cagg.get("total_amount", 0)
+
+    print(data)
+
+    return get_file_stats({"datagetter_aggregates": data}, **kwargs)
+
+def get_date_range(v):
+    agg = v.get("datagetter_aggregates")
+    if agg is None:
+        return None
+
     max_award_date = datetime.datetime.strptime(agg.get("max_award_date", None), "%Y-%m-%d")
     min_award_date = datetime.datetime.strptime(agg.get("min_award_date", None), "%Y-%m-%d")
     if max_award_date and min_award_date:
         min_award_ym = min_award_date.strftime("%b %Y")
         max_award_ym = max_award_date.strftime("%b %Y")
         if min_award_ym == max_award_ym:
-            stats.append(max_award_ym)
+            return max_award_ym
         else:
-            stats.append(min_award_ym + " to " + max_award_ym)
-
-    return stats
-
+            return (min_award_ym + " to " + max_award_ym)
 
 def get_license_badge(url, name):
     if "creativecommons.org/licenses" in url:
@@ -261,13 +259,13 @@ def get_license_badge(url, name):
         badge_url = url.replace("creativecommons.org/licenses", "i.creativecommons.org/l")
         badge_url = badge_url.replace("creativecommons.org/publicdomain", "i.creativecommons.org/p")
         badge_url = badge_url + "88x31.png"
-        return html.Img(src=badge_url, title=name, style={'max-height': '24px'})
+        return [html.Img(src=badge_url, title=name, style={'max-height': '24px'})]
 
     if "open-government-licence" in url:
         badge_url = "http://www.nationalarchives.gov.uk/images/infoman/ogl-symbol-41px-retina-black.png"
-        return html.Img(src=badge_url, title=name, style={'max-height': '24px'})
+        return [html.Img(src=badge_url, title=name, style={'max-height': '24px'})]
 
     if "http://www.opendefinition.org/licenses/odc-pddl" == url:
-        return html.Div('ODC PDDL', title=name, className='ui label')
+        return [html.Div('ODC PDDL', title=name, className='ui label')]
     
     return name
