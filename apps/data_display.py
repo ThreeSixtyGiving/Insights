@@ -27,10 +27,6 @@ DEFAULT_FILTERS = {
 layout = html.Div(id="dashboard-container", className='ui grid', children=[
     html.Div(className="row", children=[
 
-        html.Div(className="twelve wide column", children=[
-            html.Div(id="dashboard-output", children=[], className='ui grid'),
-        ]),
-
         html.Div(className="four wide column", children=[
             html.Div(className="ui grid", children=[
                 html.Div(className="sixteen wide column", children=[
@@ -73,7 +69,11 @@ layout = html.Div(id="dashboard-container", className='ui grid', children=[
                 ]),
                 html.Div(html.Pre(id='award-dates', children=json.dumps(DEFAULT_FILTERS, indent=4)), style={"display": "none"}),
             ])
-        ])
+        ]),
+
+        html.Div(className="twelve wide column", children=[
+            html.Div(id="dashboard-output", children=[], className='ui grid'),
+        ]),
     ])
 ])
 

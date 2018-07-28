@@ -25,23 +25,38 @@ FILE_TYPES = {
     "json": ("JSON", "JSON is a structured file format"),
 }
 
-layout = html.Div(id="status-container", className='', children=[
-    html.Form(className='', children=[
-        html.Div(className='ui input', children=[
-            dcc.Input(id='status-search', placeholder='Search', type='text')
-        ]),
-        dcc.Dropdown(id='status-licence', multi=True, options=[]),
-        html.Div(className='field', children=[
-            html.Label('Last updated'),
-            dcc.Dropdown(id='status-last-modified', options=[
-                {'label': 'All publishers', 'value': '__all'},
-                {'label': 'In the last month', 'value': 'lastmonth'},
-                {'label': 'In the last 6 months', 'value': '6month'},
-                {'label': 'In the last year', 'value': '12month'},
+layout = html.Div(id="status-container", className='ui grid', children=[
+    html.Div(className='row', children=[
+        html.Div(className="four wide column", children=[
+            html.Form(className='ui form', children=[
+                html.Div(className='field', children=[
+                    html.Div(className='ui input', children=[
+                        dcc.Input(id='status-search', placeholder='Search', type='text')
+                    ]),
+                ]),
+                html.Div(className='field', children=[
+                    html.Label('Licence'),
+                    dcc.Dropdown(id='status-licence', multi=True, options=[]),
+                ]),
+                html.Div(className='field', children=[
+                    html.Label('Currency'),
+                    dcc.Dropdown(id='status-currency', multi=True, options=[]),
+                ]),
+                html.Div(className='field', children=[
+                    html.Label('Last updated'),
+                    dcc.Dropdown(id='status-last-modified', options=[
+                        {'label': 'All publishers', 'value': '__all'},
+                        {'label': 'In the last month', 'value': 'lastmonth'},
+                        {'label': 'In the last 6 months', 'value': '6month'},
+                        {'label': 'In the last year', 'value': '12month'},
+                    ]),
+                ]),
             ]),
         ]),
+        html.Div(className="twelve wide column", children=[
+            html.Div(id='status-rows', children=[], className='ui very relaxed items'),
+        ]),
     ]),
-    html.Div(id='status-rows', children=[], className='ui very relaxed items'),
 ])
 
 @app.callback(Output('status-licence', 'options'),
@@ -58,19 +73,48 @@ def get_status_options(_):
         "value": k
     } for k, v in licenses.items()]
 
+@app.callback(Output('status-currency', 'options'),
+              [Input('status-container', 'children')])
+def get_currency_options(_):
+    print('get_currency_options')
+    reg = get_registry()
+    currencies = []
+    for r in reg:
+        for c in r.get("datagetter_aggregates", {}).get('currencies', {}):
+            if c not in currencies:
+                currencies.append(c)
+    
+    return [{
+        "label": "{} [{}]".format(babel.numbers.get_currency_name(c), c),
+        "value": c
+    } for c in currencies]
+
 
 @app.callback(Output('status-rows', 'children'),
               [Input('status-search', 'value'),
                Input('status-licence', 'value'),
-               Input('status-last-modified', 'value')])
-def update_status_container(search, licence, last_modified):
-    print("update_status_container", search, licence, last_modified)
+               Input('status-last-modified', 'value'),
+               Input('status-currency', 'value')])
+def update_status_container(search, licence, last_modified, currency):
+    print("update_status_container", search, licence, last_modified, currency)
     reg = get_registry_by_publisher(filters={
         "search": search,
         "licence": licence,
-        "last_modified": last_modified
+        "last_modified": last_modified,
+        "currency": currency
     })
-    rows = []
+    rows = [
+        html.Div(className='item', children=[
+            html.Div(className='content', children=[
+                html.Div(className='meta', children=[
+                    html.Span(className="", children=[
+                        "{} {}".format(len(reg), pluralize("publisher", len(reg)))
+                    ]),
+                    # html.Span('·'),
+                ]),
+            ]),
+        ], style={"margin-bottom": "48px"})
+    ]
     for pub, pub_reg in reg.items():
         rows.append(
             html.Div(className='item', children=[

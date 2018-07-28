@@ -91,6 +91,14 @@ def get_registry_by_publisher(filters={}, **kwargs):
                 if last_modified < last_modified_poss.get(filters.get("last_modified")):
                     continue
 
+        if filters.get("currency"):
+            choose_this = False
+            for c in filters.get("currency", []):
+                if c in r.get("datagetter_aggregates", {}).get("currencies", {}).keys():
+                    choose_this = True
+            if not choose_this:
+                continue
+
 
         if p not in reg_:
             reg_[p] = []
