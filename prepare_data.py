@@ -40,17 +40,17 @@ def get_company(orgid, ch_url=CH_URL):
 
 def prepare_data(df, cache={}):
 
-    # ensure correct column types
-    df.loc[:, "Award Date"] = pd.to_datetime(df["Award Date"])
-
     # check column names for typos
-    wrongly_spelled = ['Amount Awarded', 'Funding Org:Name']
+    wrongly_spelled = ['Amount Awarded', 'Funding Org:Name', 'Award Date']
     renames = {}
     for c in df.columns:
         for w in wrongly_spelled:
             if c.lower() == w.lower() and c != w:
                 renames[c] = w
     df = df.rename(columns=renames)
+
+    # ensure correct column types
+    df.loc[:, "Award Date"] = pd.to_datetime(df["Award Date"])
 
     # add additional columns
     df.loc[:, "Award Date:Year"] = df["Award Date"].dt.year
@@ -68,7 +68,7 @@ def prepare_data(df, cache={}):
         df.loc[:, "Recipient Org:Identifier:Clean"] = df.loc[:, "Recipient Org:Identifier:Clean"].fillna(
             df["Recipient Org:Charity Number"].apply(charity_number_to_org_id))
     df.loc[:, "Recipient Org:Identifier:Scheme"] = df["Recipient Org:Identifier:Clean"].apply(
-        lambda x: ("360G" if x.startswith("360G-") else "-".join(x.split("-")[:2])) if x else None
+        lambda x: ("360G" if x.startswith("360G-") else "-".join(x.split("-")[:2])) if isinstance(x, str) else None
         ).fillna(df["Recipient Org:Identifier:Scheme"])
 
     # look for any charity details
@@ -120,13 +120,13 @@ def prepare_data(df, cache={}):
                 address = c.get("primaryTopic", {}).get("RegAddress", {})
                 address = {} if address is None else address
                 company_rows.append({
-            "orgid": k,
-            "charity_number": None,
+                    "orgid": k,
+                    "charity_number": None,
                     "company_number": company.get("CompanyNumber"),
                     "date_registered": company.get("IncorporationDate"),
                     "date_removed": company.get("DissolutionDate"),
                     "postcode": address.get("Postcode"),
-            "latest_income": None,
+                    "latest_income": None,
                     "org_type": COMPANY_REPLACE.get(company.get("CompanyCategory"), company.get("CompanyCategory")),
                 })
             except AttributeError:
