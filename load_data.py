@@ -99,6 +99,10 @@ def get_registry_by_publisher(filters={}, **kwargs):
             if not choose_this:
                 continue
 
+        if filters.get("filetype"):
+            if r.get('datagetter_metadata', {}).get("file_type") not in filters["filetype"]:
+                continue
+
 
         if p not in reg_:
             reg_[p] = []

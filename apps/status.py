@@ -30,8 +30,9 @@ layout = html.Div(id="status-container", className='ui grid', children=[
         html.Div(className="four wide column", children=[
             html.Form(className='ui form', children=[
                 html.Div(className='field', children=[
-                    html.Div(className='ui input', children=[
-                        dcc.Input(id='status-search', placeholder='Search', type='text')
+                    html.Div(className='ui icon input', children=[
+                        dcc.Input(id='status-search', placeholder='Search', type='text'),
+                        html.I(className='search icon'),
                     ]),
                 ]),
                 html.Div(className='field', children=[
@@ -41,6 +42,10 @@ layout = html.Div(id="status-container", className='ui grid', children=[
                 html.Div(className='field', children=[
                     html.Label('Currency'),
                     dcc.Dropdown(id='status-currency', multi=True, options=[]),
+                ]),
+                html.Div(className='field', children=[
+                    html.Label('File type'),
+                    dcc.Dropdown(id='status-file-type', multi=True, options=[]),
                 ]),
                 html.Div(className='field', children=[
                     html.Label('Last updated'),
@@ -89,20 +94,38 @@ def get_currency_options(_):
         "value": c
     } for c in currencies]
 
+@app.callback(Output('status-file-type', 'options'),
+              [Input('status-container', 'children')])
+def get_filetype_options(_):
+    print('get_filetype_options')
+    reg = get_registry()
+    filetypes = {}
+    for r in reg:
+        filetype = r.get('datagetter_metadata', {}).get("file_type")
+        filetypes[filetype] = FILE_TYPES.get(filetype, (filetype, filetype))
+    return [{
+        "label": "{} ({})".format(v[0], v[1]),
+        "value": k
+    } for k, v in filetypes.items()]
+
 
 @app.callback(Output('status-rows', 'children'),
               [Input('status-search', 'value'),
                Input('status-licence', 'value'),
                Input('status-last-modified', 'value'),
-               Input('status-currency', 'value')])
-def update_status_container(search, licence, last_modified, currency):
-    print("update_status_container", search, licence, last_modified, currency)
+               Input('status-currency', 'value'),
+               Input('status-file-type', 'value')])
+def update_status_container(search, licence, last_modified, currency, filetype):
+    print("update_status_container", search, licence, last_modified, currency, filetype)
     reg = get_registry_by_publisher(filters={
         "search": search,
         "licence": licence,
         "last_modified": last_modified,
-        "currency": currency
+        "currency": currency,
+        "filetype": filetype
     })
+
+    file_count = sum([len(pub_reg) for pub, pub_reg in reg.items()])
     rows = [
         html.Div(className='item', children=[
             html.Div(className='content', children=[
@@ -110,7 +133,10 @@ def update_status_container(search, licence, last_modified, currency):
                     html.Span(className="", children=[
                         "{} {}".format(len(reg), pluralize("publisher", len(reg)))
                     ]),
-                    # html.Span('·'),
+                    html.Span('·'),
+                    html.Span(className="", children=[
+                        "{} {}".format(file_count, pluralize("file", file_count))
+                    ]),
                 ]),
             ]),
         ], style={"margin-bottom": "48px"})
@@ -174,11 +200,10 @@ def file_row(v, files=1):
     return html.Div(className='ui fluid card', children=[
         html.Div(className='content', children=[
             html.A(
-                children=get_license_badge(v.get('license'), v.get("license_name")) + [' licence'], 
+                children=get_license_badge(v.get('license'), v.get("license_name")),
                 href=v.get('license'), 
                 target='_blank',
-                className='ui basic label right floated',
-                style={"position": "absolute !important", "left": 'calc(100% + 1rem) !important'}
+                className='ui right floated',
             ),
             html.A(
                 v.get("title"),
