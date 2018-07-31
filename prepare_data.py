@@ -112,17 +112,26 @@ def prepare_data(df, cache={}):
 
     # create company dataframe
     if cache["company"]:
-        companies_df = pd.DataFrame([{
+        company_rows = []
+        for k, c in cache["company"].items():
+            try:
+                company = c.get("primaryTopic", {})
+                company = {} if company is None else company
+                address = c.get("primaryTopic", {}).get("RegAddress", {})
+                address = {} if address is None else address
+                company_rows.append({
             "orgid": k,
             "charity_number": None,
-            "company_number": c.get("primaryTopic", {}).get("CompanyNumber"),
-            "date_registered": c.get("primaryTopic", {}).get("IncorporationDate"),
-            "date_removed": c.get("primaryTopic", {}).get("DissolutionDate"),
-            "postcode": c.get("primaryTopic", {}).get("RegAddress", {}).get("Postcode"),
+                    "company_number": company.get("CompanyNumber"),
+                    "date_registered": company.get("IncorporationDate"),
+                    "date_removed": company.get("DissolutionDate"),
+                    "postcode": address.get("Postcode"),
             "latest_income": None,
-            "org_type": COMPANY_REPLACE.get(c.get("primaryTopic", {}).get("CompanyCategory"), None),
-        }
-            for k, c in cache["company"].items()]).set_index("orgid")
+                    "org_type": COMPANY_REPLACE.get(company.get("CompanyCategory"), company.get("CompanyCategory")),
+                })
+            except AttributeError:
+                pass
+        companies_df = pd.DataFrame(company_rows).set_index("orgid")
         companies_df.loc[:, "date_registered"] = pd.to_datetime(
             companies_df.loc[:, "date_registered"], dayfirst=True)
         companies_df.loc[:, "date_removed"] = pd.to_datetime(
