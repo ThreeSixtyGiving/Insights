@@ -24,54 +24,60 @@ DEFAULT_FILTERS = {
 }
 
 
-layout = html.Div(id="dashboard-container", className='ui grid', children=[
-    html.Div(className="row", children=[
+layout = html.Div(id="dashboard-container", className='', children=[
+    html.Div(className="", children=[
 
-        html.Div(className="four wide column", children=[
-            html.Div(className="ui grid", children=[
-                html.Div(className="sixteen wide column", children=[
-                    html.Form(id="dashboard-filter", className='ui form', children=[
-                        html.Div(id='df-change-funder-wrapper', className='field', children=[
+        html.Div(className="fl w-25 pa2", children=[
+            message_box(title="Filter data", contents=[
+                html.Div(className="cf", children=[
+                    html.Form(id="dashboard-filter", className='', children=[
+                        html.Div(id='df-change-funder-wrapper', className='', children=[
                             html.Label(children='Funder'),
-                            dcc.Dropdown(
-                                id='df-change-funder',
-                                options=DEFAULT_FILTERS["funders"],
-                                multi=True,
-                                value=[DEFAULT_FILTERS["funders"][0]["value"]]
-                            ),
+                            html.Div(className='cf mv3', children=[
+                                dcc.Dropdown(
+                                    id='df-change-funder',
+                                    options=DEFAULT_FILTERS["funders"],
+                                    multi=True,
+                                    value=[DEFAULT_FILTERS["funders"][0]["value"]]
+                                ),
+                            ])
                         ]),
 
                         html.Div(id='df-change-grant-programme-wrapper', className='field', children=[
                             html.Label(children='Grant programme'),
-                            dcc.Dropdown(
-                                id='df-change-grant-programme',
-                                options=DEFAULT_FILTERS["grant_programmes"],
-                                multi=True,
-                                value=[DEFAULT_FILTERS["grant_programmes"][0]["value"]]
-                            ),
+                            html.Div(className='cf mv3', children=[
+                                dcc.Dropdown(
+                                    id='df-change-grant-programme',
+                                    options=DEFAULT_FILTERS["grant_programmes"],
+                                    multi=True,
+                                    value=[DEFAULT_FILTERS["grant_programmes"][0]["value"]]
+                                ),
+                            ]),
                         ]),
 
                         html.Div(id='df-change-year-wrapper', className='field', children=[
                             html.Label(children='Data years'),
-                            dcc.RangeSlider(
-                                id='df-change-year',
-                                min=DEFAULT_FILTERS["award_dates"]["min"],
-                                max=DEFAULT_FILTERS["award_dates"]["max"],
-                                step=1,
-                                value=[DEFAULT_FILTERS["award_dates"]["min"],DEFAULT_FILTERS["award_dates"]["max"]],
-                                marks={"2015": "2015", "2018": "2018"}
-                            ),
+                            html.Div(className='cf ph3 mv3', children=[
+                                dcc.RangeSlider(
+                                    id='df-change-year',
+                                    min=DEFAULT_FILTERS["award_dates"]["min"],
+                                    max=DEFAULT_FILTERS["award_dates"]["max"],
+                                    step=1,
+                                    value=[DEFAULT_FILTERS["award_dates"]["min"],DEFAULT_FILTERS["award_dates"]["max"]],
+                                    marks={"2015": "2015", "2018": "2018"}
+                                ),
+                            ])
                         ]),
                     ]),
                 ]),
-                html.Div(className="sixteen wide column", children=[
+                html.Div(className="cf mt4", children=[
                     html.Div(dcc.Link(href='/', children='Select new data')),
                 ]),
                 html.Div(html.Pre(id='award-dates', children=json.dumps(DEFAULT_FILTERS, indent=4)), style={"display": "none"}),
             ])
         ]),
 
-        html.Div(className="twelve wide column", children=[
+        html.Div(className="fl w-75 pa2", children=[
             html.Div(id="dashboard-output", children=[], className='ui grid'),
         ]),
     ])
@@ -93,17 +99,9 @@ def dashboard_output(grant_programme, funder, year, fileid):
     
 
     outputs.append(
-        html.Div(className='row', children=[
-            html.Div(className='column', children=[
-                html.H2(children=get_funder_output(df, grant_programme), id="funder-name")
-            ])
-        ])
+        html.H2(className='normal', children=get_funder_output(df, grant_programme), id="funder-name")
     )
-    outputs.append(
-        html.Div(className='row', children=[
-            html.Div(className='column', children=[get_statistics(df)])
-        ])
-    )
+    outputs.append(get_statistics(df))
 
     charts = []
 
@@ -113,24 +111,28 @@ def dashboard_output(grant_programme, funder, year, fileid):
     charts.append(awards_over_time_chart(df))
     charts.append(organisation_type_chart(df))
     charts.append(region_and_country_chart(df))
+    charts.append(location_map(df))
     charts.append(organisation_age_chart(df))
     charts.append(organisation_income_chart(df))
 
-    row = []
-    for i in charts:
-        # if len(row)==2:
-        #     outputs.append(html.Div(className='row', children=row))
-        #     row = []
-        row.append(html.Div(className='sixteen wide column', children=i))
-    if row:
-        outputs.append(html.Div(className='row', children=row))
+    outputs.extend(charts)
+
+    # row = []
+    # for i in charts:
+    #     outputs.
+    #     # if len(row)==2:
+    #     #     outputs.append(html.Div(className='row', children=row))
+    #     #     row = []
+    #     row.append(html.Div(className='sixteen wide column', children=i))
+    # if row:
+    #     outputs.append(html.Div(className='row', children=row))
 
         
-    outputs.append(
-        html.Div(className='row', children=[
-            html.Div(className='column', children=[dataframe_datatable(df)])
-        ])
-    )
+    # outputs.append(
+    #     html.Div(className='row', children=[
+    #         html.Div(className='column', children=[dataframe_datatable(df)])
+    #     ])
+    # )
 
     return outputs
 

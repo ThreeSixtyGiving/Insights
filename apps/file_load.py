@@ -13,42 +13,39 @@ import pandas as pd
 from app import app
 from load_data import get_cache, get_from_cache, save_to_cache, get_registry, fetch_reg_file
 from prepare_data import prepare_data, fetch_geocodes
-from charts import list_to_string
+from charts import list_to_string, message_box
 
 dash_resumable_upload.decorate_server(app.server, "uploads")
 
 
-layout = html.Div(id="upload-container", className='ui grid', children=[
-    html.Div(className="row", children=[
-        html.Div(className="twelve wide column", children=[
-            html.Div(className='row', children=[
-                html.H2('Select your data'),
-                html.Div(className='field', children=[
-                    html.Label(children='Select file'),
-                    dash_resumable_upload.Upload(
-                        id='upload-data',
-                        maxFiles=1,
-                        maxFileSize=1024*1024*1000,  # 100 MB
-                        filetypes=['csv', 'xlsx'],
-                        service="/upload_resumable",
-                        textLabel="Drag and Drop Here to upload!",
-                        startButton=True
-                    ),
-                ]),
-                html.Div(className='row', children=[
-                    html.Div(id='output-data-upload')
-                ]),
+layout = html.Div(id="upload-container", className='w-two-thirds center', children=[
+    html.Div(className="flex flex-wrap justify-center", children=[
+        html.Div(id='output-data-upload', className='w-100'),
+        html.Div(className='w-100 tc ph5 pt3 pb4 white bg-threesixty-one', children=[
+            html.H2('Select your data', className='f3'),
+            html.Div(className='field', children=[
+                # html.Label(children='Select file'),
+                dash_resumable_upload.Upload(
+                    id='upload-data',
+                    maxFiles=1,
+                    maxFileSize=1024*1024*1000,  # 100 MB
+                    filetypes=['csv', 'xlsx'],
+                    service="/upload_resumable",
+                    textLabel="Drop your file here to upload",
+                    startButton=True
+                ),
             ]),
-            html.Div(className='row', children=[
-                html.H2('Select file from registry'),
-                dcc.Dropdown(id='registry-list', options=[]),
-                html.Button('Fetch file', id='import-registry'),
-            ]),
-            html.Div(className='row', children=[
-                html.H2('View existing dashboards'),
-                html.Ul(id="files-list", children=[])
-            ]),
-        ])
+        ]),
+        html.Div(className='w-100 tc ph5 pv3 f3 flex items-center justify-center', children='or'),
+        html.Div(className='w-100 tc ph5 pt3 pb4 white bg-threesixty-two', children=[
+            html.H2('Select file from registry', className='f3'),
+            dcc.Dropdown(id='registry-list', className='black tl', options=[]),
+            html.Button('Fetch file', className='mt3 f6 link dim ph3 pv2 mb2 dib white bg-near-black', id='import-registry'),
+        ]),
+        # html.Div(className='w-third tc pa5 white bg-threesixty-three', children=[
+        #     html.H2('View existing dashboards'),
+        #     html.Ul(id="files-list", children=[])
+        # ]),
     ])
 ])
 
@@ -115,12 +112,19 @@ def parse_contents(contents, filename, date):
         df = get_dataframe(filename, contents, date)
         save_to_cache( fileid, df )
 
-    return html.Div([
-        html.H5(filename),
-        (html.H6(datetime.datetime.fromtimestamp(date)) if date else ""),
-        html.Hr(),  # horizontal line
-        dcc.Link(href='/file/{}'.format(fileid), children='Data uploaded - view results')
-    ])
+    return message_box(
+        'File fetch results',
+        [
+            html.Div(children=[
+                html.Strong('File fetched: '),
+                filename
+            ]),
+            (html.H6(datetime.datetime.fromtimestamp(date)) if date else ""),
+            dcc.Link(href='/file/{}'.format(fileid),
+                     className='link dim near-black bg-threesixty-three pv2 ph3 mv3 dib',
+                     children='Data uploaded - view results >')
+        ]
+    )
 
 
 def get_existing_files():
@@ -135,20 +139,23 @@ def get_existing_files():
                Input('import-registry', 'n_clicks')],
               [State('registry-list', 'value')])
 def update_output(fileNames, n_clicks, regid):
-    print("update_output", fileNames, n_clicks, regid)
-    if n_clicks is not None and regid is not None:
-        reg = get_registry()
-        regentry = [x for x in reg if x["identifier"]==regid]
-        if len(regentry)==1:
-            regentry = regentry[0]
-            url = regentry.get("distribution", [{}])[0].get("downloadURL")
-            filetype = regentry.get("datagetter_metadata", {}).get("file_type")
-            contents = fetch_reg_file(url)
-            filename = url if url.endswith(filetype) else "{}.{}".format(url, filetype)
-            return parse_contents(contents, filename, None)
+    try:
+        if n_clicks is not None and regid is not None:
+            reg = get_registry()
+            regentry = [x for x in reg if x["identifier"]==regid]
+            if len(regentry)==1:
+                regentry = regentry[0]
+                url = regentry.get("distribution", [{}])[0].get("downloadURL")
+                filetype = regentry.get("datagetter_metadata", {}).get("file_type")
+                contents = fetch_reg_file(url)
+                filename = url if url.endswith(filetype) else "{}.{}".format(url, filetype)
+                return parse_contents(contents, filename, None)
 
-    if fileNames is not None:
-        return parse_contents(None, fileNames[-1], None)
+        if fileNames is not None:
+            return parse_contents(None, fileNames[-1], None)
+
+    except Exception as e:
+        return message_box("Could not load file", str(e), error=True)
 
 
 @app.callback(Output('files-list', 'children'),

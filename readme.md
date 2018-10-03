@@ -1,5 +1,12 @@
 
 
+## Run development version
+
+```sh
+python index.py
+```
+
+
 ## Setup on dokku
 
 ```bash

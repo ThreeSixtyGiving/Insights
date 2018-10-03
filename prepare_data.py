@@ -45,9 +45,17 @@ def prepare_data(df, cache={}):
     renames = {}
     for c in df.columns:
         for w in wrongly_spelled:
-            if c.lower() == w.lower() and c != w:
+            if c.replace(" ","").lower() == w.replace(" ","").lower() and c != w:
                 renames[c] = w
     df = df.rename(columns=renames)
+
+    # columns to check exist
+    columns_exist = [
+        'Amount Awarded', 'Funding Org:Name', 'Award Date', 'Recipient Org:Identifier',
+    ]
+    for c in columns_exist:
+        if c not in df.columns:
+            raise ValueError("Column {} not found in data".format(c))
 
     # ensure correct column types
     df.loc[:, "Award Date"] = pd.to_datetime(df["Award Date"])

@@ -16,7 +16,7 @@ import humanize
 
 from app import app
 from load_data import get_registry_by_publisher, get_registry
-from charts import pluralize, format_currency
+from charts import pluralize, format_currency, message_box
 
 FILE_TYPES = {
     "xlsx": ("Excel", "Microsoft Excel"),
@@ -25,29 +25,30 @@ FILE_TYPES = {
     "json": ("JSON", "JSON is a structured file format"),
 }
 
-layout = html.Div(id="status-container", className='ui grid', children=[
-    html.Div(className='row', children=[
-        html.Div(className="four wide column", children=[
+layout = html.Div(id="status-container", className='', children=[
+    html.Div(className="fl w-25 pa2", children=[
+        message_box(title="Filter data", contents=[
             html.Form(className='ui form', children=[
-                html.Div(className='field', children=[
+                html.Div(className='cf mv3', children=[
                     html.Div(className='ui icon input', children=[
-                        dcc.Input(id='status-search', placeholder='Search', type='text'),
+                        dcc.Input(id='status-search', placeholder='Search',
+                                  type='text', className='w-100 pa2'),
                         html.I(className='search icon'),
                     ]),
                 ]),
-                html.Div(className='field', children=[
+                html.Div(className='cf mv3', children=[
                     html.Label('Licence'),
                     dcc.Dropdown(id='status-licence', multi=True, options=[]),
                 ]),
-                html.Div(className='field', children=[
+                html.Div(className='cf mv3', children=[
                     html.Label('Currency'),
                     dcc.Dropdown(id='status-currency', multi=True, options=[]),
                 ]),
-                html.Div(className='field', children=[
+                html.Div(className='cf mv3', children=[
                     html.Label('File type'),
                     dcc.Dropdown(id='status-file-type', multi=True, options=[]),
                 ]),
-                html.Div(className='field', children=[
+                html.Div(className='cf mv3', children=[
                     html.Label('Last updated'),
                     dcc.Dropdown(id='status-last-modified', options=[
                         {'label': 'All publishers', 'value': '__all'},
@@ -58,9 +59,9 @@ layout = html.Div(id="status-container", className='ui grid', children=[
                 ]),
             ]),
         ]),
-        html.Div(className="twelve wide column", children=[
-            html.Div(id='status-rows', children=[], className='ui very relaxed items'),
-        ]),
+    ]),
+    html.Div(className="fl w-75 pa2", children=[
+        html.Div(id='status-rows', children=[], className='ui very relaxed items'),
     ]),
 ])
 

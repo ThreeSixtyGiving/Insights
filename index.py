@@ -15,7 +15,10 @@ server = app.server
 
 # Append an externally hosted CSS stylesheet
 app.css.append_css({
-    "external_url": "https://cdn.jsdelivr.net/npm/semantic-ui@2.3.3/dist/semantic.min.css"
+    "external_url": "https://unpkg.com/tachyons@4.10.0/css/tachyons.min.css"
+})
+app.css.append_css({
+    "external_url": "https://fonts.googleapis.com/css?family=Source+Sans+Pro"
 })
 
 @app.server.route('/redis_cache')
@@ -52,14 +55,32 @@ def refresh_lookup_cache():
     r.set("lookup_cache", json.dumps(cache))
     return json.dumps(cache["geocodes"])
     
-
-app.layout = html.Div(className='ui container', children=[
+app.title = '360 Giving Data Explorer'
+app.layout = html.Div(className='pv2 ph4', children=[
     dcc.Location(id='url', refresh=False),
-    html.H1(children='360 Giving data explorer', className='ui dividing header'),
-    html.Div(id='page-content'),
-    html.Div(id='output-data-id'),
+    html.Div(id="page-header", className='cf mv3 pv3 bb b-threesixty-two bw4', children=[
+        html.Img(className='fr mw5 mr3',
+                 src='http://www.threesixtygiving.org/wp-content/themes/360giving/assets/img/logo.png'),
+        html.H1(className='', children=[
+            dcc.Link(href='/', className='link dim black',
+                     children='360 Giving data explorer')
+        ]),
+    ]),
+    html.Div(id='page-content', className='cf'),
+    html.Div(id='output-data-id', className='f6 grey'),
     html.Div(dt.DataTable(rows=[{}]), style={'display': 'none'}), # make sure we can load dash_table_experiments
     html.Div(dash_resumable_upload.Upload(), style={'display': 'none'}), # dummy upload to make sure dash loads dash_resumable_upload
+    html.Div(id="page-footer", className='cf mv3 pv3 bt b-threesixty-one bw4', children=[
+        html.Div(className='fl w-50 mr1', children=[
+            html.H4('About the explorer'),
+            html.P(className='', children=['''
+                This tool showcases the potential of data published to the 360 giving standard. Upload a file
+                that meets the 360 giving standard and the tool will display some key views of the data. When
+                a file is uploaded the tool will check for any recipients with charity or company numbers and
+                download extra data about them, as well as adding data based on the postcode of the recipients.
+            ''']),
+        ]),
+    ]),
 ])
 
 

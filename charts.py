@@ -1,3 +1,5 @@
+import os
+
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_table_experiments as dt
@@ -10,16 +12,33 @@ import babel.numbers
 DEFAULT_TABLE_FIELDS = ["Title", "Description", "Amount Awarded", 
                         "Award Date", "Recipient Org:Name", 
                         "Grant Programme:Title"]
+THREESIXTY_COLOURS = ['#9c2061', '#f48320', '#cddc2b', '#53aadd']
 
+MAPBOX_ACCESS_TOKEN = os.environ.get("MAPBOX_ACCESS_TOKEN")
+MAPBOX_STYLE = os.environ.get("MAPBOX_STYLE", 'mapbox://styles/davidkane/cjmtr1n101qlz2ruqszjcmhls')
 
-def get_bar_data(values, name="Grants", chart_type='bar'):
+def message_box(title, contents, error=False):
+    border = 'b--red' if error else 'b--black'
+    background = 'bg-red' if error else 'bg-black'
+    return html.Div(className='center hidden ba mv4 {}'.format(border), children=[
+        html.H1(className='f4 white mv0 pv2 ph3 {}'.format(background),
+                children=title),
+        html.Div(className='pa3', children=[
+            html.P(className='f6 f5-ns lh-copy mv0', children=contents),
+        ]),
+    ])
+
+def get_bar_data(values, name="Grants", chart_type='bar', colour=0):
     titles = [i[0] for i in values.iteritems()]
     titles = [" - ".join(get_unique_list(i)) if isinstance(i, (list, tuple)) else i for i in titles]
     bar_data = {
         'x': titles, 
         'y': [i[1] for i in values.iteritems()], 
         'type': chart_type, 
-        'name': 'Grants'
+        'name': name,
+        'marker': {
+            'color': THREESIXTY_COLOURS[colour]
+        }
     }
     if chart_type=='column':
         bar_data['type'] = 'bar'
@@ -40,7 +59,13 @@ def grant_programme_chart(df):
         figure={
             'data': [get_bar_data(df["Grant Programme:Title"].value_counts())],
             'layout': {
-                'title': 'Grant programmes (number of grants)'
+                'title': 'Grant programmes (number of grants)',
+                'yaxis': {
+                    'automargin': True,
+                },
+                'xaxis': {
+                    'automargin': True,
+                },
             }
         }
     )
@@ -51,7 +76,16 @@ def amount_awarded_chart(df):
         figure={
             'data': [get_bar_data(df["Amount Awarded:Bands"].value_counts().sort_index())],
             'layout': {
-                'title': 'Amount awarded (number of grants)'
+                'title': 'Amount awarded (number of grants)',
+                'font': {
+                    'family': '"Source Sans Pro",sans-serif;'
+                },
+                'yaxis': {
+                    'automargin': True,
+                },
+                'xaxis': {
+                    'automargin': True,
+                },
             }
         }
     )
@@ -62,7 +96,13 @@ def awards_over_time_chart(df):
         figure={
             'data': [get_bar_data(df["Award Date"].apply(lambda x: x.strftime("%Y-%m")).value_counts().sort_index())],
             'layout': {
-                'title': 'Award Date (number of grants)'
+                'title': 'Award Date (number of grants)',
+                'yaxis': {
+                    'automargin': True,
+                },
+                'xaxis': {
+                    'automargin': True,
+                },
             }
         } 
     )
@@ -77,7 +117,13 @@ def region_and_country_chart(df):
         figure={
             'data': [get_bar_data(values["Title"], chart_type='column')],
             'layout': {
-                'title': 'Region and Country (number of grants)'
+                'title': 'Region and Country (number of grants)',
+                'yaxis': {
+                    'automargin': True,
+                },
+                'xaxis': {
+                    'automargin': True,
+                },
             }
         } 
     )
@@ -91,34 +137,101 @@ def organisation_type_chart(df):
                 labels=[i[0] for i in values.iteritems()],
                 values=[i[1] for i in values.iteritems()],
                 hole=0.4,
+                marker={
+                    'colors': THREESIXTY_COLOURS
+                },
+                insidetextfont={
+                    'color': 'white'
+                }
                 )],
             'layout': {
-                'title': 'Recipient type (number of grants)'
+                'title': 'Recipient type (number of grants)',
+                'yaxis': {
+                    'automargin': True,
+                },
+                'xaxis': {
+                    'automargin': True,
+                },
             }
         }
     )
 
+
 def organisation_income_chart(df):
+    if df["__org_latest_income_bands"].count() == 0:
+        return message_box('Could not show chart', 'No charities found in data', error=True)
     return dcc.Graph(
         id="organisation_income_chart",
         figure={
             'data': [get_bar_data(df["__org_latest_income_bands"].value_counts().sort_index())],
             'layout': {
-                'title': 'Latest income of charity recipients (number of grants)'
+                'title': 'Latest income of charity recipients (number of grants)',
+                'yaxis': {
+                    'automargin': True,
+                },
+                'xaxis': {
+                    'automargin': True,
+                },
             }
         } 
     )
 
 def organisation_age_chart(df):
+    if df["__org_age_bands"].count()==0:
+        return message_box('Could not show chart', 'No charities found in data', error=True)
     return dcc.Graph(
         id="organisation_age_chart",
         figure={
             'data': [get_bar_data(df["__org_age_bands"].value_counts().sort_index())],
             'layout': {
-                'title': 'Age of charity recipients (number of grants)'
+                'title': 'Age of charity recipients (number of grants)',
+                'yaxis': {
+                    'automargin': True,
+                },
+                'xaxis': {
+                    'automargin': True,
+                },
             }
         } 
     )
+
+def location_map(df):
+
+    if not MAPBOX_ACCESS_TOKEN:
+        return
+
+    geo = df[["__geo_lat", "__geo_long", "Recipient Org:Name"]].dropna()
+    data = [
+        go.Scattermapbox(
+            lat=geo["__geo_lat"].values,
+            lon=geo["__geo_long"].values,
+            mode='markers',
+            marker=dict(
+                size=9,
+                color=THREESIXTY_COLOURS[0]
+            ),
+            text=geo["Recipient Org:Name"].values,
+        )
+    ]
+
+    layout = go.Layout(
+        autosize=True,
+        height=800,
+        hovermode='closest',
+        mapbox=dict(
+            accesstoken=MAPBOX_ACCESS_TOKEN,
+            bearing=0,
+            center=dict(
+                lat=54.093409,
+                lon=-2.89479
+            ),
+            pitch=0,
+            zoom=5,
+            style=MAPBOX_STYLE
+        ),
+    )
+
+    return dcc.Graph(id='grant_location_chart', figure={"data": data, "layout": layout})
 
 def dataframe_datatable(df, max_length=50, fields=DEFAULT_TABLE_FIELDS):
     rows = df.sample(max_length) if len(df)>max_length else df
@@ -134,20 +247,20 @@ def get_statistics(df):
     amount_awarded = [format_currency(amount, currency) for currency, amount in amount_awarded.items()]
 
     return html.Div(
-        className='ui statistics',
+        className='flex statistics',
         children=[
-            html.Div(className='statistic', children=[
-                html.Div(className='value', children="{:,.0f}".format(len(df))),
-                html.Div(className='label', children=pluralize("grant", len(df)))
+            html.Div(className='pa5 tc white bg-red', children=[
+                html.Div(className='b f2', children="{:,.0f}".format(len(df))),
+                html.Div(className='', children=pluralize("grant", len(df)))
             ]),
-            html.Div(className='statistic', children=[
-                html.Div(className='value', children="{:,.0f}".format(df["Recipient Org:Identifier"].unique().size)),
-                html.Div(className='label', children=pluralize("recipient", df["Recipient Org:Identifier"].unique().size))
+            html.Div(className='pa5 tc white bg-red', children=[
+                html.Div(className='b f2', children="{:,.0f}".format(df["Recipient Org:Identifier"].unique().size)),
+                html.Div(className='', children=pluralize("recipient", df["Recipient Org:Identifier"].unique().size))
             ])
         ] + [
-            html.Div(className='statistic', children=[
-                html.Div(className='value', children=i[0]),
-                html.Div(className='label', children=i[1])
+            html.Div(className='pa5 tc white bg-red', children=[
+                html.Div(className='b f2', children=i[0]),
+                html.Div(className='', children=i[1])
             ]) for i in amount_awarded
         ]
     )
@@ -180,7 +293,11 @@ def get_funder_output(df, grant_programme=[]):
     else:
         years = " between {} and {}".format(years["min"], years["max"])
 
-    return_str = "{} made by {} {}".format(pluralize("Grant", len(df)), funders, years)
+    return_str = [
+        html.Span("{} made by ".format(pluralize("Grant", len(df)))),
+        html.Strong(funders, className='pa1 white bg-threesixty-two'),
+        html.Span(" {}".format(years)),
+    ]
 
     # if grant_programme and '__all' not in grant_programme:
     #     return [
