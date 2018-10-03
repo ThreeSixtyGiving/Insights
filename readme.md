@@ -6,6 +6,16 @@
 python index.py
 ```
 
+## Get mapbox to work
+
+For the maps to show you need to have a mapbox personal access token set to the
+`MAPBOX_ACCESS_TOKEN` environmental variable. On dokku this would be something
+like:
+
+```bash
+dokku config:set explorer MAPBOX_ACCESS_TOKEN="insert_access_token_here"
+```
+
 
 ## Setup on dokku
 
@@ -23,6 +33,6 @@ dokku domains:enable explorer
 dokku domains:add explorer example.com
 
 # letsencrypt
-dokku config:set --no-restart es-postcodes DOKKU_LETSENCRYPT_EMAIL=your@email.tld
+dokku config:set --no-restart explorer DOKKU_LETSENCRYPT_EMAIL=your@email.tld
 dokku letsencrypt explorer
 ```
