@@ -60,7 +60,7 @@ app.layout = html.Div(className='pv2 ph4', children=[
     dcc.Location(id='url', refresh=False),
     html.Div(id="page-header", className='cf mv3 pv3 bb b-threesixty-two bw4', children=[
         html.Img(className='fr mw5 mr3',
-                 src='http://www.threesixtygiving.org/wp-content/themes/360giving/assets/img/logo.png'),
+                 src='https://www.threesixtygiving.org/wp-content/themes/360giving/assets/img/logo.png'),
         html.H1(className='', children=[
             dcc.Link(href='/', className='link dim black',
                      children='360 Giving data explorer')
