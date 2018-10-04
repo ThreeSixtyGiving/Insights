@@ -20,7 +20,7 @@ MAPBOX_STYLE = os.environ.get("MAPBOX_STYLE", 'mapbox://styles/davidkane/cjmtr1n
 def message_box(title, contents, error=False):
     border = 'b--red' if error else 'b--black'
     background = 'bg-red' if error else 'bg-black'
-    return html.Div(className='center hidden ba mv4 {}'.format(border), children=[
+    return html.Div(className='center hidden ba mb4 {}'.format(border), children=[
         html.H1(className='f4 white mv0 pv2 ph3 {}'.format(background),
                 children=title),
         html.Div(className='pa3', children=[

@@ -26,7 +26,7 @@ FILE_TYPES = {
 }
 
 layout = html.Div(id="status-container", className='', children=[
-    html.Div(className="fl w-25 pa2", children=[
+    html.Div(className="fl w-25-l w-100 pa2-l", children=[
         message_box(title="Filter data", contents=[
             html.Form(className='ui form', children=[
                 html.Div(className='cf mv3', children=[
@@ -60,7 +60,7 @@ layout = html.Div(id="status-container", className='', children=[
             ]),
         ]),
     ]),
-    html.Div(className="fl w-75 pa2", children=[
+    html.Div(className="fl w-75-l w-100 pa2-l", children=[
         html.Div(id='status-rows', children=[], className='ui very relaxed items'),
     ]),
 ])
@@ -128,44 +128,40 @@ def update_status_container(search, licence, last_modified, currency, filetype):
 
     file_count = sum([len(pub_reg) for pub, pub_reg in reg.items()])
     rows = [
-        html.Div(className='item', children=[
-            html.Div(className='content', children=[
-                html.Div(className='meta', children=[
-                    html.Span(className="", children=[
-                        "{} {}".format(len(reg), pluralize("publisher", len(reg)))
-                    ]),
-                    html.Span('·'),
-                    html.Span(className="", children=[
-                        "{} {}".format(file_count, pluralize("file", file_count))
-                    ]),
-                ]),
+        html.Div(className='w-100 f3', children=[
+            html.Span(className="", children=[
+                html.Strong(len(reg)),
+                ' ' + pluralize("publisher", len(reg))
             ]),
-        ], style={"margin-bottom": "48px"})
+            html.Span(className='mh2', children='·'),
+            html.Span(className="", children=[
+                html.Strong(file_count),
+                ' ' + pluralize("file", file_count)
+            ]),
+        ])
     ]
     for pub, pub_reg in reg.items():
         rows.append(
-            html.Div(className='item', children=[
-                html.Div(className='ui small image', children=[
-                    html.Img(src=pub_reg[0].get("publisher", {}).get("logo")),
+            html.Div(className='br2 ba dark-gray b--black-10 mv4 w-100 center mb4', children=[
+                html.Div(className='w-100 cf pa3', children=[
+                    html.A(className='f3 link black b',
+                           href=pub_reg[0].get("publisher", {}).get("website"),
+                           target='_blank', children=[
+                               pub_reg[0].get("publisher", {}).get("name")
+                           ]),
+                    html.Img(className='fr mw5', src=pub_reg[0].get(
+                        "publisher", {}).get("logo"), style={'max-height': '8rem'}),
                 ]),
                 html.Div(className='content', children=[
-                    html.A(className='header', 
-                        href=pub_reg[0].get("publisher", {}).get("website"),
-                        target='_blank', children=[
-                        pub_reg[0].get("publisher", {}).get("name")
-                    ]),
-                    html.Div(className='meta', children=([
-                        html.Span(className="", children=[
-                            "{} {}".format(len(pub_reg), pluralize("file", len(pub_reg)))
-                        ]),
-                        html.Span('·'),
+                    html.Div(className='flex ph3', children=([
+                        to_statistic(len(pub_reg), pluralize("file", len(pub_reg)))
                     ] + get_publisher_stats(pub_reg, separator=html.Span('·')) if len(pub_reg)>1 else [])
                     ),
                     html.Div(className='description ui cards', children=[
                         file_row(v, len(pub_reg)) for v in pub_reg
                     ])
                 ])
-            ], style={"margin-bottom": "48px"})
+            ])
         )
     return rows
 
@@ -186,39 +182,39 @@ def file_row(v, files=1):
     for i in validity:
         if v.get('datagetter_metadata', {}).get(i)==True:
             validity[i]['class'] = 'positive'
-            validity[i]['icon'] = html.I(className='icon checkmark green')
+            validity[i]['icon'] = html.Span(className='green mr1', children='✓')
             validity[i]['message'] = validity[i]['messages']['positive']
             validity[i]['color'] = 'green'
         elif v.get('datagetter_metadata', {}).get(i)==False:
             validity[i]['class'] = 'positive'
-            validity[i]['icon'] = html.I(className='icon close red')
+            validity[i]['icon'] = html.Span(className='red mr1', children='✕')
             validity[i]['message'] = validity[i]['messages']['negative']
             validity[i]['color'] = 'red'
 
     file_type = v.get("datagetter_metadata", {}).get("file_type", "")
     file_type = FILE_TYPES.get(file_type.lower(), file_type)
 
-    return html.Div(className='ui fluid card', children=[
+    return html.Div(className='bt pa3 b--black-10', children=[
         html.Div(className='content', children=[
             html.A(
                 children=get_license_badge(v.get('license'), v.get("license_name")),
                 href=v.get('license'), 
                 target='_blank',
-                className='ui right floated',
+                className='fr',
             ),
             html.A(
                 v.get("title"),
                 href=v.get('distribution', [{}])[0].get('accessURL'),
                 target="_blank",
-                className='header'
+                className='f4 link black b'
             ),
-            html.Div(className='meta', children=[
+            html.Div(className='gray', children=[
                 html.Span(get_date_range(v)),
-                html.Span('·'),
+                html.Span(className='mh1', children='·'),
                 html.Span(', '.join(
                     [babel.numbers.get_currency_name(k) for k in v.get("datagetter_aggregates", {}).get("currencies", {})]
                 )),
-                html.Span('·'),
+                html.Span(className='mh1', children='·'),
                 html.Span([
                     'Last modified ',
                     html.Time(dateTime=v.get("modified"), children=[
@@ -228,53 +224,44 @@ def file_row(v, files=1):
                     ' ago'
                 ]),
             ]),
-            html.Div(className='description', children=[
-                html.Div(className='ui small statistics', children=get_file_stats(v, as_statistic=True), 
-                style={"margin-top": "24px"})
+            html.Div(className='mt3', children=[
+                html.Div(className='flex', children=get_file_stats(v, as_statistic=True),)
             ]),
         ]),
-        html.Div(className='extra content', children=[
+        html.Div(className='pb3', children=[
             html.Span(
                 [
                     validity[i]['icon'],
                     validity[i]['message']
                 ],
-                className=validity[i]['class'],
+                className=validity[i]['class'] + ' mr3',
                 style={
                     "color": validity[i].get('color')
                 }
             )
             for i in validity
-        ], style={"padding": ".75em 1em"}),
-        html.A(
-            [
-                html.I(className='download icon'),
+        ]),
+        html.Div(className='mv3', children=[
+            html.A(
                 'Download from publisher (in {} format)'.format(file_type[0]),
-            ],
-            href=v.get('distribution', [{}])[0].get('downloadURL'),
-            className='ui button ',
-            title=file_type[1],
-        ),
+                href=v.get('distribution', [{}])[0].get('downloadURL'),
+                className='link white dim bg-threesixty-one pa2',
+                title=file_type[1],
+            ),
+        ])
     ])
 
+def to_statistic(val, label):
+    return html.Div([
+        html.Strong(val, className='f3 b', style={}),
+        html.Div(label, className=''),
+    ], className='pa3 tc', style={})
 
 def get_file_stats(v, separator=None, as_statistic=True):
     stats = []
     agg = v.get("datagetter_aggregates")
     if agg is None:
         return stats
-
-    def to_statistic(val, label):
-        if as_statistic:
-            return html.Span([
-                html.Strong(val, className='value detail', style={}),
-                html.Span(label, className='label'),
-            ], className='statistic', style={})
-
-        return html.Span([
-            html.Strong(val, className='value detail', style={}),
-            html.Span(label, className='label'),
-        ], className='', style={})
 
     count = agg.get("count", 0)
     stats.append(to_statistic(
