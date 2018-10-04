@@ -18,10 +18,10 @@ from charts import list_to_string, message_box
 dash_resumable_upload.decorate_server(app.server, "uploads")
 
 
-layout = html.Div(id="upload-container", className='w-two-thirds center', children=[
+layout = html.Div(id="upload-container", className='w-two-thirds-l center', children=[
     html.Div(className="flex flex-wrap justify-center", children=[
         html.Div(id='output-data-upload', className='w-100'),
-        html.Div(className='w-100 tc ph5 pt3 pb4 white bg-threesixty-one', children=[
+        html.Div(className='w-100 tc ph3 ph5-l pt3 pb4 white bg-threesixty-one', children=[
             html.H2('Select your data', className='f3'),
             html.Div(className='field', children=[
                 # html.Label(children='Select file'),
@@ -36,8 +36,8 @@ layout = html.Div(id="upload-container", className='w-two-thirds center', childr
                 ),
             ]),
         ]),
-        html.Div(className='w-100 tc ph5 pv3 f3 flex items-center justify-center', children='or'),
-        html.Div(className='w-100 tc ph5 pt3 pb4 white bg-threesixty-two', children=[
+        html.Div(className='w-100 tc ph3 ph5-l pv3 f3 flex items-center justify-center', children='or'),
+        html.Div(className='w-100 tc ph3 ph5-l pt3 pb4 white bg-threesixty-two', children=[
             html.H2('Select file from registry', className='f3'),
             dcc.Dropdown(id='registry-list', className='black tl', options=[]),
             html.Button('Fetch file', className='mt3 f6 link dim ph3 pv2 mb2 dib white bg-near-black', id='import-registry'),

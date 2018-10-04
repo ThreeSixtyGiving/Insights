@@ -27,7 +27,7 @@ DEFAULT_FILTERS = {
 layout = html.Div(id="dashboard-container", className='', children=[
     html.Div(className="", children=[
 
-        html.Div(className="fl w-25 pa2", children=[
+        html.Div(className="fl w-100 w-25-l pa2-l", children=[
             message_box(title="Filter data", contents=[
                 html.Div(className="cf", children=[
                     html.Form(id="dashboard-filter", className='', children=[
@@ -77,7 +77,7 @@ layout = html.Div(id="dashboard-container", className='', children=[
             ])
         ]),
 
-        html.Div(className="fl w-75 pa2", children=[
+        html.Div(className="fl w-100 w-75-l pa2-l", children=[
             html.Div(id="dashboard-output", children=[], className='ui grid'),
         ]),
     ])

@@ -59,7 +59,7 @@ app.title = '360 Giving Data Explorer'
 app.layout = html.Div(className='pv2 ph4', children=[
     dcc.Location(id='url', refresh=False),
     html.Div(id="page-header", className='cf mv3 pv3 bb b-threesixty-two bw4', children=[
-        html.Img(className='fr mw5 mr3',
+        html.Img(className='fr mw4 mw5-ns mr3',
                  src='https://www.threesixtygiving.org/wp-content/themes/360giving/assets/img/logo.png'),
         html.H1(className='', children=[
             dcc.Link(href='/', className='link dim black',
@@ -71,7 +71,7 @@ app.layout = html.Div(className='pv2 ph4', children=[
     html.Div(dt.DataTable(rows=[{}]), style={'display': 'none'}), # make sure we can load dash_table_experiments
     html.Div(dash_resumable_upload.Upload(), style={'display': 'none'}), # dummy upload to make sure dash loads dash_resumable_upload
     html.Div(id="page-footer", className='cf mv3 pv3 bt b-threesixty-one bw4', children=[
-        html.Div(className='fl w-50 mr1', children=[
+        html.Div(className='fl w-100 w-50-l mr1', children=[
             html.H4('About the explorer'),
             html.P(className='', children=['''
                 This tool showcases the potential of data published to the 360 giving standard. Upload a file
