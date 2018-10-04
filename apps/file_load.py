@@ -22,7 +22,16 @@ layout = html.Div(id="upload-container", className='w-two-thirds-l center', chil
     html.Div(className="flex flex-wrap justify-center", children=[
         html.Div(id='output-data-upload', className='w-100'),
         html.Div(className='w-100 tc ph3 ph5-l pt3 pb4 white bg-threesixty-one', children=[
-            html.H2('Select your data', className='f3'),
+            html.H2('Upload a file', className='f3'),
+            html.P(className='light-gray', children=[
+                'File must meet the ',
+                html.A(
+                    children='360 Giving data standard',
+                    href='https://www.threesixtygiving.org/support/standard/',
+                    target='_blank',
+                    className='light-gray underline dim'
+                )
+            ]),
             html.Div(className='field', children=[
                 # html.Label(children='Select file'),
                 dash_resumable_upload.Upload(
@@ -38,7 +47,15 @@ layout = html.Div(id="upload-container", className='w-two-thirds-l center', chil
         ]),
         html.Div(className='w-100 tc ph3 ph5-l pv3 f3 flex items-center justify-center', children='or'),
         html.Div(className='w-100 tc ph3 ph5-l pt3 pb4 white bg-threesixty-two', children=[
-            html.H2('Select file from registry', className='f3'),
+            html.H2(className='f3', children=[
+                'Select file from ',
+                html.A(
+                    children='360 Giving registry of publishers',
+                    href='http://data.threesixtygiving.org/',
+                    target='_blank',
+                    className='white underline dim'
+                    )
+            ]),
             dcc.Dropdown(id='registry-list', className='black tl', options=[]),
             html.Button('Fetch file', className='mt3 f6 link dim ph3 pv2 mb2 dib white bg-near-black', id='import-registry'),
         ]),
