@@ -2,6 +2,8 @@ import hashlib
 import os
 import json
 import io
+import uuid
+import time
 
 import dash_core_components as dcc
 import dash_html_components as html
@@ -9,6 +11,7 @@ from dash.dependencies import Input, Output, State
 import dash_resumable_upload
 
 import pandas as pd
+from rq import Queue
 
 from app import app
 from load_data import get_cache, get_from_cache, save_to_cache, get_registry, fetch_reg_file
@@ -21,6 +24,16 @@ dash_resumable_upload.decorate_server(app.server, "uploads")
 layout = html.Div(id="upload-container", className='w-two-thirds-l center', children=[
     html.Div(className="flex flex-wrap justify-center", children=[
         html.Div(id='output-data-upload', className='w-100'),
+        html.Div([
+
+            html.Div(children='', id='dummy-results'),
+            dcc.Interval(
+                id='update-interval',
+                interval=60*60*5000,  # in milliseconds
+                n_intervals=0
+            )
+
+        ], id='results'),
         html.Div(className='w-100 tc ph3 ph5-l pt3 pb4 white bg-threesixty-one', children=[
             html.H2('Upload a file', className='f3'),
             html.P(className='light-gray', children=[
@@ -129,19 +142,7 @@ def parse_contents(contents, filename, date):
         df = get_dataframe(filename, contents, date)
         save_to_cache( fileid, df )
 
-    return message_box(
-        'File fetch results',
-        [
-            html.Div(children=[
-                html.Strong('File fetched: '),
-                filename
-            ]),
-            (html.H6(datetime.datetime.fromtimestamp(date)) if date else ""),
-            dcc.Link(href='/file/{}'.format(fileid),
-                     className='link dim near-black bg-threesixty-three pv2 ph3 mv3 dib',
-                     children='Data uploaded - view results >')
-        ]
-    )
+    return (fileid, filename, date)
 
 
 def get_existing_files():
@@ -149,30 +150,6 @@ def get_existing_files():
     return {
         k.decode('utf8'): json.loads(v.decode('utf8')) for k, v in r.hgetall("files").items()
     }
-
-
-@app.callback(Output('output-data-upload', 'children'),
-              [Input('upload-data', 'fileNames'),
-               Input('import-registry', 'n_clicks')],
-              [State('registry-list', 'value')])
-def update_output(fileNames, n_clicks, regid):
-    try:
-        if n_clicks is not None and regid is not None:
-            reg = get_registry()
-            regentry = [x for x in reg if x["identifier"]==regid]
-            if len(regentry)==1:
-                regentry = regentry[0]
-                url = regentry.get("distribution", [{}])[0].get("downloadURL")
-                filetype = regentry.get("datagetter_metadata", {}).get("file_type")
-                contents = fetch_reg_file(url)
-                filename = url if url.endswith(filetype) else "{}.{}".format(url, filetype)
-                return parse_contents(contents, filename, None)
-
-        if fileNames is not None:
-            return parse_contents(None, fileNames[-1], None)
-
-    except Exception as e:
-        return message_box("Could not load file", str(e), error=True)
 
 
 @app.callback(Output('files-list', 'children'),
@@ -201,3 +178,147 @@ def update_registry_list(_):
             'value': v.get('identifier')
         } for v in reg if v.get("datagetter_metadata", {}).get("file_type") in ["xlsx", "csv"]
     ]
+
+# =============================
+# Callbacks for calling workers
+#
+# From: https://github.com/WileyIntelligentSolutions/wiley-boilerplate-dash-app/
+# =============================
+
+
+# this callback checks submits the query as a new job, returning job_id to the invisible div
+@app.callback(Output('job-id', 'children'),
+              [Input('upload-data', 'fileNames'),
+               Input('import-registry', 'n_clicks')],
+              [State('registry-list', 'value')])
+def update_output(fileNames, n_clicks, regid):
+    if (n_clicks is None or regid is None) and fileNames is None:
+        return ''
+    
+    # a query was submitted, so queue it up and return job_id
+    q = Queue(connection=get_cache())
+    job_id = str(uuid.uuid4())
+    try:
+        if n_clicks is not None and regid is not None:
+            reg = get_registry()
+            regentry = [x for x in reg if x["identifier"]==regid]
+            if len(regentry)==1:
+                regentry = regentry[0]
+                url = regentry.get("distribution", [{}])[0].get("downloadURL")
+                filetype = regentry.get("datagetter_metadata", {}).get("file_type")
+                contents = fetch_reg_file(url)
+                filename = url if url.endswith(filetype) else "{}.{}".format(url, filetype)
+                job = q.enqueue_call(func=parse_contents,
+                                     args=(contents, filename, None),
+                                     timeout='3m',
+                                     job_id=job_id)
+                return job_id
+
+        if fileNames is not None:
+            job = q.enqueue_call(func=parse_contents,
+                                 args=(None, fileNames[-1], None),
+                                 timeout='3m',
+                                 job_id=job_id)
+            return job_id
+
+    except Exception as e:
+        return message_box("Could not load file", str(e), error=True)
+
+
+def get_queue_job(job_id):
+    q = Queue(connection=get_cache())
+    failed_q = Queue('failed', connection=get_cache())
+    failed_job = failed_q.fetch_job(job_id)
+    if failed_job:
+        return failed_job
+    return q.fetch_job(job_id)
+
+
+# this callback checks if the job result is ready.  If it's ready
+# the results return to the table.  If it's not ready, it pauses
+# for a short moment, then empty results are returned.  If there is
+# no job, then empty results are returned.
+@app.callback(Output('output-data-upload', 'children'),
+              [Input('update-interval', 'n_intervals')],
+              [State('job-id', 'children')])
+def update_results_tables(n_intervals, job_id):
+    job = get_queue_job(job_id)
+    if job is None:
+        return ''
+    
+    # check for failed jobs
+    if job.is_failed:
+        return message_box(
+            'Error fetching file',
+            [
+                html.Div(children=[
+                    html.Strong('Attempted to fetch file: '),
+                    job.args[1]
+                ]),
+                (html.H6(datetime.datetime.fromtimestamp(
+                    job.args[2])) if job.args[2] else ""),
+                html.P('Could not fetch file'),
+                html.Div(className='bg-light-gray pa1 f6 ws-pre pre', children=[
+                    html.Pre(job.exc_info),
+                ]),
+            ],
+            error=True
+        )
+
+    # job exists - try to get result
+    result = job.result
+    if result is None:
+        # results aren't ready, pause then return empty results
+        # You will need to fine tune this interval depending on
+        # your environment
+        time.sleep(3)
+        return html.Div('Fetching results...')
+
+    # results are ready
+    fileid, filename, date = result
+    return message_box(
+        'File fetch results',
+        [
+            html.Div(children=[
+                html.Strong('File fetched: '),
+                filename
+            ]),
+            (html.H6(datetime.datetime.fromtimestamp(date)) if date else ""),
+            dcc.Link(href='/file/{}'.format(fileid),
+                    className='link dim near-black bg-threesixty-three pv2 ph3 mv3 dib',
+                    children='Data uploaded - view results >')
+        ]
+    )
+
+
+# this callback orders the table to be regularly refreshed if
+# the user is waiting for results, or to be static (refreshed once
+# per hour) if they are not.
+@app.callback(Output('update-interval', 'interval'),
+              [Input('job-id', 'children'),
+              Input('update-interval', 'n_intervals')])
+def stop_or_start_table_update(job_id, n_intervals):
+    job = get_queue_job(job_id)
+
+    if job is None:
+        # the job does not exist, therefore stop regular refreshing
+        print("Job doesn't exist")
+        return 60*60*1000
+        
+    if job.is_failed:
+        # the job has failed, therefore semi-regular refreshing
+        print("Job failed")
+        return 10*1000
+
+    # the job exists - try to get results
+    if job.result:
+        # the results are ready, therefore stop regular refreshing
+        print("Job result")
+        return 60*60*1000
+
+    # a job is in progress but we're waiting for results
+    # therefore regular refreshing is required.  You will
+    # need to fine tune this interval depending on your
+    # environment.
+    print("Job waiting")
+    return 1000

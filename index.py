@@ -73,7 +73,8 @@ app.layout = html.Div(className='pv2 ph4', children=[
         ]),
     ]),
     html.Div(id='page-content', className='cf'),
-    html.Div(id='output-data-id', className='f6 grey'),
+    html.Div(id='output-data-id', className='f6 grey', style={'display': 'none'}),
+    html.Div(id='job-id', style={'display': 'none'}), # invisible div to safely store the current job-id
     html.Div(dt.DataTable(rows=[{}]), style={'display': 'none'}), # make sure we can load dash_table_experiments
     html.Div(dash_resumable_upload.Upload(), style={'display': 'none'}), # dummy upload to make sure dash loads dash_resumable_upload
     html.Div(id="page-footer", className='cf mv3 pv3 bt b-threesixty-one bw4', children=[

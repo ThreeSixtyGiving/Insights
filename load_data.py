@@ -5,22 +5,17 @@ import json
 import datetime
 import dateutil
 
-from flask import g
-from redis import StrictRedis
+from flask import g, Flask
+from cache import redis_cache
 
 import pandas as pd
 import requests
 
 THREESIXTY_STATUS_JSON = 'https://storage.googleapis.com/datagetter-360giving-output/branch/master/status.json'
-REDIS_DEFAULT_URL = 'redis://localhost:6379/0'
 DEFAULT_PREFIX    = 'file_'
 
 def get_cache():
-    if 'cache' not in g:
-        redis_url = os.environ.get('REDIS_URL', REDIS_DEFAULT_URL)
-        g.cache = StrictRedis.from_url(redis_url)
-
-    return g.cache
+    return redis_cache()
 
 
 def save_to_cache(fileid, df, prefix=DEFAULT_PREFIX):
