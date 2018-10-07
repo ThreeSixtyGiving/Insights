@@ -102,8 +102,10 @@ All external data is used under the [Open Government Licence](http://www.nationa
         '''),
         dcc.Markdown(className='fl w-100 w-third-l pl3 tr', children='''
 [Github](https://github.com/ThreeSixtyGiving/threethings) |
-[360 Giving](https://www.threesixtygiving.org/) |
-Built by [David Kane](https://drkane.co.uk/)
+[360 Giving](https://www.threesixtygiving.org/)
+
+Built by [David Kane](https://drkane.co.uk/) using 
+[Dash by Plotly](https://dash.plot.ly/)
         ''')
     ]),
 ])
