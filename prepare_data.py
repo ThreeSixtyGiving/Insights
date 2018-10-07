@@ -41,19 +41,19 @@ def get_company(orgid, ch_url=CH_URL):
 def prepare_data(df, cache={}):
 
     # check column names for typos
-    wrongly_spelled = ['Amount Awarded', 'Funding Org:Name', 'Award Date']
+    columns_to_check = [
+        'Amount Awarded', 'Funding Org:Name', 'Award Date', 
+        'Recipient Org:Name', 'Recipient Org:Identifier'
+    ]
     renames = {}
     for c in df.columns:
-        for w in wrongly_spelled:
+        for w in columns_to_check:
             if c.replace(" ","").lower() == w.replace(" ","").lower() and c != w:
                 renames[c] = w
     df = df.rename(columns=renames)
 
     # columns to check exist
-    columns_exist = [
-        'Amount Awarded', 'Funding Org:Name', 'Award Date', 'Recipient Org:Identifier',
-    ]
-    for c in columns_exist:
+    for c in columns_to_check:
         if c not in df.columns:
             raise ValueError("Column {} not found in data".format(c))
 
