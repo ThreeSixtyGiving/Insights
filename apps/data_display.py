@@ -139,7 +139,6 @@ def dashboard_output(grant_programme, funder, year, fileid):
 @app.callback(Output('award-dates', 'children'),
               [Input('output-data-id', 'children')])
 def award_dates_change(fileid):
-    print("award_Dates_change", fileid)
     df = get_from_cache(fileid)
     logging.debug("award_dates_change", fileid, df is None)
     if df is None:

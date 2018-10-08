@@ -155,7 +155,6 @@ def get_existing_files():
 @app.callback(Output('files-list', 'children'),
               [Input('output-data-upload', 'children')])
 def update_files_list(_):
-    print("update_files_list", _)
     return [
         html.Li([
             dcc.Link(href='/file/{}'.format(k), children=list_to_string(v["funders"]))
@@ -166,7 +165,6 @@ def update_files_list(_):
 @app.callback(Output('registry-list', 'options'),
               [Input('output-data-upload', 'children')])
 def update_registry_list(_):
-    print("update_registry_list", _)
     reg = get_registry()
     return [
         {
@@ -332,23 +330,19 @@ def stop_or_start_table_update(job_id, n_intervals):
 
     if job is None:
         # the job does not exist, therefore stop regular refreshing
-        print("Job doesn't exist")
         return 60*60*1000
         
     if job.is_failed:
         # the job has failed, therefore semi-regular refreshing
-        print("Job failed")
         return 10*1000
 
     # the job exists - try to get results
     if job.result:
         # the results are ready, therefore stop regular refreshing
-        print("Job result")
         return 60*60*1000
 
     # a job is in progress but we're waiting for results
     # therefore regular refreshing is required.  You will
     # need to fine tune this interval depending on your
     # environment.
-    print("Job waiting")
     return 1000

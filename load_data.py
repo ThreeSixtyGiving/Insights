@@ -22,7 +22,6 @@ def save_to_cache(fileid, df, prefix=DEFAULT_PREFIX):
     r = get_cache()
     r.set("{}{}".format(prefix, fileid), pickle.dumps(df))
     logging.info("Dataframe [{}] saved to redis".format(fileid))
-    print(df.columns)
 
     metadata = {
         "fileid": fileid,

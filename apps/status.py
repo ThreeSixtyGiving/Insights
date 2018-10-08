@@ -82,7 +82,6 @@ def get_status_options(_):
 @app.callback(Output('status-currency', 'options'),
               [Input('status-container', 'children')])
 def get_currency_options(_):
-    print('get_currency_options')
     reg = get_registry()
     currencies = []
     for r in reg:
@@ -98,7 +97,6 @@ def get_currency_options(_):
 @app.callback(Output('status-file-type', 'options'),
               [Input('status-container', 'children')])
 def get_filetype_options(_):
-    print('get_filetype_options')
     reg = get_registry()
     filetypes = {}
     for r in reg:
@@ -117,7 +115,6 @@ def get_filetype_options(_):
                Input('status-currency', 'value'),
                Input('status-file-type', 'value')])
 def update_status_container(search, licence, last_modified, currency, filetype):
-    print("update_status_container", search, licence, last_modified, currency, filetype)
     reg = get_registry_by_publisher(filters={
         "search": search,
         "licence": licence,
