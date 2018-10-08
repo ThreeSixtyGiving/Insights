@@ -268,11 +268,41 @@ def update_results_tables(n_intervals, job_id):
     # job exists - try to get result
     result = job.result
     if result is None:
-        # results aren't ready, pause then return empty results
-        # You will need to fine tune this interval depending on
-        # your environment
-        time.sleep(3)
-        return html.Div('Fetching results...')
+        # results aren't ready, show progres
+        if "progress" in job.meta:
+            progress = []
+            if job.meta["progress"].get("progress"):
+                width = '{0:.1f}%'.format(
+                    (job.meta["progress"].get("progress")[0] / job.meta["progress"].get("progress")[1]) * 100
+                )
+                progress = [
+                    html.P('Processed {} of {}'.format(
+                        job.meta["progress"].get("progress")[0],
+                        job.meta["progress"].get("progress")[1]
+                    )),
+                    html.Div(className='bg-moon-gray br-pill h1 overflow-y-hidden', children=[
+                        html.Div(className='bg-threesixty-two br-pill h1 shadow-1', style={"width": width})
+                    ])
+                ]
+            step_width = '{0:.1f}%'.format(
+                (job.meta["progress"]["stage"] /
+                 len(job.meta["stages"])) * 100
+            )
+            return message_box(
+                'Fetching file',
+                [
+                    html.P(html.Strong(job.meta["stages"][job.meta["progress"]["stage"]])),
+                    html.P('Step {} of {}'.format(
+                        job.meta["progress"]["stage"],
+                        len(job.meta["stages"])
+                    )),
+                    html.Div(className='bg-moon-gray br-pill h1 overflow-y-hidden', children=[
+                        html.Div(className='bg-threesixty-one br-pill h1 shadow-1',
+                                 style={"width": step_width})
+                    ])
+                ] + progress
+            )
+        return message_box('Fetching file', [])
 
     # results are ready
     fileid, filename, date = result

@@ -5,6 +5,7 @@ import os
 import pandas as pd
 import requests
 import tqdm
+from rq import get_current_job
 
 FTC_URL  = 'https://findthatcharity.uk/orgid/{}.json'
 CH_URL   = 'http://data.companieshouse.gov.uk/doc/company/{}.json'
@@ -39,6 +40,20 @@ def get_company(orgid, ch_url=CH_URL):
 
 
 def prepare_data(df, cache={}):
+    
+    job = get_current_job()
+    job.meta['stages'] = [
+        'Check column names', 'Check columns exist', 'Check column types',
+        'Add extra columns', 'Clean recipient identifiers', 'Look up charity data',
+        'Look up company data', 'Add charity and company details to data', 
+        'Look up postcode data', 'Add geo data', 'Add extra fields from external data'
+    ]
+    job.meta['progress'] = {"stage": 0, "progress": None}
+
+    def progress_job(add_stage=1, progress=None):
+        job.meta['progress']["stage"] += add_stage
+        job.meta['progress']["progress"] = progress
+        job.save_meta()
 
     # check column names for typos
     columns_to_check = [
@@ -53,19 +68,23 @@ def prepare_data(df, cache={}):
     df = df.rename(columns=renames)
 
     # columns to check exist
+    progress_job()
     for c in columns_to_check:
         if c not in df.columns:
             raise ValueError("Column {} not found in data".format(c))
 
     # ensure correct column types
+    progress_job()
     df.loc[:, "Award Date"] = pd.to_datetime(df["Award Date"])
 
     # add additional columns
+    progress_job()
     df.loc[:, "Award Date:Year"] = df["Award Date"].dt.year
     df.loc[:, "Recipient Org:Identifier:Scheme"] = df["Recipient Org:Identifier"].apply(
         lambda x: "360G" if x.startswith("360G-") else "-".join(x.split("-")[:2]))
 
     # add a column with a "clean" identifier that can be fetched from find that charity
+    progress_job()
     df.loc[
         df["Recipient Org:Identifier:Scheme"].isin(FTC_SCHEMES), "Recipient Org:Identifier:Clean"
     ] = df.loc[df["Recipient Org:Identifier:Scheme"].isin(FTC_SCHEMES), "Recipient Org:Identifier"]
@@ -80,10 +99,12 @@ def prepare_data(df, cache={}):
         ).fillna(df["Recipient Org:Identifier:Scheme"])
 
     # look for any charity details
+    progress_job()
     orgids = df.loc[df["Recipient Org:Identifier:Scheme"].isin(
         FTC_SCHEMES), "Recipient Org:Identifier:Clean"].dropna().unique()
     print("Finding details for {} charities".format(len(orgids)))
-    for orgid in tqdm.tqdm(orgids):
+    for k, orgid in tqdm.tqdm(enumerate(orgids)):
+        progress_job(0, (k+1, len(orgids)))
         if orgid not in cache["charity"]:
             try:
                 cache["charity"][orgid] = get_charity(orgid)
@@ -107,11 +128,13 @@ def prepare_data(df, cache={}):
         orgid_df.loc[:, "date_removed"])
 
     # look for any company details
+    progress_job()
     company_orgids = df.loc[
         ~df["Recipient Org:Identifier:Clean"].isin(orgid_df.index) &
         (df["Recipient Org:Identifier:Scheme"]=="GB-COH"), "Recipient Org:Identifier:Clean"].unique()
     print("Finding details for {} companies".format(len(company_orgids)))
-    for orgid in tqdm.tqdm(company_orgids):
+    for k, orgid in tqdm.tqdm(enumerate(company_orgids)):
+        progress_job(0, (k+1, len(company_orgids)))
         if orgid not in cache["company"]:
             try:
                 cache["company"][orgid] = get_company(orgid)
@@ -119,6 +142,7 @@ def prepare_data(df, cache={}):
                 pass
 
     # create company dataframe
+    progress_job()
     if cache["company"]:
         company_rows = []
         for k, c in cache["company"].items():
@@ -166,9 +190,11 @@ def prepare_data(df, cache={}):
         df.loc[:, "Recipient Org:Postcode"] = df["__org_postcode"]
 
     # fetch postcode data
+    progress_job()
     postcodes = df.loc[:, "Recipient Org:Postcode"].dropna().unique()
     print("Finding details for {} postcodes".format(len(postcodes)))
-    for pc in tqdm.tqdm(postcodes):
+    for k, pc in tqdm.tqdm(enumerate(postcodes)):
+        progress_job(0, (k+1, len(postcodes)))
         if pc not in cache["postcode"]:
             try:
                 cache["postcode"][pc] = requests.get(PC_URL.format(pc)).json()
@@ -176,6 +202,7 @@ def prepare_data(df, cache={}):
                 continue
 
     # turn into a dataframe
+    progress_job()
     postcode_df = pd.DataFrame([{
         **{"postcode": k}, 
         **{j: c.get("data", {}).get("attributes", {}).get(j) for j in POSTCODE_FIELDS}
@@ -192,6 +219,7 @@ def prepare_data(df, cache={}):
     df = df.join(postcode_df.rename(columns=lambda x: "__geo_" + x), on="Recipient Org:Postcode", how="left")
 
     # add banded fields
+    progress_job()
     amount_bins = [0,500,1000,2000,5000,10000,100000,1000000,float("inf")]
     amount_bin_labels = ["Under £500", "£500 - £1,000", "£1,000 - £2,000", "£2k - £5k", "£5k - £10k",
                         "£10k - £100k", "£100k - £1m", "Over £1m"]
