@@ -20,6 +20,9 @@ DEFAULT_FILTERS = {
     ],
     "funders": [
         {"label": "Funder", "value": "__all"}
+    ],
+    "area": [
+        {"label": "All areas", "value": "__all"}
     ]
 }
 
@@ -51,6 +54,18 @@ layout = html.Div(id="dashboard-container", className='', children=[
                                     options=DEFAULT_FILTERS["grant_programmes"],
                                     multi=True,
                                     value=[DEFAULT_FILTERS["grant_programmes"][0]["value"]]
+                                ),
+                            ]),
+                        ]),
+
+                        html.Div(id='df-change-area-wrapper', className='field', children=[
+                            html.Label(children='Region and country'),
+                            html.Div(className='cf mv3', children=[
+                                dcc.Dropdown(
+                                    id='df-change-area',
+                                    options=DEFAULT_FILTERS["area"],
+                                    multi=True,
+                                    value=[DEFAULT_FILTERS["area"][0]["value"]]
                                 ),
                             ]),
                         ]),
@@ -88,12 +103,16 @@ layout = html.Div(id="dashboard-container", className='', children=[
               [Input('df-change-grant-programme', 'value'),
                Input('df-change-funder', 'value'),
                Input('df-change-year', 'value'),
+               Input('df-change-area', 'value'),
                Input('output-data-id', 'children')])
-def dashboard_output(grant_programme, funder, year, fileid):
-    df = get_filtered_df(fileid, grant_programme=grant_programme, funder=funder, year=year)
+def dashboard_output(grant_programme, funder, year, area, fileid):
+    df = get_filtered_df(fileid, grant_programme=grant_programme, funder=funder, year=year, area=area)
     logging.debug("dashboard_output", fileid, df is None)
     if df is None:
         return []
+
+    if len(df) == 0:
+        return html.Div('No grants meet criteria')
 
     outputs = []
     
@@ -159,6 +178,16 @@ def award_dates_change(fileid):
                 'label': '{} ({})'.format(i[0], i[1]), 
                 'value': i[0]
             } for i in df["Funding Org:Name"].value_counts().iteritems()
+         ],
+        "area": [
+            {
+                'label': (
+                    '{} ({})'.format(value[0], count) \
+                    if value[0].strip() == value[1].strip() \
+                    else "{} - {} ({})".format(value[0], value[1], count)
+                ),
+                'value': "{}##{}".format(value[0], value[1])
+            } for value, count in df.fillna({"__geo_ctry": "Unknown", "__geo_rgn": "Unknown"}).groupby(["__geo_ctry", "__geo_rgn"]).size().iteritems()
          ]
     }, indent=4)
 
@@ -201,6 +230,29 @@ def grant_programme_dropdown_hide(value, existing_style):
     existing_style = {} if existing_style is None else existing_style
     value = json.loads(value) if value else DEFAULT_FILTERS
     if len(value["grant_programmes"])>1:
+        if "display" in existing_style:
+            del existing_style["display"]
+    else:
+        existing_style["display"] = 'none'
+    return existing_style
+
+
+
+@app.callback(Output('df-change-area', 'options'),
+              [Input('award-dates', 'children')])
+def area_dropdown(value):
+    logging.debug("area_dropdown", value)
+    value = json.loads(value) if value else DEFAULT_FILTERS
+    return value["area"]
+
+
+@app.callback(Output('df-change-area-wrapper', 'style'),
+              [Input('award-dates', 'children')],
+              [State('df-change-area-wrapper', 'style')])
+def area_dropdown_hide(value, existing_style):
+    existing_style = {} if existing_style is None else existing_style
+    value = json.loads(value) if value else DEFAULT_FILTERS
+    if len(value["area"])>1:
         if "display" in existing_style:
             del existing_style["display"]
     else:

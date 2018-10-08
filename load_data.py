@@ -131,4 +131,19 @@ def get_filtered_df(fileid, **filters):
             (df["Award Date"].dt.year <= filters.get("year")[1])
         ]
 
+    # filter on area
+    if filters.get("area") and '__all' not in filters.get("area", []):
+        countries = []
+        regions = []
+        for f in filters.get('area', []):
+            if "##" in f:
+                f = f.split('##')
+                countries.append(f[0])
+                regions.append(f[1])
+        if countries and regions:
+            df = df[
+                (df["__geo_ctry"].isin(countries)) &
+                (df["__geo_rgn"].isin(regions))
+            ]
+
     return df
