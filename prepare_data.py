@@ -20,6 +20,15 @@ COMPANY_REPLACE = {
 } # replacement values for companycategory
 POSTCODE_FIELDS = ['ctry', 'cty', 'laua', 'pcon', 'rgn', 'imd', 'ru11ind', 'oac11', 'lat', 'long'] # fields to care about from the postcodes)
 
+# Bins used for numeric fields
+AMOUNT_BINS = [0,500,1000,2000,5000,10000,100000,1000000,float("inf")]
+AMOUNT_BIN_LABELS = ["Under £500", "£500 - £1,000", "£1,000 - £2,000", "£2k - £5k", "£5k - £10k",
+                    "£10k - £100k", "£100k - £1m", "Over £1m"]
+INCOME_BINS = [0,10000,100000,1000000,10000000,float("inf")]
+INCOME_BIN_LABELS = ["Under £10k", "£10k - £100k", "£100k - £1m", "£1m - £10m", "Over £10m"]
+AGE_BINS = pd.to_timedelta([x * 365 for x in [0,1,2,5,10,25,200]], unit="D")
+AGE_BIN_LABELS = ["Under 1 year", "1-2 years", "2-5 years", "5-10 years", "10-25 years", "Over 25 years"]
+
 # utils
 def charity_number_to_org_id(regno):
     if not isinstance(regno, str):
@@ -220,17 +229,10 @@ def prepare_data(df, cache={}):
 
     # add banded fields
     progress_job()
-    amount_bins = [0,500,1000,2000,5000,10000,100000,1000000,float("inf")]
-    amount_bin_labels = ["Under £500", "£500 - £1,000", "£1,000 - £2,000", "£2k - £5k", "£5k - £10k",
-                        "£10k - £100k", "£100k - £1m", "Over £1m"]
-    income_bins = [0,10000,100000,1000000,10000000,float("inf")]
-    income_bin_labels = ["Under £10k", "£10k - £100k", "£100k - £1m", "£1m - £10m", "Over £10m"]
-    age_bins = pd.to_timedelta([x * 365 for x in [0,1,2,5,10,25,200]], unit="D")
-    age_bin_labels = ["Under 1 year", "1-2 years", "2-5 years", "5-10 years", "10-25 years", "Over 25 years"]
-    df.loc[:, "Amount Awarded:Bands"] = pd.cut(df["Amount Awarded"], bins=amount_bins, labels=amount_bin_labels)
+    df.loc[:, "Amount Awarded:Bands"] = pd.cut(df["Amount Awarded"], bins=AMOUNT_BINS, labels=AMOUNT_BIN_LABELS)
     df.loc[:, "__org_latest_income_bands"] = pd.cut(df["__org_latest_income"].astype(float), 
-                                                bins=income_bins, labels=income_bin_labels)
-    df.loc[:, "__org_age_bands"] = pd.cut(df["__org_age"], bins=age_bins, labels=age_bin_labels)
+                                                bins=INCOME_BINS, labels=INCOME_BIN_LABELS)
+    df.loc[:, "__org_age_bands"] = pd.cut(df["__org_age"], bins=AGE_BINS, labels=AGE_BIN_LABELS)
 
     if "Grant Programme:Title" not in df.columns:
         df.loc[:, "Grant Programme:Title"] = "All grants"
