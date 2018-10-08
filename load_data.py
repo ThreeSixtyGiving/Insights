@@ -11,6 +11,8 @@ from cache import redis_cache
 import pandas as pd
 import requests
 
+from filters import FILTERS
+
 THREESIXTY_STATUS_JSON = 'https://storage.googleapis.com/datagetter-360giving-output/branch/master/status.json'
 DEFAULT_PREFIX    = 'file_'
 
@@ -115,35 +117,14 @@ def fetch_reg_file(url):
 
 def get_filtered_df(fileid, **filters):
     df = get_from_cache(fileid)
-    
-    # Filter on grant programme
-    if filters.get("grant_programme") and '__all' not in filters.get("grant_programme", []):
-        df = df[df["Grant Programme:Title"].isin(filters.get("grant_programme", []))]
-    
-    # Filter on funder
-    if filters.get("funder") and '__all' not in filters.get("funder", []):
-        df = df[df["Funding Org:Name"].isin(filters.get("funder", []))]
 
-    # filter on year
-    if filters.get("year") and df is not None:
-        df = df[
-            (df["Award Date"].dt.year >= filters.get("year")[0]) & 
-            (df["Award Date"].dt.year <= filters.get("year")[1])
-        ]
-
-    # filter on area
-    if filters.get("area") and '__all' not in filters.get("area", []):
-        countries = []
-        regions = []
-        for f in filters.get('area', []):
-            if "##" in f:
-                f = f.split('##')
-                countries.append(f[0])
-                regions.append(f[1])
-        if countries and regions:
-            df = df[
-                (df["__geo_ctry"].isin(countries)) &
-                (df["__geo_rgn"].isin(regions))
-            ]
+    for filter_id, filter_def in FILTERS.items():
+        new_df = filter_def["apply_filter"](
+            df,
+            filters.get(filter_id),
+            filter_def
+        )
+        if new_df is not None:
+            df = new_df
 
     return df

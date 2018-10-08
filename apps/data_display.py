@@ -9,22 +9,37 @@ import dash_table_experiments as dt
 from app import app
 from load_data import get_filtered_df, get_from_cache, get_cache
 from charts import *
+from filters import FILTERS
 
-DEFAULT_FILTERS = {
-    "award_dates": {
-        "min": 2015,
-        "max": 2018
-    },
-    "grant_programmes": [
-        {"label": "All grants", "value": "__all"}
-    ],
-    "funders": [
-        {"label": "Funder", "value": "__all"}
-    ],
-    "area": [
-        {"label": "All areas", "value": "__all"}
-    ]
-}
+def filter_html(filter_id, filter_def):
+    if filter_def.get("type") == 'rangeslider':
+        min_ = filter_def["defaults"].get("min", 0)
+        max_ = filter_def["defaults"].get("max", 100)
+        step_ = filter_def["defaults"].get("step", 1)
+        return dcc.RangeSlider(
+            id=filter_id,
+            min=min_,
+            max=max_,
+            step=step_,
+            value=[min_,max_],
+            marks={str(min_): str(min_), str(max_): str(max_)}
+        )
+
+    if filter_def.get("type") == 'multidropdown':
+        return dcc.Dropdown(
+            id=filter_id,
+            options=filter_def["defaults"],
+            multi=True,
+            value=[filter_def["defaults"][0]["value"]]
+        )
+
+    if filter_def.get("type") == 'dropdown':
+        return dcc.Dropdown(
+            id=filter_id,
+            options=filter_def["defaults"],
+            multi=False,
+            value=[filter_def["defaults"][0]["value"]]
+        )
 
 
 layout = html.Div(id="dashboard-container", className='', children=[
@@ -34,61 +49,24 @@ layout = html.Div(id="dashboard-container", className='', children=[
             message_box(title="Filter data", contents=[
                 html.Div(className="cf", children=[
                     html.Form(id="dashboard-filter", className='', children=[
-                        html.Div(id='df-change-funder-wrapper', className='', children=[
-                            html.Label(children='Funder'),
+                        html.Div(id='df-change-{}-wrapper'.format(filter_id), className='', children=[
+                            html.Label(children=filter_def.get('label', filter_id)),
                             html.Div(className='cf mv3', children=[
-                                dcc.Dropdown(
-                                    id='df-change-funder',
-                                    options=DEFAULT_FILTERS["funders"],
-                                    multi=True,
-                                    value=[DEFAULT_FILTERS["funders"][0]["value"]]
-                                ),
+                                filter_html('df-change-{}'.format(filter_id), filter_def)
                             ])
-                        ]),
-
-                        html.Div(id='df-change-grant-programme-wrapper', className='field', children=[
-                            html.Label(children='Grant programme'),
-                            html.Div(className='cf mv3', children=[
-                                dcc.Dropdown(
-                                    id='df-change-grant-programme',
-                                    options=DEFAULT_FILTERS["grant_programmes"],
-                                    multi=True,
-                                    value=[DEFAULT_FILTERS["grant_programmes"][0]["value"]]
-                                ),
-                            ]),
-                        ]),
-
-                        html.Div(id='df-change-area-wrapper', className='field', children=[
-                            html.Label(children='Region and country'),
-                            html.Div(className='cf mv3', children=[
-                                dcc.Dropdown(
-                                    id='df-change-area',
-                                    options=DEFAULT_FILTERS["area"],
-                                    multi=True,
-                                    value=[DEFAULT_FILTERS["area"][0]["value"]]
-                                ),
-                            ]),
-                        ]),
-
-                        html.Div(id='df-change-year-wrapper', className='field', children=[
-                            html.Label(children='Data years'),
-                            html.Div(className='cf ph3 mv3', children=[
-                                dcc.RangeSlider(
-                                    id='df-change-year',
-                                    min=DEFAULT_FILTERS["award_dates"]["min"],
-                                    max=DEFAULT_FILTERS["award_dates"]["max"],
-                                    step=1,
-                                    value=[DEFAULT_FILTERS["award_dates"]["min"],DEFAULT_FILTERS["award_dates"]["max"]],
-                                    marks={"2015": "2015", "2018": "2018"}
-                                ),
-                            ])
-                        ]),
+                        ]) for filter_id, filter_def in FILTERS.items()
                     ]),
                 ]),
                 html.Div(className="cf mt4", children=[
                     html.Div(dcc.Link(href='/', children='Select new data')),
                 ]),
-                html.Div(html.Pre(id='award-dates', children=json.dumps(DEFAULT_FILTERS, indent=4)), style={"display": "none"}),
+                html.Div(
+                    html.Pre(
+                        id='award-dates', 
+                        children=json.dumps({f: FILTERS[f]["defaults"] for f in FILTERS}, indent=4)
+                    ), 
+                    style={"display": "none"}
+                ),
             ])
         ]),
 
@@ -100,13 +78,13 @@ layout = html.Div(id="dashboard-container", className='', children=[
 
 
 @app.callback(Output('dashboard-output', 'children'),
-              [Input('df-change-grant-programme', 'value'),
-               Input('df-change-funder', 'value'),
-               Input('df-change-year', 'value'),
-               Input('df-change-area', 'value'),
-               Input('output-data-id', 'children')])
-def dashboard_output(grant_programme, funder, year, area, fileid):
-    df = get_filtered_df(fileid, grant_programme=grant_programme, funder=funder, year=year, area=area)
+              [Input('output-data-id', 'children')] + [
+                  Input('df-change-{}'.format(f), 'value')
+                  for f in FILTERS
+              ])
+def dashboard_output(fileid, *args):
+    filter_args = dict(zip(FILTERS.keys(), args))
+    df = get_filtered_df(fileid, **filter_args)
     logging.debug("dashboard_output", fileid, df is None)
     if df is None:
         return []
@@ -118,7 +96,7 @@ def dashboard_output(grant_programme, funder, year, area, fileid):
     
 
     outputs.append(
-        html.H2(className='normal', children=get_funder_output(df, grant_programme), id="funder-name")
+        html.H2(className='normal', children=get_funder_output(df, filter_args.get("grant_programmes")), id="funder-name")
     )
     outputs.append(get_statistics(df))
 
@@ -161,149 +139,115 @@ def award_dates_change(fileid):
     df = get_from_cache(fileid)
     logging.debug("award_dates_change", fileid, df is None)
     if df is None:
-        return json.dumps(DEFAULT_FILTERS)
-    return json.dumps({
-        "award_dates": {
-            "min": int(df["Award Date"].dt.year.min()),
-            "max": int(df["Award Date"].dt.year.max()),
-        },
-        "grant_programmes": [
-            {
-                'label': '{} ({})'.format(i[0], i[1]), 
-                'value': i[0]
-            } for i in df["Grant Programme:Title"].value_counts().iteritems()
-         ],
-        "funders": [
-            {
-                'label': '{} ({})'.format(i[0], i[1]), 
-                'value': i[0]
-            } for i in df["Funding Org:Name"].value_counts().iteritems()
-         ],
-        "area": [
-            {
-                'label': (
-                    '{} ({})'.format(value[0], count) \
-                    if value[0].strip() == value[1].strip() \
-                    else "{} - {} ({})".format(value[0], value[1], count)
-                ),
-                'value': "{}##{}".format(value[0], value[1])
-            } for value, count in df.fillna({"__geo_ctry": "Unknown", "__geo_rgn": "Unknown"}).groupby(["__geo_ctry", "__geo_rgn"]).size().iteritems()
-         ]
-    }, indent=4)
+        return json.dumps({f: FILTERS[f]["defaults"] for f in FILTERS})
+
+    return json.dumps({f: FILTERS[f]["get_values"](df) for f in FILTERS}, indent=4)
+
+# ================
+# Functions that return a function to be used in callbacks
+# ================
 
 
-@app.callback(Output('df-change-funder', 'options'),
-              [Input('award-dates', 'children')])
-def funder_dropdown(value):
-    logging.debug("funder_dropdown", value)
-    value = json.loads(value) if value else DEFAULT_FILTERS
-    return value["funders"]
+def dropdown_filter(filter_id, filter_def):
+    def dropdown_filter_func(value):
+        logging.debug("dropdown", filter_id, filter_def, value)
+        value = json.loads(value) if value else {filter_id: filter_def["defaults"]}
+        return value[filter_id]
+    return dropdown_filter_func
 
 
-@app.callback(Output('df-change-funder-wrapper', 'style'),
-              [Input('award-dates', 'children')],
-              [State('df-change-funder-wrapper', 'style')])
-def funder_dropdown_hide(value, existing_style):
-    existing_style = {} if existing_style is None else existing_style
-    value = json.loads(value) if value else DEFAULT_FILTERS
-    if len(value["funders"])>1:
-        if "display" in existing_style:
-            del existing_style["display"]
-    else:
-        existing_style["display"] = 'none'
-    return existing_style
-
-
-
-@app.callback(Output('df-change-grant-programme', 'options'),
-              [Input('award-dates', 'children')])
-def grant_programme_dropdown(value):
-    logging.debug("grant_programme_dropdown", value)
-    value = json.loads(value) if value else DEFAULT_FILTERS
-    return value["grant_programmes"]
-
-
-@app.callback(Output('df-change-grant-programme-wrapper', 'style'),
-              [Input('award-dates', 'children')],
-              [State('df-change-grant-programme-wrapper', 'style')])
-def grant_programme_dropdown_hide(value, existing_style):
-    existing_style = {} if existing_style is None else existing_style
-    value = json.loads(value) if value else DEFAULT_FILTERS
-    if len(value["grant_programmes"])>1:
-        if "display" in existing_style:
-            del existing_style["display"]
-    else:
-        existing_style["display"] = 'none'
-    return existing_style
-
-
-
-@app.callback(Output('df-change-area', 'options'),
-              [Input('award-dates', 'children')])
-def area_dropdown(value):
-    logging.debug("area_dropdown", value)
-    value = json.loads(value) if value else DEFAULT_FILTERS
-    return value["area"]
-
-
-@app.callback(Output('df-change-area-wrapper', 'style'),
-              [Input('award-dates', 'children')],
-              [State('df-change-area-wrapper', 'style')])
-def area_dropdown_hide(value, existing_style):
-    existing_style = {} if existing_style is None else existing_style
-    value = json.loads(value) if value else DEFAULT_FILTERS
-    if len(value["area"])>1:
-        if "display" in existing_style:
-            del existing_style["display"]
-    else:
-        existing_style["display"] = 'none'
-    return existing_style
+def filter_dropdown_hide(filter_id, filter_def):
+    def filter_dropdown_hide_func(value, existing_style):
+        existing_style = {} if existing_style is None else existing_style
+        value = json.loads(value) if value else {filter_id: filter_def["defaults"]}
+        if len(value[filter_id])>1:
+            if "display" in existing_style:
+                del existing_style["display"]
+        else:
+            existing_style["display"] = 'none'
+        return existing_style
+    return filter_dropdown_hide_func
     
+def slider_select_min(filter_id, filter_def):
+    def slider_select_min_func(value):
+        logging.debug("year_select_min", value)
+        value = json.loads(value) if value else {filter_id: filter_def["defaults"]}
+        return value[filter_id]["min"]
+    return slider_select_min_func
+        
+def slider_select_max(filter_id, filter_def):
+    def slider_select_max_func(value):
+        logging.debug("year_select_max", value)
+        value = json.loads(value) if value else {filter_id: filter_def["defaults"]}
+        return value[filter_id]["max"]
+    return slider_select_max_func
 
-@app.callback(Output('df-change-year', 'min'),
-              [Input('award-dates', 'children')])
-def year_select_min(value):
-    logging.debug("year_select_min", value)
-    value = json.loads(value) if value else DEFAULT_FILTERS
-    return value["award_dates"]["min"]
-    
+def slider_select_marks(filter_id, filter_def):
+    def slider_select_marks_func(value):
+        logging.debug("year_select_marks", value)
+        value = json.loads(value) if value else {filter_id: filter_def["defaults"]}
+        step = 3 if (value[filter_id]["max"] - value[filter_id]["min"]) > 6 else 1
+        min_max = range(value[filter_id]["min"], value[filter_id]["max"] + 1, step)
+        return {str(i): str(i) for i in min_max}
+    return slider_select_marks_func
+        
+def slider_select_value(filter_id, filter_def):
+    def slider_select_value_func(value):
+        logging.debug("year_select_value", value)
+        value = json.loads(value) if value else {filter_id: filter_def["defaults"]}
+        return [value[filter_id]["min"], value[filter_id]["max"]]
+    return slider_select_value_func
 
-@app.callback(Output('df-change-year', 'max'),
-              [Input('award-dates', 'children')])
-def year_select_max(value):
-    logging.debug("year_select_max", value)
-    value = json.loads(value) if value else DEFAULT_FILTERS
-    return value["award_dates"]["max"]
-    
+def slider_hide(filter_id, filter_def):
+    def slider_hide_func(value, existing_style):
+        existing_style = {} if existing_style is None else existing_style
+        value = json.loads(value) if value else {filter_id: filter_def["defaults"]}
+        if value[filter_id]["min"] != value[filter_id]["max"]:
+            if "display" in existing_style:
+                del existing_style["display"]
+        else:
+            existing_style["display"] = 'none'
+        return existing_style
+    return slider_hide_func
 
-@app.callback(Output('df-change-year', 'marks'),
-              [Input('award-dates', 'children')])
-def year_select_marks(value):
-    logging.debug("year_select_marks", value)
-    value = json.loads(value) if value else DEFAULT_FILTERS
-    step = 3 if (value["award_dates"]["max"] - value["award_dates"]["min"]) > 6 else 1
-    min_max = range(value["award_dates"]["min"], value["award_dates"]["max"] + 1, step)
-    return {str(i): str(i) for i in min_max}
-    
+for filter_id, filter_def in FILTERS.items():
 
-@app.callback(Output('df-change-year', 'value'),
-              [Input('award-dates', 'children')])
-def year_select_value(value):
-    logging.debug("year_select_value", value)
-    value = json.loads(value) if value else DEFAULT_FILTERS
-    return [value["award_dates"]["min"], value["award_dates"]["max"]]
-    
+    if filter_def.get("type") in ['dropdown', 'multidropdown']:
+        app.callback(
+            Output('df-change-{}'.format(filter_id), 'options'),
+            [Input('award-dates', 'children')])(
+                dropdown_filter(filter_id, filter_def)
+            )
 
+        app.callback(Output('df-change-{}-wrapper'.format(filter_id), 'style'),
+                    [Input('award-dates', 'children')],
+            [State('df-change-{}-wrapper'.format(filter_id), 'style')])(
+                filter_dropdown_hide(filter_id, filter_def)
+            )
 
-@app.callback(Output('df-change-year-wrapper', 'style'),
-              [Input('award-dates', 'children')],
-              [State('df-change-year-wrapper', 'style')])
-def year_hide(value, existing_style):
-    existing_style = {} if existing_style is None else existing_style
-    value = json.loads(value) if value else DEFAULT_FILTERS
-    if value["award_dates"]["min"] != value["award_dates"]["max"]:
-        if "display" in existing_style:
-            del existing_style["display"]
-    else:
-        existing_style["display"] = 'none'
-    return existing_style
+    elif filter_def.get("type") in ['rangeslider']:
+        app.callback(Output('df-change-{}'.format(filter_id), 'min'),
+                    [Input('award-dates', 'children')])(
+                        slider_select_min(filter_id, filter_def)
+                    )
+            
+        app.callback(Output('df-change-{}'.format(filter_id), 'max'),
+                    [Input('award-dates', 'children')])(
+                        slider_select_max(filter_id, filter_def)
+                    )
+            
+        app.callback(Output('df-change-{}'.format(filter_id), 'marks'),
+                    [Input('award-dates', 'children')])(
+                        slider_select_marks(filter_id, filter_def)
+                    )
+            
+        app.callback(Output('df-change-{}'.format(filter_id), 'value'),
+                    [Input('award-dates', 'children')])(
+                        slider_select_value(filter_id, filter_def)
+                    )
+            
+        app.callback(Output('df-change-{}-wrapper'.format(filter_id), 'style'),
+                    [Input('award-dates', 'children')],
+                    [State('df-change-{}-wrapper'.format(filter_id), 'style')])(
+                        slider_hide(filter_id, filter_def)
+                    )
