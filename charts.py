@@ -200,7 +200,11 @@ def location_map(df):
     if not MAPBOX_ACCESS_TOKEN:
         return
 
-    geo = df[["__geo_lat", "__geo_long", "Recipient Org:Name"]].dropna()
+    try:
+        geo = df[["__geo_lat", "__geo_long", "Recipient Org:Name"]].dropna().drop_duplicates()
+    except KeyError:
+        return
+        
     data = [
         go.Scattermapbox(
             lat=geo["__geo_lat"].values,
