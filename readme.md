@@ -38,4 +38,10 @@ dokku domains:add explorer example.com
 # letsencrypt
 dokku config:set --no-restart explorer DOKKU_LETSENCRYPT_EMAIL=your@email.tld
 dokku letsencrypt explorer
+
+# create app storage
+mkdir -p /var/lib/dokku/data/storage/explorer-uploads
+chown -R dokku:dokku /var/lib/dokku/data/storage/explorer-uploads
+chown -R 32767:32767 /var/lib/dokku/data/storage/explorer-uploads
+dokku storage:mount explorer /var/lib/dokku/data/storage/explorer-uploads:/app/uploads
 ```

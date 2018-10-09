@@ -81,6 +81,7 @@ layout = html.Div(id="upload-container", className='w-two-thirds-l center', chil
 
 
 def get_dataframe(filename, contents=None, date_=None, fileid=None):
+    df = None
     if contents:
         if isinstance(contents, str):
             # if it's a string we assume it's dataurl/base64 encoded
