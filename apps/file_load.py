@@ -209,14 +209,14 @@ def update_output(fileNames, n_clicks, regid):
                 filename = url if url.endswith(filetype) else "{}.{}".format(url, filetype)
                 job = q.enqueue_call(func=parse_contents,
                                      args=(contents, filename, None),
-                                     timeout='3m',
+                                     timeout='15m',
                                      job_id=job_id)
                 return job_id
 
         if fileNames is not None:
             job = q.enqueue_call(func=parse_contents,
                                  args=(None, fileNames[-1], None),
-                                 timeout='3m',
+                                 timeout='15m',
                                  job_id=job_id)
             return job_id
 
