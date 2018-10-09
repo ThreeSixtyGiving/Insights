@@ -111,7 +111,18 @@ def get_registry_by_publisher(filters={}, **kwargs):
 
 
 def fetch_reg_file(url):
-    reg_file = requests.get(url)
+    user_agents = {
+        "findthatcharity": 'FindThatCharity.uk',
+        'spoof': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:63.0) Gecko/20100101 Firefox/63.0',
+    }
+    reg_file = requests.get(
+        url, headers={'User-Agent': user_agents['findthatcharity']})
+    try:
+        reg_file.raise_for_status()
+    except:
+        reg_file = requests.get(
+            url, headers={'User-Agent': user_agents['spoof']})
+        reg_file.raise_for_status()
     return reg_file.content
 
 

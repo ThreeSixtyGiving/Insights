@@ -211,20 +211,23 @@ def update_output(fileNames, n_clicks, regid):
                                      args=(contents, filename, None),
                                      timeout='15m',
                                      job_id=job_id)
-                return job_id
+                return json.dumps({"job": job_id})
 
         if fileNames is not None:
             job = q.enqueue_call(func=parse_contents,
                                  args=(None, fileNames[-1], None),
                                  timeout='15m',
                                  job_id=job_id)
-            return job_id
+            return json.dumps({"job": job_id})
 
     except Exception as e:
-        return message_box("Could not load file", str(e), error=True)
+        return json.dumps({"error": str(e)})
+        # message_box("Could not load file", str(e), error=True)
 
 
 def get_queue_job(job_id):
+    if not isinstance(job_id, str):
+        return None
     q = Queue(connection=get_cache())
     failed_q = Queue('failed', connection=get_cache())
     failed_job = failed_q.fetch_job(job_id)
@@ -238,9 +241,20 @@ def get_queue_job(job_id):
 # for a short moment, then empty results are returned.  If there is
 # no job, then empty results are returned.
 @app.callback(Output('output-data-upload', 'children'),
-              [Input('update-interval', 'n_intervals')],
-              [State('job-id', 'children')])
-def update_results_tables(n_intervals, job_id):
+              [Input('update-interval', 'n_intervals'),
+               Input('job-id', 'children')])
+def update_results_tables(n_intervals, job_status):
+
+    if job_status is None:
+        return
+
+    job_status = json.loads(job_status)
+    job_id = job_status.get("job")
+
+    # the job id may be an error - in which case return the error
+    if "error" in job_status or job_id is None:
+        return message_box("Error fetching file", job_status.get("error", "Unknown error"), error=True)
+
     job = get_queue_job(job_id)
     if job is None:
         return ''
@@ -326,7 +340,13 @@ def update_results_tables(n_intervals, job_id):
 @app.callback(Output('update-interval', 'interval'),
               [Input('job-id', 'children'),
               Input('update-interval', 'n_intervals')])
-def stop_or_start_table_update(job_id, n_intervals):
+def stop_or_start_table_update(job_status, n_intervals):
+
+    if job_status is None:
+        return 60*60*1000
+
+    job_status = json.loads(job_status)
+    job_id = job_status.get("job")
     job = get_queue_job(job_id)
 
     if job is None:
