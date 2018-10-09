@@ -239,7 +239,7 @@ def organisation_type_chart(df):
 def organisation_income_chart(df):
     if df["__org_latest_income_bands"].count() == 0:
         return message_box(
-            'Could not show organisation income chart',
+            'Latest income of charity recipients',
             '''This chart can\'t be shown as there are no recipients in the data with 
 income data. If your data contains grants to charities, you can add charity
 numbers to your data to show a chart of their latest income.
@@ -268,7 +268,7 @@ numbers to your data to show a chart of their latest income.
 def organisation_age_chart(df):
     if df["__org_age_bands"].count()==0:
         return message_box(
-            'Could not show organisation age chart',
+            'Age of recipients',
             '''This chart can\'t be shown as there are no recipients in the data with 
 organisation age data. Add company or charity numbers to your data to show a chart of
 the age of organisations.
@@ -309,11 +309,18 @@ def location_map(df):
         geo = df[["__geo_lat", "__geo_long", popup_col]].dropna().drop_duplicates()
     except KeyError as e:
         return message_box(
-            'Location map',
+            'Location of grant recipients',
             [
                 '''An error occured when attempting to show the map. Error: ''',
                 html.Pre(str(e))
             ],
+            error=True
+        )
+
+    if len(geo) == 0:
+        return message_box(
+            'Location of grant recipients',
+            '''Map cannot be shown. No location data is available.''',
             error=True
         )
         
@@ -404,7 +411,10 @@ def format_currency(amount, currency='GBP', humanize_=True, int_format="{:,.0f}"
 
 def get_funder_output(df, grant_programme=[]):
     
-    funders = list_to_string(df["Funding Org:Name"].unique().tolist())
+    funders = list_to_string(
+        [html.Strong(f, className='pa1 white bg-threesixty-two') for f in df["Funding Org:Name"].unique().tolist()],
+        as_list=True
+    )
     
     years = {
         "max": df["Award Date"].dt.year.max(),
@@ -417,7 +427,7 @@ def get_funder_output(df, grant_programme=[]):
 
     return_str = [
         html.Span("{} made by ".format(pluralize("Grant", len(df)))),
-        html.Strong(funders, className='pa1 white bg-threesixty-two'),
+        html.Span(funders),
         html.Span(" {}".format(years)),
     ]
 
@@ -431,7 +441,7 @@ def get_funder_output(df, grant_programme=[]):
 
     
 
-def list_to_string(l, oxford_comma='auto', separator=", "):
+def list_to_string(l, oxford_comma='auto', separator=", ", as_list=False):
     if len(l)==1:
         return l[0]
     # if oxford_comma == "auto" then if any items contain "and" it is set to true
@@ -440,9 +450,21 @@ def list_to_string(l, oxford_comma='auto', separator=", "):
             oxford_comma=True
         else:
             oxford_comma=False
+
+    if as_list:
+        return_list = [l[0]]
+        for i in l[1:-1]:
+            return_list.append(i)
+            return_list.append(separator)
+        if oxford_comma:
+            return_list.append(separator)
+        return_list.append(" and ")
+        return_list.append(l[-1])
+        return return_list
+
     return "{}{} and {}".format(
-        ", ".join(l[0:-1]),
-        ", " if oxford_comma else "",
+        separator.join(l[0:-1]),
+        separator if oxford_comma else "",
         l[-1]
     )
 
