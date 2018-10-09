@@ -17,15 +17,33 @@ THREESIXTY_COLOURS = ['#9c2061', '#f48320', '#cddc2b', '#53aadd']
 MAPBOX_ACCESS_TOKEN = os.environ.get("MAPBOX_ACCESS_TOKEN")
 MAPBOX_STYLE = os.environ.get("MAPBOX_STYLE", 'mapbox://styles/davidkane/cjmtr1n101qlz2ruqszjcmhls')
 
+def chart_title(title, subtitle=None, description=None):
+    return html.Figcaption(className='', children=[
+        html.H3(className='f4 mv0', children=title),
+        (html.P(className='f5 gray mv0', children=subtitle) if subtitle else None),
+        (dcc.Markdown(className='', children=description) if description else None),
+    ])
+
+def chart_wrapper(chart, title, subtitle=None, description=None):
+    return html.Figure(className='ph0 mh0', children=[
+        chart_title(title, subtitle, description),
+        chart
+    ])
+
 def message_box(title, contents, error=False):
     border = 'b--red' if error else 'b--black'
     background = 'bg-red' if error else 'bg-black'
+    if isinstance(contents, str):
+        contents_div = dcc.Markdown(
+            className='f6 f5-ns lh-copy mv0', children=contents)
+    else:
+        contents_div = html.P(
+            className='f6 f5-ns lh-copy mv0', children=contents),
+
     return html.Div(className='center hidden ba mb4 {}'.format(border), children=[
         html.H1(className='f4 white mv0 pv2 ph3 {}'.format(background),
                 children=title),
-        html.Div(className='pa3', children=[
-            html.P(className='f6 f5-ns lh-copy mv0', children=contents),
-        ]),
+        html.Div(className='pa3', children=contents_div),
     ])
 
 def get_bar_data(values, name="Grants", chart_type='bar', colour=0):
@@ -38,7 +56,8 @@ def get_bar_data(values, name="Grants", chart_type='bar', colour=0):
         'name': name,
         'marker': {
             'color': THREESIXTY_COLOURS[colour]
-        }
+        },
+        'fill': 'tozeroy',
     }
     if chart_type=='column':
         bar_data['type'] = 'bar'
@@ -54,156 +73,249 @@ def get_unique_list(l):
     return [x.strip() for x in l if x.strip() not in used and (used.add(x.strip()) or True)]
 
 def grant_programme_chart(df):
-    return dcc.Graph(
-        id="grant_programme_chart",
-        figure={
-            'data': [get_bar_data(df["Grant Programme:Title"].value_counts())],
-            'layout': {
-                'title': 'Grant programmes (number of grants)',
-                'yaxis': {
-                    'automargin': True,
-                },
-                'xaxis': {
-                    'automargin': True,
-                },
+
+    if "Grant Programmes:Title" not in df.columns or len(df["Grant Programmes:Title"].unique()) <= 1:
+        return
+
+    return chart_wrapper(
+        dcc.Graph(
+            id="grant_programme_chart",
+            figure={
+                'data': [get_bar_data(df["Grant Programme:Title"].value_counts())],
+                'layout': {
+                    'yaxis': {
+                        'automargin': True,
+                    },
+                    'xaxis': {
+                        'automargin': True,
+                    },
+                }
             }
-        }
+        ),
+        'Grant programmes', 
+        '(number of grants)'
     )
 
+
 def amount_awarded_chart(df):
-    return dcc.Graph(
-        id="amount_awarded_chart",
-        figure={
-            'data': [get_bar_data(df["Amount Awarded:Bands"].value_counts().sort_index())],
-            'layout': {
-                'title': 'Amount awarded (number of grants)',
-                'font': {
-                    'family': '"Source Sans Pro",sans-serif;'
-                },
-                'yaxis': {
-                    'automargin': True,
-                },
-                'xaxis': {
-                    'automargin': True,
-                },
+    return chart_wrapper(
+        dcc.Graph(
+            id="amount_awarded_chart",
+            figure={
+                'data': [get_bar_data(df["Amount Awarded:Bands"].value_counts().sort_index())],
+                'layout': {
+                    'font': {
+                        'family': '"Source Sans Pro",sans-serif;'
+                    },
+                    'yaxis': {
+                        'automargin': True,
+                    },
+                    'xaxis': {
+                        'automargin': True,
+                    },
+                }
             }
-        }
+        ),
+        'Amount awarded',
+        '(number of grants)',
     )
 
 def awards_over_time_chart(df):
-    return dcc.Graph(
-        id="awards_over_time_chart",
-        figure={
-            'data': [get_bar_data(df["Award Date"].apply(lambda x: x.strftime("%Y-%m")).value_counts().sort_index())],
-            'layout': {
-                'title': 'Award Date (number of grants)',
-                'yaxis': {
-                    'automargin': True,
-                },
-                'xaxis': {
-                    'automargin': True,
-                },
-            }
-        } 
+
+    data = [dict(
+        x = df['Award Date'],
+        autobinx = False,
+        autobiny = True,
+        marker = dict(color = THREESIXTY_COLOURS[1]),
+        name = 'date',
+        type = 'histogram',
+        xbins = dict(
+            start='{}-01-01'.format(df['Award Date'].dt.year.min()),
+            end='{}-12-31'.format(df['Award Date'].dt.year.max()),
+            size = 'M1',
+        )
+    )]
+
+    updatemenus = [dict(
+        x = 0.1,
+        y = 1.15,
+        xref = 'paper',
+        yref = 'paper',
+        yanchor = 'top',
+        active = 0,
+        showactive = True,
+        buttons = [
+        dict(
+            args = ['xbins.size', 'M1'],
+            label = 'by month',
+            method = 'restyle',
+        ), dict(
+            args = ['xbins.size', 'M3'],
+            label = 'by quarter',
+            method = 'restyle',
+        ), dict(
+            args = ['xbins.size', 'M12'],
+            label = 'by year',
+            method = 'restyle',
+        )]
+    )]
+
+    return chart_wrapper(
+        dcc.Graph(
+            id="awards_over_time_chart",
+            figure={
+                'data': data,
+                'layout': {
+                    'yaxis': {'automargin': True},
+                    'xaxis': {'automargin': True},
+                    'updatemenus': updatemenus
+                }
+            } 
+        ),
+        'Award Date',
+        '(number of grants)'
     )
+
 
 def region_and_country_chart(df):
     values = df.fillna({"__geo_ctry": "Unknown", "__geo_rgn": "Unknown"}).groupby(["__geo_ctry", "__geo_rgn"]).agg({
         "Amount Awarded": "sum",
         "Title": "size"
     })
-    return dcc.Graph(
-        id="region_and_country_chart",
-        figure={
-            'data': [get_bar_data(values["Title"], chart_type='column')],
-            'layout': {
-                'title': 'Region and Country (number of grants)',
-                'yaxis': {
-                    'automargin': True,
-                },
-                'xaxis': {
-                    'automargin': True,
-                },
-            }
-        } 
+    return chart_wrapper(
+        dcc.Graph(
+            id="region_and_country_chart",
+            figure={
+                'data': [get_bar_data(values["Title"], chart_type='column', colour=2)],
+                'layout': {
+                    'yaxis': {
+                        'automargin': True,
+                    },
+                    'xaxis': {
+                        'automargin': True,
+                    },
+                }
+            } 
+        ),
+        'Region and Country',
+        '(number of grants)',
+        description='''Based on the registered address of a charity or company
+(or a postcode if included with the grant data). Only available for registered
+charities or companies, or those grants which contain a postcode.'''
     )
 
 def organisation_type_chart(df):
     values = df["__org_org_type"].fillna("Unknown").value_counts().sort_index()
-    return dcc.Graph(
-        id="organisation_type_chart",
-        figure={
-            "data": [go.Pie(
-                labels=[i[0] for i in values.iteritems()],
-                values=[i[1] for i in values.iteritems()],
-                hole=0.4,
-                marker={
-                    'colors': THREESIXTY_COLOURS
-                },
-                insidetextfont={
-                    'color': 'white'
+    return chart_wrapper(
+        dcc.Graph(
+            id="organisation_type_chart",
+            figure={
+                "data": [go.Pie(
+                    labels=[i[0] for i in values.iteritems()],
+                    values=[i[1] for i in values.iteritems()],
+                    hole=0.4,
+                    marker={
+                        'colors': THREESIXTY_COLOURS
+                    },
+                    insidetextfont={
+                        'color': 'white'
+                    }
+                    )],
+                'layout': {
+                    'yaxis': {
+                        'automargin': True,
+                    },
+                    'xaxis': {
+                        'automargin': True,
+                    },
                 }
-                )],
-            'layout': {
-                'title': 'Recipient type (number of grants)',
-                'yaxis': {
-                    'automargin': True,
-                },
-                'xaxis': {
-                    'automargin': True,
-                },
             }
-        }
+        ),
+        'Recipient type',
+        '(proportion of grants)'
     )
 
 
 def organisation_income_chart(df):
     if df["__org_latest_income_bands"].count() == 0:
-        return message_box('Could not show chart', 'No charities found in data', error=True)
-    return dcc.Graph(
-        id="organisation_income_chart",
-        figure={
-            'data': [get_bar_data(df["__org_latest_income_bands"].value_counts().sort_index())],
-            'layout': {
-                'title': 'Latest income of charity recipients (number of grants)',
-                'yaxis': {
-                    'automargin': True,
-                },
-                'xaxis': {
-                    'automargin': True,
-                },
-            }
-        } 
+        return message_box(
+            'Could not show organisation income chart',
+            '''This chart can\'t be shown as there are no recipients in the data with 
+income data. If your data contains grants to charities, you can add charity
+numbers to your data to show a chart of their latest income.
+            ''',
+            error=True
+        )
+    return chart_wrapper(
+        dcc.Graph(
+            id="organisation_income_chart",
+            figure={
+                'data': [get_bar_data(df["__org_latest_income_bands"].value_counts().sort_index(), colour=3)],
+                'layout': {
+                    'yaxis': {
+                        'automargin': True,
+                    },
+                    'xaxis': {
+                        'automargin': True,
+                    },
+                }
+            } 
+        ),
+        'Latest income of charity recipients',
+        '(number of grants)',
     )
 
 def organisation_age_chart(df):
     if df["__org_age_bands"].count()==0:
-        return message_box('Could not show chart', 'No charities found in data', error=True)
-    return dcc.Graph(
-        id="organisation_age_chart",
-        figure={
-            'data': [get_bar_data(df["__org_age_bands"].value_counts().sort_index())],
-            'layout': {
-                'title': 'Age of charity recipients (number of grants)',
-                'yaxis': {
-                    'automargin': True,
-                },
-                'xaxis': {
-                    'automargin': True,
-                },
+        return message_box(
+            'Could not show organisation age chart',
+            '''This chart can\'t be shown as there are no recipients in the data with 
+organisation age data. Add company or charity numbers to your data to show a chart of
+the age of organisations.
+            ''',
+            error=True
+        )
+    return chart_wrapper(
+        dcc.Graph(
+            id="organisation_age_chart",
+            figure={
+                'data': [get_bar_data(df["__org_age_bands"].value_counts().sort_index())],
+                'layout': {
+                    'yaxis': {
+                        'automargin': True,
+                    },
+                    'xaxis': {
+                        'automargin': True,
+                    },
+                }
             }
-        } 
+        ),
+        'Age of recipients',
+        '(number of grants)',
+        description='Based only on recipients with charity or company numbers.'
     )
+
 
 def location_map(df):
 
     if not MAPBOX_ACCESS_TOKEN:
         return
 
+    popup_col = 'Recipient Org:Name'
+    if popup_col not in df.columns and 'Recipient Org:Identifier' in df.columns:
+        popup_col = 'Recipient Org:Identifier'
+
     try:
-        geo = df[["__geo_lat", "__geo_long", "Recipient Org:Name"]].dropna().drop_duplicates()
-    except KeyError:
-        return
+        geo = df[["__geo_lat", "__geo_long", popup_col]].dropna().drop_duplicates()
+    except KeyError as e:
+        return message_box(
+            'Location map',
+            [
+                '''An error occured when attempting to show the map. Error: ''',
+                html.Pre(str(e))
+            ],
+            error=True
+        )
         
     data = [
         go.Scattermapbox(
@@ -214,7 +326,7 @@ def location_map(df):
                 size=9,
                 color=THREESIXTY_COLOURS[0]
             ),
-            text=geo["Recipient Org:Name"].values,
+            text=geo[popup_col].values,
         )
     ]
 
@@ -235,7 +347,13 @@ def location_map(df):
         ),
     )
 
-    return dcc.Graph(id='grant_location_chart', figure={"data": data, "layout": layout})
+    return chart_wrapper(
+        dcc.Graph(id='grant_location_chart', figure={"data": data, "layout": layout}),
+        'Location of grant recipients',
+        description='''Based on the registered address of a charity or company
+(or a postcode if included with the grant data). Only available for registered
+charities or companies, or those grants which contain a postcode.'''
+    )
 
 def dataframe_datatable(df, max_length=50, fields=DEFAULT_TABLE_FIELDS):
     rows = df.sample(max_length) if len(df)>max_length else df

@@ -43,37 +43,34 @@ def filter_html(filter_id, filter_def):
 
 
 layout = html.Div(id="dashboard-container", className='', children=[
-    html.Div(className="", children=[
-
-        html.Div(className="fl w-100 w-25-l pa2-l", children=[
-            message_box(title="Filter data", contents=[
-                html.Div(className="cf", children=[
-                    html.Form(id="dashboard-filter", className='', children=[
-                        html.Div(id='df-change-{}-wrapper'.format(filter_id), className='', children=[
-                            html.Label(children=filter_def.get('label', filter_id)),
-                            html.Div(className='cf mv3', children=[
-                                filter_html('df-change-{}'.format(filter_id), filter_def)
-                            ])
-                        ]) for filter_id, filter_def in FILTERS.items()
-                    ]),
+    html.Div(className="fl w-100 w-25-l pa2-l", children=[
+        message_box(title="Filter data", contents=[
+            html.Div(className="cf", children=[
+                html.Form(id="dashboard-filter", className='', children=[
+                    html.Div(id='df-change-{}-wrapper'.format(filter_id), className='', children=[
+                        html.Label(children=filter_def.get('label', filter_id)),
+                        html.Div(className='cf mv3', children=[
+                            filter_html('df-change-{}'.format(filter_id), filter_def)
+                        ])
+                    ]) for filter_id, filter_def in FILTERS.items()
                 ]),
-                html.Div(className="cf mt4", children=[
-                    html.Div(dcc.Link(href='/', children='Select new data')),
-                ]),
-                html.Div(
-                    html.Pre(
-                        id='award-dates', 
-                        children=json.dumps({f: FILTERS[f]["defaults"] for f in FILTERS}, indent=4)
-                    ), 
-                    style={"display": "none"}
-                ),
-            ])
-        ]),
+            ]),
+            html.Div(className="cf mt4", children=[
+                html.Div(dcc.Link(href='/', children='Select new data')),
+            ]),
+            html.Div(
+                html.Pre(
+                    id='award-dates', 
+                    children=json.dumps({f: FILTERS[f]["defaults"] for f in FILTERS}, indent=4)
+                ), 
+                style={"display": "none"}
+            ),
+        ])
+    ]),
 
-        html.Div(className="fl w-100 w-75-l pa2-l", children=[
-            html.Div(id="dashboard-output", children=[], className='ui grid'),
-        ]),
-    ])
+    html.Div(className="fl w-100 w-75-l pa2-l", children=[
+        html.Article(id="dashboard-output", children=[], className=''),
+    ]),
 ])
 
 
@@ -96,7 +93,7 @@ def dashboard_output(fileid, *args):
     
 
     outputs.append(
-        html.H2(className='normal', children=get_funder_output(df, filter_args.get("grant_programmes")), id="funder-name")
+        html.H2(className='normal mt0 mb4', children=get_funder_output(df, filter_args.get("grant_programmes")), id="funder-name")
     )
     outputs.append(get_statistics(df))
 

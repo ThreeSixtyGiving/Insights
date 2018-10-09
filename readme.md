@@ -2,8 +2,11 @@
 
 ## Run development version
 
+Run in two different command lines.
+
 ```sh
 python index.py
+python worker.py
 ```
 
 ## Get mapbox to work

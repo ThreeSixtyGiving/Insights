@@ -69,7 +69,8 @@ app.layout = html.Div(className='pv2 ph4', children=[
         ]),
         html.H1(className='', children=[
             dcc.Link(href='/', className='link dim black',
-                     children='360 Giving data explorer')
+                     children='360 Giving data explorer'),
+            html.Span(className='gray f4', children=' Beta')
         ]),
     ]),
     html.Div(id='page-content', className='cf'),

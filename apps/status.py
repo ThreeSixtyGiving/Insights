@@ -28,9 +28,9 @@ FILE_TYPES = {
 layout = html.Div(id="status-container", className='', children=[
     html.Div(className="fl w-25-l w-100 pa2-l", children=[
         message_box(title="Filter data", contents=[
-            html.Form(className='ui form', children=[
+            html.Form(className='', children=[
                 html.Div(className='cf mv3', children=[
-                    html.Div(className='ui icon input', children=[
+                    html.Div(className='', children=[
                         dcc.Input(id='status-search', placeholder='Search',
                                   type='text', className='w-100 pa2'),
                         html.I(className='search icon'),
@@ -61,7 +61,7 @@ layout = html.Div(id="status-container", className='', children=[
         ]),
     ]),
     html.Div(className="fl w-75-l w-100 pa2-l", children=[
-        html.Div(id='status-rows', children=[], className='ui very relaxed items'),
+        html.Div(id='status-rows', children=[], className=''),
     ]),
 ])
 
@@ -154,7 +154,7 @@ def update_status_container(search, licence, last_modified, currency, filetype):
                         to_statistic(len(pub_reg), pluralize("file", len(pub_reg)))
                     ] + get_publisher_stats(pub_reg, separator=html.Span('·')) if len(pub_reg)>1 else [])
                     ),
-                    html.Div(className='description ui cards', children=[
+                    html.Div(className='description', children=[
                         file_row(v, len(pub_reg)) for v in pub_reg
                     ])
                 ])
@@ -353,6 +353,6 @@ def get_license_badge(url, name):
         return [html.Img(src=badge_url, title=name, style={'max-height': '24px'})]
 
     if "http://www.opendefinition.org/licenses/odc-pddl" == url:
-        return [html.Div('ODC PDDL', title=name, className='ui label')]
+        return [html.Div('ODC PDDL', title=name, className='')]
     
     return name
