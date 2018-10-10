@@ -306,7 +306,9 @@ def location_map(df):
         popup_col = 'Recipient Org:Identifier'
 
     try:
-        geo = df[["__geo_lat", "__geo_long", popup_col]].dropna().drop_duplicates()
+        geo = df[["__geo_lat", "__geo_long", popup_col]].dropna()
+        grant_count = len(geo)
+        geo = geo.groupby(["__geo_lat", "__geo_long", popup_col]).size().rename("grants").reset_index()
     except KeyError as e:
         return message_box(
             'Location of grant recipients',
@@ -333,7 +335,10 @@ def location_map(df):
                 size=9,
                 color=THREESIXTY_COLOURS[0]
             ),
-            text=geo[popup_col].values,
+            text=geo.apply(
+                lambda row: "{} ({} grants)".format(row[popup_col], row['grants']) if row["grants"] > 1 else row[popup_col],
+                axis=1
+            ).values,
         )
     ]
 
@@ -357,9 +362,13 @@ def location_map(df):
     return chart_wrapper(
         dcc.Graph(id='grant_location_chart', figure={"data": data, "layout": layout}),
         'Location of grant recipients',
-        description='''Based on the registered address of a charity or company
+        description='''Showing the location of **{:,.0f}** grants out of {:,.0f}
+        
+Based on the registered address of a charity or company
 (or a postcode if included with the grant data). Only available for registered
-charities or companies, or those grants which contain a postcode.'''
+charities or companies, or those grants which contain a postcode.'''.format(
+            grant_count, len(df)
+)
     )
 
 def dataframe_datatable(df, max_length=50, fields=DEFAULT_TABLE_FIELDS):
@@ -399,12 +408,24 @@ def format_currency(amount, currency='GBP', humanize_=True, int_format="{:,.0f}"
         amount_str = humanize.intword(amount).split(" ")
         if len(amount_str) == 2:
             return (
-                babel.numbers.format_currency(float(amount_str[0]), currency, format="¤#,##0.0", currency_digits=False), 
+                babel.numbers.format_currency(
+                    float(amount_str[0]),
+                    currency,
+                    format="¤#,##0.0",
+                    currency_digits=False,
+                    locale='en_UK'
+                ), 
                 amount_str[1]
             )
 
     return (
-        babel.numbers.format_currency(amount, currency, format="¤#,##0", currency_digits=False), 
+        babel.numbers.format_currency(
+            amount,
+            currency,
+            format="¤#,##0",
+            currency_digits=False,
+            locale='en_UK'
+        ), 
         ""
     )
 
