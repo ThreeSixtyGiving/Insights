@@ -1,10 +1,12 @@
 import json
+import os
 
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
 import dash_table_experiments as dt
 import dash_resumable_upload
+import flask
 
 from app import app
 from apps import data_display, file_load, status
@@ -21,7 +23,7 @@ app.css.append_css({
     "external_url": "https://fonts.googleapis.com/css?family=Source+Sans+Pro"
 })
 
-@app.server.route('/redis_cache')
+@server.route('/redis_cache')
 def check_redis_cache():
     r = get_cache()
     cache_contents = {
@@ -34,7 +36,7 @@ def check_redis_cache():
     }
     return json.dumps(cache_contents)
 
-@app.server.route('/refresh_lookup_cache')
+@server.route('/refresh_lookup_cache')
 def refresh_lookup_cache():
     # prepare the cache
     r = get_cache()
@@ -54,6 +56,13 @@ def refresh_lookup_cache():
 
     r.set("lookup_cache", json.dumps(cache))
     return json.dumps(cache["geocodes"])
+
+
+@server.route('/favicon.ico')
+def favicon():
+    return flask.send_from_directory(os.path.join(server.root_path, 'assets'),
+                                     'favicon.ico')
+
     
 app.title = '360Giving Data Explorer'
 app.layout = html.Div(className='pv2 ph4', children=[
