@@ -93,15 +93,15 @@ def dashboard_output(fileid, *args):
     
 
     outputs.append(
-        html.H2(className='normal mt0 mb4', children=get_funder_output(df, filter_args.get("grant_programmes")), id="funder-name")
+        html.H2(className='normal mt0 mb4 lh-copy', children=get_funder_output(df, filter_args.get("grant_programmes")), id="funder-name")
     )
     outputs.append(get_statistics(df))
 
     charts = []
 
+    charts.append(funder_chart(df))
     charts.append(amount_awarded_chart(df))
-    if "Grant Programme:Title" in df.columns:
-        charts.append(grant_programme_chart(df))
+    charts.append(grant_programme_chart(df))
     charts.append(awards_over_time_chart(df))
     charts.append(organisation_type_chart(df))
     charts.append(region_and_country_chart(df))

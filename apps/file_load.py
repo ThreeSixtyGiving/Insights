@@ -39,7 +39,7 @@ layout = html.Div(id="upload-container", className='w-two-thirds-l center', chil
             html.P(className='light-gray', children=[
                 'File must meet the ',
                 html.A(
-                    children='360 Giving data standard',
+                    children='360Giving data standard',
                     href='https://www.threesixtygiving.org/support/standard/',
                     target='_blank',
                     className='light-gray underline dim'
@@ -63,7 +63,7 @@ layout = html.Div(id="upload-container", className='w-two-thirds-l center', chil
             html.H2(className='f3', children=[
                 'Select file from ',
                 html.A(
-                    children='360 Giving registry of publishers',
+                    children='360Giving registry of publishers',
                     href='http://data.threesixtygiving.org/',
                     target='_blank',
                     className='white underline dim'
@@ -315,7 +315,7 @@ def update_results_tables(n_intervals, job_status):
                     ])
                 ] + progress
             )
-        return message_box('Fetching file', [])
+        return message_box('Fetching file', [html.P(html.Strong("Starting to fetch file..."))])
 
     # results are ready
     fileid, filename, date = result

@@ -47,7 +47,7 @@ def get_from_cache(fileid, prefix=DEFAULT_PREFIX):
         return pickle.loads(df)
 
 
-# fetch the 360 giving registry
+# fetch the 360Giving registry
 def get_registry(reg_url=THREESIXTY_STATUS_JSON, cache_expire=60*60*24):
     reg_key = "threesixty_status"
     r = get_cache()

@@ -55,7 +55,7 @@ def refresh_lookup_cache():
     r.set("lookup_cache", json.dumps(cache))
     return json.dumps(cache["geocodes"])
     
-app.title = '360 Giving Data Explorer'
+app.title = '360Giving Data Explorer'
 app.layout = html.Div(className='pv2 ph4', children=[
     dcc.Location(id='url', refresh=False),
     html.Div(id="page-header", className='cf mv3 pv3 bb b-threesixty-two bw4', children=[
@@ -68,8 +68,7 @@ app.layout = html.Div(className='pv2 ph4', children=[
                      src='https://www.threesixtygiving.org/wp-content/themes/360giving/assets/img/logo.png'),
         ]),
         html.H1(className='', children=[
-            dcc.Link(href='/', className='link dim black',
-                     children='360 Giving data explorer'),
+            dcc.Link(href='/', className='link dim black', children=app.title),
             html.Span(className='gray f4', children=' Beta')
         ]),
     ]),
@@ -103,8 +102,8 @@ data from [postcodes.findthatcharity.uk](https://postcodes.findthatcharity.uk/).
 All external data is used under the [Open Government Licence](http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/).
         '''),
         dcc.Markdown(className='fl w-100 w-third-l pl3 tr', children='''
-[Github](https://github.com/ThreeSixtyGiving/threethings) |
-[360 Giving](https://www.threesixtygiving.org/)
+[Github](https://github.com/ThreeSixtyGiving/explorer) |
+[360Giving](https://www.threesixtygiving.org/)
 
 Built by [David Kane](https://drkane.co.uk/) using 
 [Dash by Plotly](https://dash.plot.ly/)

@@ -72,6 +72,32 @@ def get_unique_list(l):
     used = set()
     return [x.strip() for x in l if x.strip() not in used and (used.add(x.strip()) or True)]
 
+def funder_chart(df):
+
+    funders = df["Funding Org:Name"].value_counts()
+    if len(funders) <= 1:
+        return
+
+    return chart_wrapper(
+        dcc.Graph(
+            id="funding_org_chart",
+            figure={
+                'data': [get_bar_data(funders)],
+                'layout': {
+                    'yaxis': {
+                        'automargin': True,
+                    },
+                    'xaxis': {
+                        'automargin': True,
+                    },
+                }
+            }
+        ),
+        'Funders', 
+        '(number of grants)'
+    )
+
+
 def grant_programme_chart(df):
 
     if "Grant Programmes:Title" not in df.columns or len(df["Grant Programmes:Title"].unique()) <= 1:
@@ -92,7 +118,7 @@ def grant_programme_chart(df):
                 }
             }
         ),
-        'Grant programmes', 
+        'Grant programmes',
         '(number of grants)'
     )
 
@@ -432,10 +458,19 @@ def format_currency(amount, currency='GBP', humanize_=True, int_format="{:,.0f}"
 
 def get_funder_output(df, grant_programme=[]):
     
-    funders = list_to_string(
-        [html.Strong(f, className='pa1 white bg-threesixty-two') for f in df["Funding Org:Name"].unique().tolist()],
-        as_list=True
-    )
+    funder_class = 'pa1 mr1 white bg-threesixty-two'
+    funder_names = sorted(df["Funding Org:Name"].unique().tolist())
+    subtitle = []
+    if len(funder_names)>5:
+        funders = html.Strong("{:,.0f} funders".format(len(funder_names)), className=funder_class)
+        subtitle = [html.Div(className='mt2 gray f4',
+                             children=list_to_string(funder_names))]
+    else:
+        funders = list_to_string(
+            [html.Strong(f, className=funder_class)
+             for f in funder_names],
+            as_list=True
+        )
     
     years = {
         "max": df["Award Date"].dt.year.max(),
@@ -446,17 +481,17 @@ def get_funder_output(df, grant_programme=[]):
     else:
         years = " between {} and {}".format(years["min"], years["max"])
 
-    return_str = [
-        html.Span("{} made by ".format(pluralize("Grant", len(df)))),
-        html.Span(funders),
-        html.Span(" {}".format(years)),
-    ]
-
     # if grant_programme and '__all' not in grant_programme:
     #     return [
     #         return_str,
     #         html.Div(children="({})".format(list_to_string(grant_programme)))
     #     ]
+
+    return_str = [
+        html.Span("{} made by ".format(pluralize("Grant", len(df)))),
+        html.Span(funders),
+        html.Span(" {}".format(years)),
+    ] + subtitle
 
     return return_str
 
