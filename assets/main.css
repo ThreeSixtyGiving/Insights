@@ -2,19 +2,59 @@
 THREESIXTY_COLOURS = ['#9c2061', '#f48320', '#cddc2b', '#53aadd']
 */
 
+@font-face {
+    font-family: Ostrich Sans Black;
+    src: url('../assets/OstrichSans-Black.otf');
+}
+
+.ostrich {
+    font-family: "Ostrich Sans Black", sans-serif;
+}
 
 body {
     font-family: "Source Sans Pro", -apple-system,BlinkMacSystemFont,avenir next,avenir,helvetica neue,helvetica,ubuntu,roboto,noto,segoe ui,arial,sans-serif;
+    background: -webkit-linear-gradient(top, #EDFEFF 0%, #fff 600px);
+    background: linear-gradient(to bottom, #EDFEFF 0%, #fff 600px);
 }
 
-.bg-threesixty-one   {background-color: #9c2061;}
-.bg-threesixty-two   {background-color: #f48320;}
-.bg-threesixty-three {background-color: #cddc2b;}
-.bg-threesixty-four  {background-color: #53aadd;}
-.b-threesixty-one    {border-color: #9c2061;}
-.b-threesixty-two    {border-color: #f48320;}
-.b-threesixty-three  {border-color: #cddc2b;}
-.b-threesixty-four   {border-color: #53aadd;}
+.markdown h1,
+.markdown h2,
+.markdown h3,
+.markdown h4,
+.markdown h5,
+.markdown h6 {
+    font-family: "Ostrich Sans Black", sans-serif;
+}
+
+.bg-threesixty-red        {background-color: #9c2061;}
+.bg-threesixty-orange     {background-color: #f48320;}
+.bg-threesixty-yellow     {background-color: #cddc2b;}
+.bg-threesixty-blue       {background-color: #53aadd;}
+.bg-threesixty-grey       {background-color: #3b3d3c;}
+.bg-threesixty-dark-green {background-color: #585a59;}
+.bg-threesixty-mid-grey   {background-color: #737373;}
+.b--threesixty-red        {border-color:     #9c2061;}
+.b--threesixty-orange     {border-color:     #f48320;}
+.b--threesixty-yellow     {border-color:     #cddc2b;}
+.b--threesixty-blue       {border-color:     #53aadd;}
+.b--threesixty-grey       {border-color:     #3b3d3c;}
+.b--threesixty-dark-green {border-color:     #585a59;}
+.b--threesixty-mid-grey   {border-color:     #737373;}
+.threesixty-red           {color:            #9c2061;}
+.threesixty-orange        {color:            #f48320;}
+.threesixty-yellow        {color:            #cddc2b;}
+.threesixty-blue          {color:            #53aadd;}
+.threesixty-grey          {color:            #3b3d3c;}
+.threesixty-dark-green    {color:            #585a59;}
+.threesixty-mid-grey      {color:            #737373;}
+
+.white a {
+    color: #fff;
+}
+
+.mw4point5 {
+    max-width: 12rem;
+}
 
 .rc-slider-track {
     background-color: #53aadd;
@@ -132,4 +172,11 @@ body {
   100% {
     transform: rotate(360deg);
   }
+}
+
+/* amendments to plotly dash layout */
+._dash-undo-redo,
+.resumable-btn-pause:disabled,
+.resumable-btn-cancel:disabled {
+    display: none;
 }

@@ -93,7 +93,8 @@ def dashboard_output(fileid, *args):
     
 
     outputs.append(
-        html.H2(className='normal mt0 mb4 lh-copy', children=get_funder_output(df, filter_args.get("grant_programmes")), id="funder-name")
+        html.H2(className='f2 mt0 mb4 lh-copy ostrich',
+                children=get_funder_output(df, filter_args.get("grant_programmes")), id="funder-name")
     )
     outputs.append(get_statistics(df))
 
@@ -109,7 +110,7 @@ def dashboard_output(fileid, *args):
     charts.append(organisation_age_chart(df))
     charts.append(organisation_income_chart(df))
 
-    outputs.extend(charts)
+    outputs.append(html.Div(className='flex flex-wrap', children=charts))
 
     # row = []
     # for i in charts:

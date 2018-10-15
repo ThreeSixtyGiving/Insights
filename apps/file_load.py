@@ -23,19 +23,31 @@ dash_resumable_upload.decorate_server(app.server, "uploads")
 
 layout = html.Div(id="upload-container", className='w-two-thirds-l center', children=[
     html.Div(className="flex flex-wrap justify-center", children=[
+        html.Div(className='w-100 tc ph3 ph5-l pt3 pb4', children=[
+            html.H2('Welcome', className='f3 ostrich threesixty-red'),
+            html.P(className='', children=[
+                'Discover grantmaking insights by uploading or selecting a file that meets the ',
+                html.A(
+                    children='360Giving standard',
+                    href='https://www.threesixtygiving.org/support/standard/',
+                    target='_blank',
+                    className='underline dim'
+                )
+            ]),
+            html.P(className='', children=[
+                '''This 360Giving Insights tool will check the data for recipients 
+                with charity or company numbers and combine extra data about them. 
+                It will also add data based on the postcode of the recipients.''',
+            ]),
+        ]),
         html.Div(id='output-data-upload', className='w-100'),
-        html.Div([
-
-            html.Div(children='', id='dummy-results'),
-            dcc.Interval(
-                id='update-interval',
-                interval=60*60*5000,  # in milliseconds
-                n_intervals=0
-            )
-
-        ], id='results'),
-        html.Div(className='w-100 tc ph3 ph5-l pt3 pb4 white bg-threesixty-one', children=[
-            html.H2('Upload a file', className='f3'),
+        dcc.Interval(
+            id='update-interval',
+            interval=60*60*5000,  # in milliseconds
+            n_intervals=0
+        ),
+        html.Div(className='w-100 tc ph3 ph5-l pt3 pb4 white bg-threesixty-red', children=[
+            html.H2('Upload a file', className='f3 ostrich'),
             html.P(className='light-gray', children=[
                 'File must meet the ',
                 html.A(
@@ -54,13 +66,15 @@ layout = html.Div(id="upload-container", className='w-two-thirds-l center', chil
                     filetypes=['csv', 'xlsx'],
                     service="/upload_resumable",
                     textLabel="Drop your file here to upload",
-                    startButton=True
+                    startButton=True,
+                    # cancelButton=False,
+                    # pauseButton=False,
                 ),
             ]),
         ]),
         html.Div(className='w-100 tc ph3 ph5-l pv3 f3 flex items-center justify-center', children='or'),
-        html.Div(className='w-100 tc ph3 ph5-l pt3 pb4 white bg-threesixty-two', children=[
-            html.H2(className='f3', children=[
+        html.Div(className='w-100 tc ph3 ph5-l pt3 pb4 white bg-threesixty-orange', children=[
+            html.H2(className='f3 ostrich', children=[
                 'Select file from ',
                 html.A(
                     children='360Giving registry of publishers',
@@ -72,8 +86,8 @@ layout = html.Div(id="upload-container", className='w-two-thirds-l center', chil
             dcc.Dropdown(id='registry-list', className='black tl', options=[]),
             html.Button('Fetch file', className='mt3 f6 link dim ph3 pv2 mb2 dib white bg-near-black', id='import-registry'),
         ]),
-        # html.Div(className='w-third tc pa5 white bg-threesixty-three', children=[
-        #     html.H2('View existing dashboards'),
+        # html.Div(className='w-third tc pa5 white bg-threesixty-yellow', children=[
+        #     html.H2('View existing dashboards ostrich'),
         #     html.Ul(id="files-list", children=[])
         # ]),
     ])
@@ -294,7 +308,7 @@ def update_results_tables(n_intervals, job_status):
                         job.meta["progress"].get("progress")[1]
                     )),
                     html.Div(className='bg-moon-gray br-pill h1 overflow-y-hidden', children=[
-                        html.Div(className='bg-threesixty-two br-pill h1 shadow-1', style={"width": width})
+                        html.Div(className='bg-threesixty-orange br-pill h1 shadow-1', style={"width": width})
                     ])
                 ]
             step_width = '{0:.1f}%'.format(
@@ -310,7 +324,7 @@ def update_results_tables(n_intervals, job_status):
                         len(job.meta["stages"])
                     )),
                     html.Div(className='bg-moon-gray br-pill h1 overflow-y-hidden', children=[
-                        html.Div(className='bg-threesixty-one br-pill h1 shadow-1',
+                        html.Div(className='bg-threesixty-red br-pill h1 shadow-1',
                                  style={"width": step_width})
                     ])
                 ] + progress
@@ -328,7 +342,7 @@ def update_results_tables(n_intervals, job_status):
             ]),
             (html.H6(datetime.datetime.fromtimestamp(date)) if date else ""),
             dcc.Link(href='/file/{}'.format(fileid),
-                    className='link dim near-black bg-threesixty-three pv2 ph3 mv3 dib',
+                    className='link dim near-black bg-threesixty-yellow pv2 ph3 mv3 dib',
                     children='Data uploaded - view results >')
         ]
     )

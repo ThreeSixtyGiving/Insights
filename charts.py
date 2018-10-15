@@ -16,16 +16,37 @@ THREESIXTY_COLOURS = ['#9c2061', '#f48320', '#cddc2b', '#53aadd']
 
 MAPBOX_ACCESS_TOKEN = os.environ.get("MAPBOX_ACCESS_TOKEN")
 MAPBOX_STYLE = os.environ.get("MAPBOX_STYLE", 'mapbox://styles/davidkane/cjmtr1n101qlz2ruqszjcmhls')
+DEFAULT_LAYOUT = {
+    'font': {
+        'family': '"Source Sans Pro",sans-serif;'
+    },
+    'titlefont': {
+        'family': '"Source Sans Pro",sans-serif;'
+    },
+    'yaxis': {
+        'automargin': True,
+    },
+    'xaxis': {
+        'automargin': True,
+    },
+    'margin': go.layout.Margin(
+        l=40,
+        r=0,
+        b=40,
+        t=0,
+        pad=4
+    ),
+}
 
 def chart_title(title, subtitle=None, description=None):
     return html.Figcaption(className='', children=[
-        html.H3(className='f4 mv0', children=title),
+        html.H3(className='f2 ostrich mv0', children=title),
         (html.P(className='f5 gray mv0', children=subtitle) if subtitle else None),
         (dcc.Markdown(className='', children=description) if description else None),
     ])
 
-def chart_wrapper(chart, title, subtitle=None, description=None):
-    return html.Figure(className='ph0 mh0', children=[
+def chart_wrapper(chart, title, subtitle=None, description=None, width='w-50-ns'):
+    return html.Figure(className='ph0 mh0 mv5 {}'.format(width), children=[
         chart_title(title, subtitle, description),
         chart
     ])
@@ -41,7 +62,7 @@ def message_box(title, contents, error=False):
             className='f6 f5-ns lh-copy mv0', children=contents),
 
     return html.Div(className='center hidden ba mb4 {}'.format(border), children=[
-        html.H1(className='f4 white mv0 pv2 ph3 {}'.format(background),
+        html.H1(className='f4 white mv0 pv2 ph3 ostrich {}'.format(background),
                 children=title),
         html.Div(className='pa3', children=contents_div),
     ])
@@ -83,14 +104,7 @@ def funder_chart(df):
             id="funding_org_chart",
             figure={
                 'data': [get_bar_data(funders)],
-                'layout': {
-                    'yaxis': {
-                        'automargin': True,
-                    },
-                    'xaxis': {
-                        'automargin': True,
-                    },
-                }
+                'layout': DEFAULT_LAYOUT
             }
         ),
         'Funders', 
@@ -108,14 +122,7 @@ def grant_programme_chart(df):
             id="grant_programme_chart",
             figure={
                 'data': [get_bar_data(df["Grant Programme:Title"].value_counts())],
-                'layout': {
-                    'yaxis': {
-                        'automargin': True,
-                    },
-                    'xaxis': {
-                        'automargin': True,
-                    },
-                }
+                'layout': DEFAULT_LAYOUT
             }
         ),
         'Grant programmes',
@@ -129,17 +136,7 @@ def amount_awarded_chart(df):
             id="amount_awarded_chart",
             figure={
                 'data': [get_bar_data(df["Amount Awarded:Bands"].value_counts().sort_index())],
-                'layout': {
-                    'font': {
-                        'family': '"Source Sans Pro",sans-serif;'
-                    },
-                    'yaxis': {
-                        'automargin': True,
-                    },
-                    'xaxis': {
-                        'automargin': True,
-                    },
-                }
+                'layout': DEFAULT_LAYOUT
             }
         ),
         'Amount awarded',
@@ -186,16 +183,18 @@ def awards_over_time_chart(df):
         )]
     )]
 
+    layout = {
+        'updatemenus': updatemenus
+    }
+    for i in DEFAULT_LAYOUT:
+        layout[i] = DEFAULT_LAYOUT[i]
+
     return chart_wrapper(
         dcc.Graph(
             id="awards_over_time_chart",
             figure={
                 'data': data,
-                'layout': {
-                    'yaxis': {'automargin': True},
-                    'xaxis': {'automargin': True},
-                    'updatemenus': updatemenus
-                }
+                'layout': layout
             } 
         ),
         'Award Date',
@@ -213,14 +212,7 @@ def region_and_country_chart(df):
             id="region_and_country_chart",
             figure={
                 'data': [get_bar_data(values["Title"], chart_type='column', colour=2)],
-                'layout': {
-                    'yaxis': {
-                        'automargin': True,
-                    },
-                    'xaxis': {
-                        'automargin': True,
-                    },
-                }
+                'layout': DEFAULT_LAYOUT
             } 
         ),
         'Region and Country',
@@ -247,14 +239,7 @@ def organisation_type_chart(df):
                         'color': 'white'
                     }
                     )],
-                'layout': {
-                    'yaxis': {
-                        'automargin': True,
-                    },
-                    'xaxis': {
-                        'automargin': True,
-                    },
-                }
+                'layout': DEFAULT_LAYOUT
             }
         ),
         'Recipient type',
@@ -277,14 +262,7 @@ numbers to your data to show a chart of their latest income.
             id="organisation_income_chart",
             figure={
                 'data': [get_bar_data(df["__org_latest_income_bands"].value_counts().sort_index(), colour=3)],
-                'layout': {
-                    'yaxis': {
-                        'automargin': True,
-                    },
-                    'xaxis': {
-                        'automargin': True,
-                    },
-                }
+                'layout': DEFAULT_LAYOUT
             } 
         ),
         'Latest income of charity recipients',
@@ -306,14 +284,7 @@ the age of organisations.
             id="organisation_age_chart",
             figure={
                 'data': [get_bar_data(df["__org_age_bands"].value_counts().sort_index())],
-                'layout': {
-                    'yaxis': {
-                        'automargin': True,
-                    },
-                    'xaxis': {
-                        'automargin': True,
-                    },
-                }
+                'layout': DEFAULT_LAYOUT
             }
         ),
         'Age of recipients',
@@ -383,11 +354,19 @@ def location_map(df):
             zoom=5,
             style=MAPBOX_STYLE
         ),
+        margin=go.layout.Margin(
+            l=0,
+            r=0,
+            b=0,
+            t=0,
+            pad=0
+        ),
     )
 
     return chart_wrapper(
         dcc.Graph(id='grant_location_chart', figure={"data": data, "layout": layout}),
         'Location of grant recipients',
+        width='w-100-ns',
         description='''Showing the location of **{:,.0f}** grants out of {:,.0f}
         
 Based on the registered address of a charity or company
@@ -411,19 +390,19 @@ def get_statistics(df):
     amount_awarded = [format_currency(amount, currency) for currency, amount in amount_awarded.items()]
 
     return html.Div(
-        className='flex statistics',
+        className='flex flex-wrap statistics',
         children=[
-            html.Div(className='pa5 tc white bg-red', children=[
-                html.Div(className='b f2', children="{:,.0f}".format(len(df))),
+            html.Div(className='pa5-ns pa2 tc white bg-red w-100 w-auto-ns', children=[
+                html.Div(className='b f2 ostrich', children="{:,.0f}".format(len(df))),
                 html.Div(className='', children=pluralize("grant", len(df)))
             ]),
-            html.Div(className='pa5 tc white bg-red', children=[
-                html.Div(className='b f2', children="{:,.0f}".format(df["Recipient Org:Identifier"].unique().size)),
+            html.Div(className='pa5-ns pa2 tc white bg-red w-100 w-auto-ns', children=[
+                html.Div(className='b f2 ostrich', children="{:,.0f}".format(df["Recipient Org:Identifier"].unique().size)),
                 html.Div(className='', children=pluralize("recipient", df["Recipient Org:Identifier"].unique().size))
             ])
         ] + [
-            html.Div(className='pa5 tc white bg-red', children=[
-                html.Div(className='b f2', children=i[0]),
+            html.Div(className='pa5-ns pa2 tc white bg-red w-100 w-auto-ns', children=[
+                html.Div(className='b f2 ostrich', children=i[0]),
                 html.Div(className='', children=i[1])
             ]) for i in amount_awarded
         ]
@@ -458,7 +437,7 @@ def format_currency(amount, currency='GBP', humanize_=True, int_format="{:,.0f}"
 
 def get_funder_output(df, grant_programme=[]):
     
-    funder_class = 'pa1 mr1 white bg-threesixty-two'
+    funder_class = 'pa1 white bg-threesixty-orange'
     funder_names = sorted(df["Funding Org:Name"].unique().tolist())
     subtitle = []
     if len(funder_names)>5:

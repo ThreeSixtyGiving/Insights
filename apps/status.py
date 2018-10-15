@@ -242,7 +242,7 @@ def file_row(v, files=1):
             html.A(
                 'Download from publisher (in {} format)'.format(file_type[0]),
                 href=v.get('distribution', [{}])[0].get('downloadURL'),
-                className='link white dim bg-threesixty-one pa2',
+                className='link white dim bg-threesixty-red pa2',
                 title=file_type[1],
             ),
         ])
