@@ -72,7 +72,7 @@ app.layout = html.Div(children=[
             html.H1(className='ostrich', children=[
                 dcc.Link(href='/', className='link threesixty-red', children=[
                     html.Img(className='mw4point5',
-                             src='https://www.threesixtygiving.org/wp-content/themes/360giving/assets/img/logo.png'),
+                             src='/assets/360logo-text.png'),
                     'Insights',
                     html.Span(className='gray f4', children=' Beta')
                 ]),
@@ -120,7 +120,7 @@ Please email us:
     ]),
     html.Footer(className='pa3 bg-threesixty-grey cf', children=[
         html.A(className='link fl', href='http://www.threesixtygiving.org/', children=[
-            html.Img(className='mw4', src='http://www.threesixtygiving.org/wp-content/themes/360giving/assets/img/logo-white.png'),
+            html.Img(className='mw4', src='/assets/360logo-white.png'),
         ]),
         html.Nav(className='fr', children=[
             html.Ul(className='list ttu b white f4 cf', children=[
