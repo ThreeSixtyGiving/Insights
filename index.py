@@ -1,5 +1,6 @@
 import json
 import os
+import io
 
 import dash_core_components as dcc
 import dash_html_components as html
@@ -7,10 +8,11 @@ from dash.dependencies import Input, Output, State
 import dash_table_experiments as dt
 import dash_resumable_upload
 import flask
+import pandas as pd
 
 from app import app
 from apps import data_display, file_load, status
-from load_data import get_cache
+from load_data import get_cache, get_filtered_df
 from prepare_data import fetch_geocodes
 
 server = app.server
@@ -63,6 +65,31 @@ def favicon():
     return flask.send_from_directory(os.path.join(server.root_path, 'assets'),
                                      'favicon.ico')
 
+@server.route('/file/<fileid>.<format>')
+def download_file(fileid, format):
+    df = get_filtered_df(fileid)
+    if df is not None:
+        if format=="csv":
+            csvdata = df.to_csv(index=False)
+            return flask.Response(
+                csvdata,
+                mimetype="text/csv",
+                headers={"Content-disposition":
+                        "attachment; filename={}.csv".format(fileid)})
+        elif format == 'xlsx':
+            output = io.BytesIO()
+            writer = pd.ExcelWriter(output, engine='xlsxwriter')
+            csvdata = df.to_excel(writer, sheet_name='grants', index=False)
+            writer.save()
+            return flask.Response(
+                output.getvalue(),
+                mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                headers={"Content-disposition":
+                         "attachment; filename={}.xlsx".format(fileid)})
+        elif format=="json":
+            pass
+        flask.abort(400)
+    flask.abort(404)
     
 app.title = '360Giving Insights'
 app.layout = html.Div(children=[
