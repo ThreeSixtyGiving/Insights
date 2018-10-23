@@ -193,14 +193,14 @@ def prepare_data(df, cache={}):
     # look for postcode
 
     # check for recipient org postcode field first
-    if "Recipient Org:Postcode" in df.columns:
-        df.loc[:, "Recipient Org:Postcode"] = df.loc[:, "Recipient Org:Postcode"].fillna(df["postcode"])
+    if "Recipient Org:Postal Code" in df.columns:
+        df.loc[:, "Recipient Org:Postal Code"] = df.loc[:, "Recipient Org:Postal Code"].fillna(df["__org_postcode"])
     else:
-        df.loc[:, "Recipient Org:Postcode"] = df["__org_postcode"]
+        df.loc[:, "Recipient Org:Postal Code"] = df["__org_postcode"]
 
     # fetch postcode data
     progress_job()
-    postcodes = df.loc[:, "Recipient Org:Postcode"].dropna().unique()
+    postcodes = df.loc[:, "Recipient Org:Postal Code"].dropna().unique()
     print("Finding details for {} postcodes".format(len(postcodes)))
     for k, pc in tqdm.tqdm(enumerate(postcodes)):
         progress_job(0, (k+1, len(postcodes)))
@@ -225,7 +225,7 @@ def prepare_data(df, cache={}):
             postcode_df.loc[postcode_df[c].fillna("").str.endswith("99999999"), c] = None
 
     # merge into main dataframe
-    df = df.join(postcode_df.rename(columns=lambda x: "__geo_" + x), on="Recipient Org:Postcode", how="left")
+    df = df.join(postcode_df.rename(columns=lambda x: "__geo_" + x), on="Recipient Org:Postal Code", how="left")
 
     # add banded fields
     progress_job()
