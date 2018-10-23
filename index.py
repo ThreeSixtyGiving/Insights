@@ -111,15 +111,7 @@ app.layout = html.Div(children=[
         html.Div(dt.DataTable(rows=[{}]), style={'display': 'none'}), # make sure we can load dash_table_experiments
         html.Div(dash_resumable_upload.Upload(), style={'display': 'none'}), # dummy upload to make sure dash loads dash_resumable_upload
         html.Div(id="page-footer", className='cf mv3 pv3 bt b--threesixty-red bw4 flex flex-wrap', children=[
-            dcc.Markdown(className='fl w-100 w-third-l pr3-l markdown', children='''
-## About the explorer
-
-This tool showcases the potential of data published to the [360 giving standard](https://www.threesixtygiving.org/support/standard/). 
-Upload a file that meets the 360 giving standard and the tool will display some key views of the data. 
-
-When a file is uploaded the tool will check for any recipients with charity or company numbers and
-download extra data about them, as well as adding data based on the postcode of the recipients.
-            '''),
+            dcc.Markdown(className='fl w-100 w-third-l pr3-l markdown', children=''),
             dcc.Markdown(className='fl w-100 w-third-l ph3-l markdown', children='''
 ## Data protection and privacy
 
