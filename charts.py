@@ -45,8 +45,8 @@ def chart_title(title, subtitle=None, description=None):
         (dcc.Markdown(className='', children=description) if description else None),
     ])
 
-def chart_wrapper(chart, title, subtitle=None, description=None, width='w-50-ns'):
-    return html.Figure(className='ph0 mh0 mv5 {}'.format(width), children=[
+def chart_wrapper(chart, title, subtitle=None, description=None, width='w-100-ns'):
+    return html.Figure(className='ph0 mh0 mv5 w-100 {}'.format(width), children=[
         chart_title(title, subtitle, description),
         chart
     ])
@@ -272,7 +272,7 @@ numbers to your data to show a chart of their latest income.
 def organisation_age_chart(df):
     if df["__org_age_bands"].count()==0:
         return message_box(
-            'Age of recipients',
+            'Age of recipient organisations',
             '''This chart can\'t be shown as there are no recipients in the data with 
 organisation age data. Add company or charity numbers to your data to show a chart of
 the age of organisations.
@@ -287,9 +287,9 @@ the age of organisations.
                 'layout': DEFAULT_LAYOUT
             }
         ),
-        'Age of recipients',
+        'Age of recipient organisations',
         '(number of grants)',
-        description='Based only on recipients with charity or company numbers.'
+        description='Organisation age uses the registeration date of that organisation. Based only on recipients with charity or company numbers.'
     )
 
 
