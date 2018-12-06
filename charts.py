@@ -1,4 +1,5 @@
 import os
+import copy
 
 import dash_core_components as dcc
 import dash_html_components as html
@@ -7,6 +8,7 @@ import plotly.graph_objs as go
 import inflect
 import humanize
 import babel.numbers
+import pandas as pd
 
 
 DEFAULT_TABLE_FIELDS = ["Title", "Description", "Amount Awarded", 
@@ -289,9 +291,57 @@ the age of organisations.
         ),
         'Age of recipient organisations',
         '(number of grants)',
-        description='Organisation age uses the registeration date of that organisation. Based only on recipients with charity or company numbers.'
+        description='Organisation age uses the registration date of that organisation. Based only on recipients with charity or company numbers.'
     )
 
+def imd_chart(df):
+    # @TODO: expand to include non-English IMD too
+    df.to_pickle("test_imd.pkl")
+    imd = df.loc[df['__geo_ctry']=='England', '__geo_imd']
+    if imd.count()==0:
+        return message_box(
+            'Index of multiple deprivation',
+            '''We can't show this chart as we couldn't find any details of the index of multiple deprivation 
+            ranking for postcodes in your data. At the moment we can only use data for England.
+            ''',
+            error=True
+        )
+    
+    # maximum rank of LSOAs by IMD
+    # from: https://www.arcgis.com/sharing/rest/content/items/0a404beab6f544be8fb72d0c2b12d62b/data
+    # NSPL user guid
+    # 1 = most deprived, this number = most deprived
+    imd_total_eng = 32844
+    imd_total_scot = 6976
+    imd_total_wal = 1909
+    imd_total_ni = 890
+
+    # work out the IMD decile
+    imd = ((imd / imd_total_eng) * 10).apply(pd.np.ceil).value_counts().sort_index().reindex(
+        pd.np.arange(1, 11)
+    ).fillna(0)
+
+    imd.index = pd.Series([
+        '1: most deprived', '2', '3', '4', '5', '6', '7', '8', '9', '10: least deprived'
+    ])
+
+    layout = copy.deepcopy(DEFAULT_LAYOUT)
+    layout['xaxis']['type'] = 'category'
+    
+    return chart_wrapper(
+        dcc.Graph(
+            id="imd_chart",
+            figure={
+                'data': [get_bar_data(imd)],
+                'layout': layout
+            }
+        ),
+        'Index of multiple deprivation',
+        '(number of grants)',
+        description='''Shows the number of grants made in each decile of deprivation in England, 
+        from 1 (most deprived) to 10 (most deprived). Based on the postcode included with the grant
+        or on an organisation's registered postcode, so may not reflect where grant activity took place.'''
+    )
 
 def location_map(df):
 

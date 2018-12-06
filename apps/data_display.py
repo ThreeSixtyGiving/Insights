@@ -107,6 +107,7 @@ def dashboard_output(fileid, *args):
     charts.append(organisation_type_chart(df))
     charts.append(region_and_country_chart(df))
     charts.append(location_map(df))
+    charts.append(imd_chart(df))
     charts.append(organisation_age_chart(df))
     charts.append(organisation_income_chart(df))
 
