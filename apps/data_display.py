@@ -42,40 +42,188 @@ def filter_html(filter_id, filter_def):
         )
 
 
-layout = html.Div(id="dashboard-container", className='', children=[
-    html.Div(className="fl w-100 w-25-l pa2-l", children=[
-        message_box(title="Filter data", contents=[
-            html.Div(className="cf", children=[
-                html.Form(id="dashboard-filter", className='', children=[
-                    html.Div(id='df-change-{}-wrapper'.format(filter_id), className='', children=[
-                        html.Label(children=filter_def.get('label', filter_id)),
-                        html.Div(className='cf mv3', children=[
-                            filter_html('df-change-{}'.format(filter_id), filter_def)
-                        ])
-                    ]) for filter_id, filter_def in FILTERS.items()
-                ]),
-            ]),
-            html.Div(className="cf mt4", children=[
-                html.Div(dcc.Link(href='/', children='Select new data')),
-            ]),
-            html.Div(
-                html.Pre(
-                    id='award-dates', 
-                    children=json.dumps({f: FILTERS[f]["defaults"] for f in FILTERS}, indent=4)
-                ), 
-                style={"display": "none"}
-            ),
-        ])
+layout = html.Div(id="dashboard-container", className='results-page', children=[
+#     <div class="results-page__header">
+#     <div class="wrapper">360Giving <span style="color:#9c1f61;">Insights</span> <span style="color:rgba(11, 40, 51, 0.3);">Beta</span></div>
+#   </div>
+    html.Div(className='results-page__header', children=[
+        html.Div(className='wrapper', children=[
+            "360Giving ",
+            html.Span(style={"color": "#9c1f61"}, children="Insights"),
+            html.Span(style={"color": "rgba(11, 40, 51, 0.3)"}, children="Beta"),
+        ]),
     ]),
+    html.Div(className='results-page__app', children=[
+        html.Aside(className='results-page__menu', children=[
+            dcc.Link(
+                className='results-page__menu__back',
+                href='/',
+                children=[
+                    html.I(className='material-icons', children='arrow_back'),
+                    " Select another dataset",
+                ]
+            ),
+            html.H3(className='results-page__menu__section-title', children='Filters'),
+            html.Form(id='filters-form', children=[
+                # @TODO: turn these into new filters
+                html.Div(className="cf", children=[
+                    html.Form(id="dashboard-filter", className='', children=[
+                        html.Div(id='df-change-{}-wrapper'.format(filter_id), className='', children=[
+                            html.Label(children=filter_def.get(
+                                'label', filter_id)),
+                            html.Div(className='cf mv3', children=[
+                                filter_html(
+                                    'df-change-{}'.format(filter_id), filter_def)
+                            ])
+                        ]) for filter_id, filter_def in FILTERS.items()
+                    ]),
+                ]),
 
-    html.Div(className="fl w-100 w-75-l pa2-l", children=[
-        html.Article(id="dashboard-output", children=[], className=''),
+                # @TODO: turn this into a store
+                html.Div(
+                    html.Pre(
+                        id='award-dates',
+                        children=json.dumps(
+                            {f: FILTERS[f]["defaults"] for f in FILTERS}, indent=4)
+                    ),
+                    style={"display": "none"}
+                ),
+            ]),
+        ]),
+
+        html.Div(className="results-page__body", children=[
+            html.Section(className='results-page__body__content',
+                         id="dashboard-output")
+        ]),
     ]),
 ])
+    #  <aside class="results-page__menu">
+    #   <a class="results-page__menu__back" href="/index.html" title="Go back to homepage">
+    #     <i class="material-icons">arrow_back</i> Select another dataset
+    #   </a>
+    #   <h3 class="results-page__menu__section-title">Filters</h3>
+    #   <form id="filters-form">
+    #     <div class="results-page__menu__subsection">
+    #       <h4 class="results-page__menu__subsection-title js-foldable js-foldable-aim-1 js-foldable-more">Region &amp; Country</h4>
+    #       <h5 class="results-page__menu__subsection-value js-foldable-target js-folgable-opposite-target js-foldable-target-1" style="max-height: 16px;">Multiple</h5>
+    #       <fieldset class="js-foldable-target js-foldable-target-1 js-foldable-foldTarget" style="max-height: 217px;">
+    #         <ul class="results-page__menu__checkbox">
+              
+    #             <li>
+    #               <input id="regionAndCountry-england-east" type="checkbox" name="regionAndCountry" value="england-east">
+    #               <label for="regionAndCountry-england-east">
+    #                 England - East of England (3)
+    #               </label>
+    #             </li>
+              
+    #             <li>
+    #               <input id="regionAndCountry-england-london" type="checkbox" name="regionAndCountry" value="england-london" checked="">
+    #               <label for="regionAndCountry-england-london">
+    #                 England - London (32)
+    #               </label>
+    #             </li>
+              
+    #             <li>
+    #               <input id="regionAndCountry-england-north-west" type="checkbox" name="regionAndCountry" value="england-north-west">
+    #               <label for="regionAndCountry-england-north-west">
+    #                 England - North West (4)
+    #               </label>
+    #             </li>
+              
+    #             <li>
+    #               <input id="regionAndCountry-england-south-east" type="checkbox" name="regionAndCountry" value="england-south-east">
+    #               <label for="regionAndCountry-england-south-east">
+    #                 England - South East (5)
+    #               </label>
+    #             </li>
+              
+    #             <li>
+    #               <input id="regionAndCountry-england-west-midlands" type="checkbox" name="regionAndCountry" value="england-west-midlands" checked="">
+    #               <label for="regionAndCountry-england-west-midlands">
+    #                 England - West Midlands (672)
+    #               </label>
+    #             </li>
+              
+    #             <li>
+    #               <input id="regionAndCountry-scotland" type="checkbox" name="regionAndCountry" value="scotland" checked="">
+    #               <label for="regionAndCountry-scotland">
+    #                 Scotland (3)
+    #               </label>
+    #             </li>
+              
+    #             <li>
+    #               <input id="regionAndCountry-unknown" type="checkbox" name="regionAndCountry" value="unknown">
+    #               <label for="regionAndCountry-unknown">
+    #                 Unknown (385)
+    #               </label>
+    #             </li>
+              
+    #         </ul>
+    #       </fieldset>
+    #     </div>
+    #     <div class="results-page__menu__subsection">
+    #       <h4 class="results-page__menu__subsection-title js-foldable js-foldable-aim-2 js-foldable-more">Funders</h4>
+    #       <h5 class="results-page__menu__subsection-value js-foldable-target js-folgable-opposite-target js-foldable-target-2" style="max-height: 16px;">Arcadia</h5>
+    #       <div class="results-page__menu__select-list__wrapper js-foldable-target js-foldable-target-2 js-foldable-foldTarget" style="max-height: 31px;">
+    #         <select id="funders" name="funders" class="results-page__menu__select-list">
+              
+    #             <option value="arcadia">Arcadia</option>
+              
+    #         </select>
+    #       </div>
+    #     </div>
+    #     <div class="results-page__menu__subsection">
+    #       <h4 class="results-page__menu__subsection-title js-foldable js-foldable-aim-3 js-foldable-more">Date Awarded</h4>
+    #       <h5 class="results-page__menu__subsection-value js-foldable-target js-folgable-opposite-target js-foldable-target-3" style="max-height: 16px;">From 2014 to 2018</h5>
+    #       <div class="js-foldable-target js-foldable-target-3 js-foldable-foldTarget" style="text-align: right; max-height: 33px;">
+    #         <fieldset style="display:inline-block;">
+    #           <ul class="results-page__menu__range-select js-range-select-dateAwarded">
+                
+    #               <li>
+    #                 <input id="dateAwarded-1" type="checkbox" name="dateAwarded" value="2014" checked="" class="show-label">
+    #                 <label for="dateAwarded-1">
+    #                   2014
+    #                 </label>
+    #               </li>
+                
+    #               <li>
+    #                 <input id="dateAwarded-2" type="checkbox" name="dateAwarded" value="2015" checked="">
+    #                 <label for="dateAwarded-2">
+    #                   2015
+    #                 </label>
+    #               </li>
+                
+    #               <li>
+    #                 <input id="dateAwarded-3" type="checkbox" name="dateAwarded" value="2016" checked="">
+    #                 <label for="dateAwarded-3">
+    #                   2016
+    #                 </label>
+    #               </li>
+                
+    #               <li>
+    #                 <input id="dateAwarded-4" type="checkbox" name="dateAwarded" value="2017" checked="">
+    #                 <label for="dateAwarded-4">
+    #                   2017
+    #                 </label>
+    #               </li>
+                
+    #               <li>
+    #                 <input id="dateAwarded-5" type="checkbox" name="dateAwarded" value="2018" checked="" class="show-label">
+    #                 <label for="dateAwarded-5">
+    #                   2018
+    #                 </label>
+    #               </li>
+                
+    #           </ul>
+    #         </fieldset>
+    #       </div>
+    #     </div>
+    #   </form>
+    # </aside>
 
 
 @app.callback(Output('dashboard-output', 'children'),
-              [Input('output-data-id', 'children')] + [
+              [Input('output-data-id', 'data')] + [
                   Input('df-change-{}'.format(f), 'value')
                   for f in FILTERS
               ])
@@ -92,10 +240,7 @@ def dashboard_output(fileid, *args):
     outputs = []
     
 
-    outputs.append(
-        html.H2(className='f2 mt0 mb4 lh-copy ostrich',
-                children=get_funder_output(df, filter_args.get("grant_programmes")), id="funder-name")
-    )
+    outputs.extend(get_funder_output(df, filter_args.get("grant_programmes")))
     outputs.append(get_statistics(df))
 
     charts = []
@@ -111,29 +256,14 @@ def dashboard_output(fileid, *args):
     charts.append(organisation_age_chart(df))
     charts.append(organisation_income_chart(df))
 
-    outputs.append(html.Div(className='flex flex-wrap', children=charts))
+    outputs.extend(charts)
 
-    # row = []
-    # for i in charts:
-    #     outputs.
-    #     # if len(row)==2:
-    #     #     outputs.append(html.Div(className='row', children=row))
-    #     #     row = []
-    #     row.append(html.Div(className='sixteen wide column', children=i))
-    # if row:
-    #     outputs.append(html.Div(className='row', children=row))
-
-        
-    # outputs.append(
-    #     html.Div(className='row', children=[
-    #         html.Div(className='column', children=[dataframe_datatable(df)])
-    #     ])
-    # )
+    # outputs.append(html.Div(className='flex flex-wrap', children=charts))
 
     return outputs
 
 @app.callback(Output('award-dates', 'children'),
-              [Input('output-data-id', 'children')])
+              [Input('output-data-id', 'data')])
 def award_dates_change(fileid):
     df = get_from_cache(fileid)
     logging.debug("award_dates_change", fileid, df is None)

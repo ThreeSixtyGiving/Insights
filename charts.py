@@ -42,13 +42,13 @@ DEFAULT_LAYOUT = {
 
 def chart_title(title, subtitle=None, description=None):
     return html.Figcaption(className='', children=[
-        html.H3(className='f2 ostrich mv0', children=title),
-        (html.P(className='f5 gray mv0', children=subtitle) if subtitle else None),
+        html.H2(className='results-page__body__section-title', children=title),
+        (html.P(className='', children=subtitle) if subtitle else None),
         (dcc.Markdown(className='', children=description) if description else None),
     ])
 
-def chart_wrapper(chart, title, subtitle=None, description=None, width='w-100-ns'):
-    return html.Figure(className='ph0 mh0 mv5 w-100 {}'.format(width), children=[
+def chart_wrapper(chart, title, subtitle=None, description=None):
+    return html.Figure(className='', children=[
         chart_title(title, subtitle, description),
         chart
     ])
@@ -440,25 +440,42 @@ def get_statistics(df):
     amount_awarded = [format_currency(amount, currency) for currency, amount in amount_awarded.items()]
 
     return html.Div(
-        className='flex flex-wrap statistics',
+        className='results-page__body__content__spheres',
         children=[
-            html.Div(className='pa5-ns pa2 tc white bg-red w-100 w-auto-ns', children=[
-                html.Div(className='b f2 ostrich', children="{:,.0f}".format(len(df))),
-                html.Div(className='', children=pluralize("grant", len(df)))
-            ]),
-            html.Div(className='pa5-ns pa2 tc white bg-red w-100 w-auto-ns', children=[
-                html.Div(className='b f2 ostrich', children="{:,.0f}".format(df["Recipient Org:Identifier"].unique().size)),
-                html.Div(className='', children=pluralize("recipient", df["Recipient Org:Identifier"].unique().size))
-            ])
+            html.Div(
+                className='results-page__body__content__sphere',
+                style={'backgroundColor': '#9c1f61'},
+                children=[
+                    html.P(className='', children="{:,.0f}".format(len(df))),
+                    html.H4(className='', children=pluralize("grant", len(df)))
+                ]
+            ),
+            html.Div(
+                className='results-page__body__content__sphere',
+                style={'backgroundColor': '#f4831f'},
+                children=[
+                    html.P(className='', children="{:,.0f}".format(df["Recipient Org:Identifier"].unique().size)),
+                    html.H4(className='', children=pluralize("recipient", df["Recipient Org:Identifier"].unique().size))
+                ]
+            ),
         ] + [
-            html.Div(className='pa5-ns pa2 tc white bg-red w-100 w-auto-ns', children=[
-                html.Div(className='b f2 ostrich', children=i[0]),
-                html.Div(className='', children=i[1])
-            ]) for i in amount_awarded
+            html.Div(
+                className='results-page__body__content__sphere',
+                style={'backgroundColor': '#50aae4'},
+                children=[
+                    html.P(className='', children=i[0]),
+                    html.H4(className='', children=i[1])
+                ]
+            ) for i in amount_awarded
         ]
     )
 
-def format_currency(amount, currency='GBP', humanize_=True, int_format="{:,.0f}"):
+def format_currency(amount, currency='GBP', humanize_=True, int_format="{:,.0f}", abbreviate=False):
+    abbreviations = {
+        'million': 'M',
+        'billion': 'bn'
+    }
+
     if humanize_:
         amount_str = humanize.intword(amount).split(" ")
         if len(amount_str) == 2:
@@ -470,7 +487,8 @@ def format_currency(amount, currency='GBP', humanize_=True, int_format="{:,.0f}"
                     currency_digits=False,
                     locale='en_UK'
                 ), 
-                amount_str[1]
+                abbreviations.get(
+                    amount_str[1], amount_str[1]) if abbreviate else amount_str[1]
             )
 
     return (
@@ -480,23 +498,23 @@ def format_currency(amount, currency='GBP', humanize_=True, int_format="{:,.0f}"
             format="¤#,##0",
             currency_digits=False,
             locale='en_UK'
-        ), 
+        ),
         ""
     )
 
 
 def get_funder_output(df, grant_programme=[]):
     
-    funder_class = 'pa1 white bg-threesixty-orange'
+    funder_class = ''
     funder_names = sorted(df["Funding Org:Name"].unique().tolist())
     subtitle = []
     if len(funder_names)>5:
-        funders = html.Strong("{:,.0f} funders".format(len(funder_names)), className=funder_class)
+        funders = html.Span("{:,.0f} funders".format(len(funder_names)), className=funder_class)
         subtitle = [html.Div(className='mt2 gray f4',
                              children=list_to_string(funder_names))]
     else:
         funders = list_to_string(
-            [html.Strong(f, className=funder_class)
+            [html.Span(f, className=funder_class)
              for f in funder_names],
             as_list=True
         )
@@ -506,9 +524,21 @@ def get_funder_output(df, grant_programme=[]):
         "min": df["Award Date"].dt.year.min(),
     }
     if years["max"] == years["min"]:
-        years = " in {}".format(years["max"])
+        years = [
+            " in ",
+            html.Span(
+                className='results-page__body__content__date',
+                children=str(years["max"])
+            ),
+        ]
     else:
-        years = " between {} and {}".format(years["min"], years["max"])
+        years = [
+            " between ",
+            html.Span(
+                className='results-page__body__content__date',
+                children=" {} and {}".format(years["min"], years["max"])
+            ),
+        ]
 
     # if grant_programme and '__all' not in grant_programme:
     #     return [
@@ -517,11 +547,22 @@ def get_funder_output(df, grant_programme=[]):
     #     ]
 
     return_str = [
-        html.Span("{} made by ".format(pluralize("Grant", len(df)))),
-        html.Span(funders),
-        html.Span(" {}".format(years)),
-    ] + subtitle
+        html.H5(
+            className='results-page__body__content__grants-made-by',
+            children="{} made by ".format(pluralize("Grant", len(df)))
+        ),
+        html.H1(
+            className='results-page__body__content__header',
+            children=[html.Span(
+                className='results-page__body__content__title',
+                style={'opacity': '1'},
+                children=funders
+            )] + years
+        ),
+    ]
 
+    # @todo: STYLING FOR subbtitle listing funders
+    # return return_str + subtitle
     return return_str
 
     

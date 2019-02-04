@@ -12,53 +12,49 @@ import dash_resumable_upload
 
 import pandas as pd
 from rq import Queue
+import humanize
 
 from app import app
 from load_data import get_cache, get_from_cache, save_to_cache, get_registry, fetch_reg_file
 from prepare_data import prepare_data, fetch_geocodes
-from charts import list_to_string, message_box
+from charts import list_to_string, message_box, format_currency
 
 dash_resumable_upload.decorate_server(app.server, "uploads")
 
 
-layout = html.Div(id="upload-container", className='w-two-thirds-l center', children=[
-    html.Div(className="flex flex-wrap justify-center", children=[
-        html.Div(className='w-100 tc ph3 ph5-l pt3 pb4', children=[
-            html.H2('Welcome', className='f3 ostrich threesixty-red'),
-            html.P(className='', children=[
-                'Discover grantmaking insights by uploading or selecting a file that meets the ',
-                html.A(
-                    children='360Giving standard',
-                    href='https://www.threesixtygiving.org/support/standard/',
-                    target='_blank',
-                    className='underline dim'
-                )
+def dataset_selection():
+    return html.Div(
+        className='homepage__data-selection hidden js-homepage-dataset-selection-window',
+        id='file-selection-modal',
+        children=[
+            html.Div(className='homepage__data-selection__window', children=[
+                html.Div(className='homepage__data-selection__highlight', children=[
+                    "Datasets",
+                    html.Div(
+                        className='close-button js-homepage-dataset-selection-window-close',
+                        id='file-selection-close'
+                    ),
+                ]),
+                html.Ul(className='homepage__data-selection__sets',
+                        id='registry-list', children=[]),
             ]),
-            html.P(className='', children=[
-                '''This 360Giving Insights tool will check the data for recipients 
-                with charity or company numbers and combine extra data about them. 
-                It will also add data based on the postcode of the recipients.''',
-            ]),
-        ]),
-        html.Div(id='output-data-upload', className='w-100'),
-        dcc.Interval(
-            id='update-interval',
-            interval=60*60*5000,  # in milliseconds
-            n_intervals=0
-        ),
-        html.Div(className='w-100 tc ph3 ph5-l pt3 pb4 white bg-threesixty-red', children=[
-            html.H2('Upload a file', className='f3 ostrich'),
-            html.P(className='light-gray', children=[
-                'File must meet the ',
-                html.A(
-                    children='360Giving data standard',
-                    href='https://www.threesixtygiving.org/support/standard/',
-                    target='_blank',
-                    className='light-gray underline dim'
-                )
-            ]),
-            html.Div(className='field', children=[
-                # html.Label(children='Select file'),
+        ]
+    )
+
+
+def dataset_upload():
+    return html.Div(
+        className='homepage__data-selection hidden js-homepage-dataset-upload-window',
+        id='upload-dataset-modal',
+        children=[
+            html.Div(className='homepage__data-selection__window', children=[
+                html.Div(className='homepage__data-selection__highlight', children=[
+                    "Upload Data",
+                    html.Div(
+                        className='close-button js-homepage-dataset-upload-window-close',
+                        id='upload-dataset-close'
+                    ),
+                ]),
                 dash_resumable_upload.Upload(
                     id='upload-data',
                     maxFiles=1,
@@ -69,29 +65,160 @@ layout = html.Div(id="upload-container", className='w-two-thirds-l center', chil
                     startButton=True,
                     # cancelButton=False,
                     # pauseButton=False,
+                    className='homepage__data-selection__upload-drop highlight',
+                    children=[
+                            html.P([
+                                html.Span(style={
+                                        "color": "#9c1f61", "fontWeight": "400"}, children="Data Privacy Information:"),
+                                """Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut
+                                labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris
+                                nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit
+                                esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt
+                                in culpa qui officia deserunt mollit anim id est laborum."""
+                            ])
+                    ]
                 ),
+                html.Div(className="homepage__data-selection__upload-wrapper", children=[
+                    html.Button(className="homepage__data-selection__upload-button js-dataset-upload", children=[
+                        "Upload file"
+                    ])
+                ]),
             ]),
-        ]),
-        html.Div(className='w-100 tc ph3 ph5-l pv3 f3 flex items-center justify-center', children='or'),
-        html.Div(className='w-100 tc ph3 ph5-l pt3 pb4 white bg-threesixty-orange', children=[
-            html.H2(className='f3 ostrich', children=[
-                'Select file from ',
-                html.A(
-                    children='360Giving registry of publishers',
-                    href='http://data.threesixtygiving.org/',
-                    target='_blank',
-                    className='white underline dim'
-                    )
-            ]),
-            dcc.Dropdown(id='registry-list', className='black tl', options=[]),
-            html.Button('Fetch file', className='mt3 f6 link dim ph3 pv2 mb2 dib white bg-near-black', id='import-registry'),
-        ]),
-        # html.Div(className='w-third tc pa5 white bg-threesixty-yellow', children=[
-        #     html.H2('View existing dashboards ostrich'),
-        #     html.Ul(id="files-list", children=[])
-        # ]),
+        ]
+    )
+
+
+def homepage_header():
+    return html.Div(className="homepage__header", children=[
+        html.Img(src=app.get_asset_url("images/360-insights-logo.png")),
+        html.Br(),
+        html.H2("Discover"),
+        html.H1("Grantmaking Insights"),
+        html.P("""The 360Giving Insights tool will check the data for recipients with 
+                charity or company numbers and combine extra data about them, like information 
+                based on the recipients’ postcode.""")
     ])
-])
+
+
+def homepage_file_selection():
+    return html.Div(className='homepage__file-selection', children=[
+        html.Div(className='homepage__file-selection__wrapper', children=[
+            html.P([
+                "Select one of our datasets",
+                html.Br(),
+                "or upload a file that meets the 360Giving Standard."
+            ]),
+            html.Div(className='homepage__file-selection__zone', children=[
+                html.Button(
+                    className='js-choose-dataset-btn button',
+                    id='file-selection-open',
+                    children=[
+                        "Choose a dataset"
+                    ]
+                ),
+                html.Div(
+                    className='homepage__file-selection__upload js-upload-dataset-btn',
+                    id='upload-dataset-open',
+                    children=[
+                        html.P(className='text', children='Upload a file'),
+                        html.P(
+                            className='homepage__file-selection__upload-icon', children='cloud_upload'),
+                    ]
+                ),
+            ])
+        ])
+    ])
+
+def homepage_data_sources():
+    return html.Div(className='homepage__data-sources', children=[
+        html.Div(style={'display': 'inline-block', 'textAlign': 'left'}, children=[
+            html.H2("Data sources"),
+            dcc.Markdown("""
+Charity data is sourced from [findthatcharity.uk](https://findthatcharity.uk) and postcode
+data from [postcodes.findthatcharity.uk](https://postcodes.findthatcharity.uk). 
+Company data is fetched using Companies House URIs. All external data is used under 
+the [Open Government Licence](http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/).
+                """)
+        ]),
+    ])
+
+
+def homepage_newsletter(): 
+    return html.Div(className='homepage__newsletter', children=[
+        html.Div(className='wrapper', children=[
+            html.Form(className='homepage__newsletter__form', children=[
+                dcc.Input(type='email',
+                        name='email',
+                        placeholder='Signup for our Newsletter...'),
+                dcc.Input(type="submit", value='send')
+            ])
+        ]),
+    ])
+
+def footer():
+    return html.Footer([
+        html.Ul(className='footer__social', children=[
+                html.Li(html.A(href='https://github.com/ThreeSixtyGiving/',
+                               children=html.Img(src='/images/icon-github.png', title='Github'))),
+                html.Li(html.A(href='https://twitter.com/360giving',
+                               children=html.Img(src='/images/icon-twitter.png', title='Twitter'))),
+                ]),
+        html.Div(className="flex-wrapper", children=[
+            html.Section([
+                html.Div([
+                    "MORE",
+                    html.Br(),
+                    "INFORMATION",
+                    html.Ul(className='footer__navigation', children=[
+                            html.Li(html.A(href='#', children='Contact')),
+                            html.Li(html.A(href='#', children='Support')),
+                            html.Li(html.A(href='#', children='Tools')),
+                            ])
+                ]),
+            ]),
+            html.Section([
+                html.Ul(className='footer__navigation', children=[
+                        html.Li(html.A(href='#', children='Privacy Notice')),
+                        html.Li(html.A(href='#', children='Terms & Conditions')),
+                        html.Li(html.A(href='#', children='License')),
+                        ])
+            ]),
+            html.Section([
+                html.P(style={"fontWeight": "300"}, children=[
+                    html.Img(src='/images/360footer.png'),
+                    html.Br(),
+                    "A quick line of text about 360Giving."
+                ]),
+            ]),
+        ]),
+        html.Div(className="footer__divider", children=[
+            html.Hr(),
+            html.Div(className='footer__divider__columns', children=[
+                html.P("Cookie Policy | Take Down Policy"),
+                html.P(style={'textAlign': 'right'}, children=[
+                    "360Giving is a company limited by guarantee 09668396 and a registered charity 1164883.",
+                ]),
+            ]),
+        ]),
+    ])
+
+def homepage():
+
+    return [
+        dataset_selection(),
+        dataset_upload(),
+        dcc.Interval(
+            id='update-interval',
+            interval=60*60*5000,  # in milliseconds
+            n_intervals=0
+        ),
+        html.Div(id='output-data-upload', className=''),
+        homepage_header(),
+        homepage_file_selection(),
+        homepage_data_sources(),
+        homepage_newsletter(),
+        footer(),
+    ]
 
 
 def get_dataframe(filename, contents=None, date_=None, fileid=None):
@@ -176,21 +303,61 @@ def update_files_list(_):
         ]) for k, v in get_existing_files().items()
     ]
 
-
-@app.callback(Output('registry-list', 'options'),
+@app.callback(Output('registry-list', 'children'),
               [Input('output-data-upload', 'children')])
 def update_registry_list(_):
     reg = get_registry()
-    return [
-        {
-            'label': '{} ({}) [{:,.0f} grants]'.format(
-                v.get("publisher", {}).get("name", ""), 
-                v.get("title", ""),
-                v.get("datagetter_aggregates", {}).get("count", 0)
-            ),
-            'value': v.get('identifier')
-        } for v in reg if v.get("datagetter_metadata", {}).get("file_type") in ["xlsx", "csv"]
-    ]
+    publishers = {}
+    for v in reg:
+        publisher = v.get("publisher", {}).get("name", "")
+        grant_count = v.get("datagetter_aggregates", {}).get("count", 0)
+        grant_amount = v.get("datagetter_aggregates", {}).get("currencies", {}).get("GBP", {}).get("total_amount", None)
+        if grant_amount:
+            grant_amount = format_currency(grant_amount, abbreviate=True)
+            grant_amount = "{}{}".format(*grant_amount)
+
+        min_award_date = pd.to_datetime(v.get("datagetter_aggregates", {}).get("min_award_date", None))
+        max_award_date = pd.to_datetime(v.get("datagetter_aggregates", {}).get("max_award_date", None))
+
+        min_award_date = min_award_date.strftime("%b '%y") if not pd.isna(min_award_date) else None
+        max_award_date = max_award_date.strftime("%b '%y") if not pd.isna(max_award_date) else None
+
+        if min_award_date == max_award_date:
+            award_date_str = min_award_date
+        else:
+            award_date_str = "{} - {}".format(min_award_date, max_award_date)
+
+        if publisher not in publishers:
+            publishers[publisher] = []
+        publishers[publisher].append(html.Li(
+            className='homepage__data-selection__data-list__item',
+            children=dcc.Link(
+                href='/registry/{}'.format(v.get('identifier')),
+                children=html.Ul([
+                    html.Li(
+                        className='homepage__data-selection__data-list__item__data-fixed',
+                        children=v.get("title", "")
+                    ),
+                    html.Li(
+                        className='homepage__data-selection__data-list__item__data-notfixed',
+                        children="{:,.0f} records".format(grant_count)
+                    ),
+                    html.Li(
+                        className='homepage__data-selection__data-list__item__data-notfixed',
+                        children=award_date_str
+                    ),
+                    html.Li(
+                        className='homepage__data-selection__data-list__item__data-notfixed',
+                        children=grant_amount
+                    ),
+                ])
+            )
+        ))
+    
+    return [html.Li(className='homepage__data-selection__set', children=[
+        html.H4(className='homepage__data-selection__set-name', children=publisher),
+        html.Ul(className='homepage__data-selection__data-list', children=files),
+    ]) for publisher, files in publishers.items()]
 
 # =============================
 # Callbacks for calling workers
@@ -199,20 +366,38 @@ def update_registry_list(_):
 # =============================
 
 
-# this callback checks submits the query as a new job, returning job_id to the invisible div
-@app.callback(Output('job-id', 'children'),
+@app.callback(Output('fetch-registry-id', 'data'),
+              [Input('url', 'pathname')])
+def fetch_registry_id(pathname):
+    if pathname is not None and pathname.startswith("/registry/"):
+        return pathname.replace("/registry/", "")
+
+
+@app.callback(Output('job-task', 'data'),
               [Input('upload-data', 'fileNames'),
-               Input('import-registry', 'n_clicks')],
-              [State('registry-list', 'value')])
-def update_output(fileNames, n_clicks, regid):
-    if (n_clicks is None or regid is None) and fileNames is None:
-        return ''
+               Input('fetch-registry-id', 'data')])
+def set_job_task(fileNames, regid):
+    return {
+        "fileNames": fileNames,
+        "regid": regid
+    }
+
+# this callback checks submits the query as a new job, returning job_id to the invisible div
+@app.callback(Output('job-id', 'data'),
+              [Input('job-task', 'data')])
+def update_output(job_task):
+    print(job_task)
+    if not job_task:
+        return None
+
+    regid = job_task.get("regid")
+    fileNames = job_task.get("fileNames")
     
     # a query was submitted, so queue it up and return job_id
     q = Queue(connection=get_cache())
     job_id = str(uuid.uuid4())
     try:
-        if n_clicks is not None and regid is not None:
+        if regid is not None:
             reg = get_registry()
             regentry = [x for x in reg if x["identifier"]==regid]
             if len(regentry)==1:
@@ -225,17 +410,17 @@ def update_output(fileNames, n_clicks, regid):
                                      args=(contents, filename, None),
                                      timeout='15m',
                                      job_id=job_id)
-                return json.dumps({"job": job_id})
+                return {"job": job_id}
 
         if fileNames is not None:
             job = q.enqueue_call(func=parse_contents,
                                  args=(None, fileNames[-1], None),
                                  timeout='15m',
                                  job_id=job_id)
-            return json.dumps({"job": job_id})
+            return {"job": job_id}
 
     except Exception as e:
-        return json.dumps({"error": str(e)})
+        return {"error": str(e)}
         # message_box("Could not load file", str(e), error=True)
 
 
@@ -256,13 +441,12 @@ def get_queue_job(job_id):
 # no job, then empty results are returned.
 @app.callback(Output('output-data-upload', 'children'),
               [Input('update-interval', 'n_intervals'),
-               Input('job-id', 'children')])
+               Input('job-id', 'data')])
 def update_results_tables(n_intervals, job_status):
 
     if job_status is None:
         return
 
-    job_status = json.loads(job_status)
     job_id = job_status.get("job")
 
     # the job id may be an error - in which case return the error
@@ -352,14 +536,13 @@ def update_results_tables(n_intervals, job_status):
 # the user is waiting for results, or to be static (refreshed once
 # per hour) if they are not.
 @app.callback(Output('update-interval', 'interval'),
-              [Input('job-id', 'children'),
+              [Input('job-id', 'data'),
               Input('update-interval', 'n_intervals')])
 def stop_or_start_table_update(job_status, n_intervals):
 
     if job_status is None:
         return 60*60*1000
-
-    job_status = json.loads(job_status)
+        
     job_id = job_status.get("job")
     job = get_queue_job(job_id)
 

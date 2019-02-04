@@ -17,14 +17,6 @@ from prepare_data import fetch_geocodes
 
 server = app.server
 
-# Append an externally hosted CSS stylesheet
-app.css.append_css({
-    "external_url": "https://unpkg.com/tachyons@4.10.0/css/tachyons.min.css"
-})
-app.css.append_css({
-    "external_url": "https://fonts.googleapis.com/css?family=Source+Sans+Pro%3A400%2C400i%2C600%2C700&ver=4.9.8"
-})
-
 @server.route('/redis_cache')
 def check_redis_cache():
     r = get_cache()
@@ -65,6 +57,10 @@ def favicon():
     return flask.send_from_directory(os.path.join(server.root_path, 'assets'),
                                      'favicon.ico')
 
+@server.route('/images/<path:path>')
+def send_images(path):
+    return flask.send_from_directory('assets/images', path)
+
 @server.route('/file/<fileid>.<format>')
 def download_file(fileid, format):
     df = get_filtered_df(fileid)
@@ -93,148 +89,14 @@ def download_file(fileid, format):
     
 app.title = '360Giving Insights'
 app.layout = html.Div(children=[
-    html.Div(className='pv2 ph4', children=[
-        dcc.Location(id='url', refresh=False),
-        html.Div(id="page-header", className='cf mv3 pv3', children=[
-            html.H1(className='ostrich', children=[
-                dcc.Link(href='/', className='link threesixty-red', children=[
-                    html.Img(className='mw4point5',
-                             src='/assets/360logo-text.png'),
-                    'Insights',
-                    html.Span(className='gray f4', children=' Beta')
-                ]),
-            ]),
-        ]),
-        html.Div(id='page-content', className='cf'),
-        html.Div(id='output-data-id', className='f6 grey', style={'display': 'none'}),
-        html.Div(id='job-id', style={'display': 'none'}), # invisible div to safely store the current job-id
-        html.Div(dt.DataTable(rows=[{}]), style={'display': 'none'}), # make sure we can load dash_table_experiments
-        html.Div(dash_resumable_upload.Upload(), style={'display': 'none'}), # dummy upload to make sure dash loads dash_resumable_upload
-        html.Div(id="page-footer", className='cf mv3 pv3 bt b--threesixty-red bw4 flex flex-wrap', children=[
-            dcc.Markdown(className='fl w-100 w-third-l pr3-l markdown', children=''),
-            dcc.Markdown(className='fl w-100 w-third-l ph3-l markdown', children='''
-## Data protection and privacy
-
-Any data you upload will be available at the URL created to anyone with the link. You should ensure that 
-no confidential information is present in the data you upload, and that you have the appropriate 
-permissions and licencing to upload the data. 
-
-## Data sources
-
-Charity data is sourced from [findthatcharity.uk](https://findthatcharity.uk/about#data-sources) and postcode
-data from [postcodes.findthatcharity.uk](https://postcodes.findthatcharity.uk/). Company data is fetched using
-[Companies House URIs](https://www.gov.uk/government/organisations/companies-house/about-our-services#uri-info). 
-All external data is used under the [Open Government Licence](http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/).
-            '''),
-            dcc.Markdown(className='fl w-100 w-third-l ph3-l ph4 pb4 bg-threesixty-blue white markdown', children='''
-## Feedback
-
-360Giving Insights is in Beta. We would love your feedback on 
-what works well and less well.
-
-Please email us: 
-**[labs@threesixtygiving.org](mailto:labs@threesixtygiving.org)**
-            '''),
-        ]),
-    ]),
-    html.Footer(className='pa3 bg-threesixty-grey cf', children=[
-        html.A(className='link fl', href='http://www.threesixtygiving.org/', children=[
-            html.Img(className='mw4', src='/assets/360logo-white.png'),
-        ]),
-        html.Nav(className='fr', children=[
-            html.Ul(className='list ttu b white f4 cf', children=[
-                html.Li(className='fl pl3', children=[
-                    html.A(className='white link underline-hover',
-                           href='http://www.threesixtygiving.org/contact/',
-                           children='Contact'),
-                ]),
-                html.Li(className='fl pl3', children=[
-                    html.A(className='white link underline-hover',
-                           href='http://www.threesixtygiving.org/support/',
-                           children='Support'),
-                ]),
-                html.Li(className='fl pl3', children=[
-                    html.A(className='white link underline-hover',
-                           href='http://www.threesixtygiving.org/news-2/',
-                           children='News'),
-                ]),
-                html.Li(className='fl pl3', children=[
-                    html.A(className='white link underline-hover',
-                           href='http://www.threesixtygiving.org/support/standard/',
-                           children='360Giving Standard'),
-                ]),
-            ]),
-            html.P(className='white f4 tr mt3', children=[
-                html.A(className='white link underline-hover b br b--white pr3 mr3',
-                       href='tel:+442037525775',
-                       children='020 3752 5775'),
-                html.A(className='white link underline-hover',
-                       href='mailto:info@threesixtygiving.org',
-                       children='info@threesixtygiving.org'),
-            ])
-        ]),
-    ]),
-    html.Footer(className='pa3 bg-threesixty-grey cf bt b--threesixty-dark-green', children=[
-        html.Div(className='cf', children=[
-            html.P(className='white fl ma0', children=[
-                '360Giving is a company limited by guarantee ',
-                html.A(className='white link underline pointer',
-                       href='https://beta.companieshouse.gov.uk/company/09668396',
-                       children='09668396'),
-                ' and a registered charity ',
-                html.A(className='white link underline pointer',
-                       href='http://beta.charitycommission.gov.uk/charity-details/?regid=1164883&subid=0',
-                       children='1164883'),
-            ]),
-            html.A(className='white ostrich ttu fr f4 link',
-                href='https://us10.campaign-archive.com/home/?u=216b8b926250184f90c7198e8&id=91870dde44',
-                children='Sign up to our newsletter'),
-        ]),
-        html.Nav(className='', children=[
-            html.Ul(className='list threesixty-mid-grey cf mt3 pl0', children=[
-                html.Li(className='fl pr2 mr2 br b--threesixty-mid-grey', children=[
-                    html.A(className='threesixty-mid-grey link underline-hover',
-                           href='http://www.threesixtygiving.org/privacy/',
-                           children='Privacy notice'),
-                ]),
-                html.Li(className='fl pr2 mr2 br b--threesixty-mid-grey', children=[
-                    html.A(className='threesixty-mid-grey link underline-hover',
-                           href='http://www.threesixtygiving.org/terms-conditions/',
-                           children='Terms & Conditions'),
-                ]),
-                html.Li(className='fl pr2 mr2 br b--threesixty-mid-grey', children=[
-                    html.A(className='threesixty-mid-grey link underline-hover',
-                           href='http://www.threesixtygiving.org/cookie-policy/',
-                           children='Cookie Policy'),
-                ]),
-                html.Li(className='fl pr2 mr2 br b--threesixty-mid-grey', children=[
-                    html.A(className='threesixty-mid-grey link underline-hover',
-                           href='http://www.threesixtygiving.org/take-down-policy/',
-                           children='Take Down Policy'),
-                ]),
-                html.Li(className='fl pr2 mr2 br b--threesixty-mid-grey', children=[
-                    html.A(className='threesixty-mid-grey link underline-hover',
-                           href='https://creativecommons.org/licenses/by/4.0/',
-                           children='License'),
-                ]),
-                html.Li(className='fl pr2 mr2 br b--threesixty-mid-grey', children=[
-                    'Built by ',
-                    html.A(className='threesixty-mid-grey link underline',
-                           href='https://drkane.co.uk/',
-                           children='David Kane'),
-                    ' using ',
-                    html.A(className='threesixty-mid-grey link underline',
-                           href='https://dash.plot.ly/',
-                           children='Dash by Plotly'),
-                ]),
-                html.Li(className='fl', children=[
-                    html.A(className='threesixty-mid-grey link underline-hover',
-                           href='https://github.com/ThreeSixtyGiving/explorer',
-                           children='Github'),
-                ]),
-            ])
-        ]),
-    ]),
+    dcc.Location(id='url', refresh=False),
+    html.Div(id='page-content', className='cf'),
+    dcc.Store(id='fetch-registry-id'),
+    dcc.Store(id='output-data-id'),
+    dcc.Store(id='job-task'),
+    dcc.Store(id='job-id'),
+    html.Div(dt.DataTable(rows=[{}]), style={'display': 'none'}), # make sure we can load dash_table_experiments
+    html.Div(dash_resumable_upload.Upload(), style={'display': 'none'}), # dummy upload to make sure dash loads dash_resumable_upload
 ])
 
 
@@ -242,16 +104,53 @@ Please email us:
               [Input('url', 'pathname')])
 def display_page(pathname):
     if pathname is None or pathname == '/':
-        return file_load.layout
+        return file_load.homepage()
+    elif pathname.startswith('/registry/'):
+        return file_load.homepage()
     elif pathname.startswith('/file/'):
         return data_display.layout
     elif pathname == '/status':
         return status.layout
     else:
         return '404'
-    
 
-@app.callback(Output('output-data-id', 'children'),
+# @TODO: move to utils
+def add_class(className, existing_class):
+    existing_class = existing_class.split(" ")
+    if className not in existing_class:
+        existing_class.append(className)
+    return " ".join(existing_class)
+
+
+def remove_class(className, existing_class):
+    existing_class = existing_class.split(" ")
+    if className in existing_class:
+        existing_class.remove(className)
+    return " ".join(existing_class)
+
+
+@app.callback(Output('file-selection-modal', 'className'),
+              [Input('file-selection-open', 'n_clicks_timestamp'), 
+               Input('file-selection-close', 'n_clicks_timestamp')],
+              [State('file-selection-modal', 'className')])
+def toggle_dataset_selection_modal(file_selection_open, file_selection_close, existing_class):
+    if (file_selection_open or 0) > (file_selection_close or 0):
+        return remove_class('hidden', existing_class)
+    else:
+        return add_class('hidden', existing_class)
+
+@app.callback(Output('upload-dataset-modal', 'className'),
+              [Input('upload-dataset-open', 'n_clicks_timestamp'),
+               Input('upload-dataset-close', 'n_clicks_timestamp')],
+              [State('upload-dataset-modal', 'className')])
+def toggle_upload_dataset_modal(upload_dataset_open, upload_dataset_close, existing_class):
+    if (upload_dataset_open or 0) > (upload_dataset_close or 0):
+        return remove_class('hidden', existing_class)
+    else:
+        return add_class('hidden', existing_class)
+
+
+@app.callback(Output('output-data-id', 'data'),
               [Input('page-content', 'children')],
               [State('url', 'pathname')])
 def update_file_id(_, pathname):
