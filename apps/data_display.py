@@ -1,4 +1,3 @@
-import json
 import logging
 
 import dash_core_components as dcc
@@ -13,6 +12,18 @@ from filters import FILTERS
 
 def filter_html(filter_id, filter_def):
     if filter_def.get("type") == 'rangeslider':
+        # <div class="js-foldable-target js-foldable-target-3 js-foldable-foldTarget" style="text-align: right; max-height: 33px;">
+        #   <fieldset style="display:inline-block;">
+        #     <ul class="results-page__menu__range-select js-range-select-dateAwarded">
+        #         <li>
+        #           <input id="dateAwarded-1" type="checkbox" name="dateAwarded" value="2014" checked="" class="show-label">
+        #           <label for="dateAwarded-1">
+        #             2014
+        #           </label>
+        #         </li>
+        #     </ul>
+        #   </fieldset>
+        # </div>
         min_ = filter_def["defaults"].get("min", 0)
         max_ = filter_def["defaults"].get("max", 100)
         step_ = filter_def["defaults"].get("step", 1)
@@ -26,6 +37,16 @@ def filter_html(filter_id, filter_def):
         )
 
     if filter_def.get("type") == 'multidropdown':
+        # <fieldset class="js-foldable-target js-foldable-target-1 js-foldable-foldTarget" style="max-height: 217px;">
+        #   <ul class="results-page__menu__checkbox">
+        #       <li>
+        #         <input id="regionAndCountry-england-east" type="checkbox" name="regionAndCountry" value="england-east">
+        #         <label for="regionAndCountry-england-east">
+        #           England - East of England (3)
+        #         </label>
+        #       </li>
+        #   </ul>
+        # </fieldset>
         return dcc.Dropdown(
             id=filter_id,
             options=filter_def["defaults"],
@@ -34,6 +55,11 @@ def filter_html(filter_id, filter_def):
         )
 
     if filter_def.get("type") == 'dropdown':
+        # <div class="results-page__menu__select-list__wrapper js-foldable-target js-foldable-target-2 js-foldable-foldTarget" style="max-height: 31px;">
+        #   <select id="funders" name="funders" class="results-page__menu__select-list">          
+        #       <option value="arcadia">Arcadia</option>
+        #   </select>
+        # </div>
         return dcc.Dropdown(
             id=filter_id,
             options=filter_def["defaults"],
@@ -43,9 +69,6 @@ def filter_html(filter_id, filter_def):
 
 
 layout = html.Div(id="dashboard-container", className='results-page', children=[
-#     <div class="results-page__header">
-#     <div class="wrapper">360Giving <span style="color:#9c1f61;">Insights</span> <span style="color:rgba(11, 40, 51, 0.3);">Beta</span></div>
-#   </div>
     html.Div(className='results-page__header', children=[
         html.Div(className='wrapper', children=[
             "360Giving ",
@@ -68,26 +91,26 @@ layout = html.Div(id="dashboard-container", className='results-page', children=[
                 # @TODO: turn these into new filters
                 html.Div(className="cf", children=[
                     html.Form(id="dashboard-filter", className='', children=[
-                        html.Div(id='df-change-{}-wrapper'.format(filter_id), className='', children=[
-                            html.Label(children=filter_def.get(
-                                'label', filter_id)),
-                            html.Div(className='cf mv3', children=[
-                                filter_html(
-                                    'df-change-{}'.format(filter_id), filter_def)
+                        html.Div(
+                            id='df-change-{}-wrapper'.format(filter_id),
+                            className='results-page__menu__subsection',
+                            children=[
+                                html.H4(
+                                    className='results-page__menu__subsection-title js-foldable js-foldable-aim-1 js-foldable-more',
+                                    children=filter_def.get('label', filter_id),
+                                ),
+                                html.H5(
+                                    className='results-page__menu__subsection-value js-foldable-target js-folgable-opposite-target js-foldable-target-1',
+                                    style={'maxHeight': '16px'},
+                                    id='df-change-{}-results'.format(filter_id),
+                                    children="",
+                                ),
+                                filter_html('df-change-{}'.format(filter_id), filter_def),
                             ])
-                        ]) for filter_id, filter_def in FILTERS.items()
+                         for filter_id, filter_def in FILTERS.items()
                     ]),
                 ]),
-
-                # @TODO: turn this into a store
-                html.Div(
-                    html.Pre(
-                        id='award-dates',
-                        children=json.dumps(
-                            {f: FILTERS[f]["defaults"] for f in FILTERS}, indent=4)
-                    ),
-                    style={"display": "none"}
-                ),
+                dcc.Store(id='award-dates', data={f: FILTERS[f]["defaults"] for f in FILTERS}),
             ]),
         ]),
 
@@ -97,129 +120,6 @@ layout = html.Div(id="dashboard-container", className='results-page', children=[
         ]),
     ]),
 ])
-    #  <aside class="results-page__menu">
-    #   <a class="results-page__menu__back" href="/index.html" title="Go back to homepage">
-    #     <i class="material-icons">arrow_back</i> Select another dataset
-    #   </a>
-    #   <h3 class="results-page__menu__section-title">Filters</h3>
-    #   <form id="filters-form">
-    #     <div class="results-page__menu__subsection">
-    #       <h4 class="results-page__menu__subsection-title js-foldable js-foldable-aim-1 js-foldable-more">Region &amp; Country</h4>
-    #       <h5 class="results-page__menu__subsection-value js-foldable-target js-folgable-opposite-target js-foldable-target-1" style="max-height: 16px;">Multiple</h5>
-    #       <fieldset class="js-foldable-target js-foldable-target-1 js-foldable-foldTarget" style="max-height: 217px;">
-    #         <ul class="results-page__menu__checkbox">
-              
-    #             <li>
-    #               <input id="regionAndCountry-england-east" type="checkbox" name="regionAndCountry" value="england-east">
-    #               <label for="regionAndCountry-england-east">
-    #                 England - East of England (3)
-    #               </label>
-    #             </li>
-              
-    #             <li>
-    #               <input id="regionAndCountry-england-london" type="checkbox" name="regionAndCountry" value="england-london" checked="">
-    #               <label for="regionAndCountry-england-london">
-    #                 England - London (32)
-    #               </label>
-    #             </li>
-              
-    #             <li>
-    #               <input id="regionAndCountry-england-north-west" type="checkbox" name="regionAndCountry" value="england-north-west">
-    #               <label for="regionAndCountry-england-north-west">
-    #                 England - North West (4)
-    #               </label>
-    #             </li>
-              
-    #             <li>
-    #               <input id="regionAndCountry-england-south-east" type="checkbox" name="regionAndCountry" value="england-south-east">
-    #               <label for="regionAndCountry-england-south-east">
-    #                 England - South East (5)
-    #               </label>
-    #             </li>
-              
-    #             <li>
-    #               <input id="regionAndCountry-england-west-midlands" type="checkbox" name="regionAndCountry" value="england-west-midlands" checked="">
-    #               <label for="regionAndCountry-england-west-midlands">
-    #                 England - West Midlands (672)
-    #               </label>
-    #             </li>
-              
-    #             <li>
-    #               <input id="regionAndCountry-scotland" type="checkbox" name="regionAndCountry" value="scotland" checked="">
-    #               <label for="regionAndCountry-scotland">
-    #                 Scotland (3)
-    #               </label>
-    #             </li>
-              
-    #             <li>
-    #               <input id="regionAndCountry-unknown" type="checkbox" name="regionAndCountry" value="unknown">
-    #               <label for="regionAndCountry-unknown">
-    #                 Unknown (385)
-    #               </label>
-    #             </li>
-              
-    #         </ul>
-    #       </fieldset>
-    #     </div>
-    #     <div class="results-page__menu__subsection">
-    #       <h4 class="results-page__menu__subsection-title js-foldable js-foldable-aim-2 js-foldable-more">Funders</h4>
-    #       <h5 class="results-page__menu__subsection-value js-foldable-target js-folgable-opposite-target js-foldable-target-2" style="max-height: 16px;">Arcadia</h5>
-    #       <div class="results-page__menu__select-list__wrapper js-foldable-target js-foldable-target-2 js-foldable-foldTarget" style="max-height: 31px;">
-    #         <select id="funders" name="funders" class="results-page__menu__select-list">
-              
-    #             <option value="arcadia">Arcadia</option>
-              
-    #         </select>
-    #       </div>
-    #     </div>
-    #     <div class="results-page__menu__subsection">
-    #       <h4 class="results-page__menu__subsection-title js-foldable js-foldable-aim-3 js-foldable-more">Date Awarded</h4>
-    #       <h5 class="results-page__menu__subsection-value js-foldable-target js-folgable-opposite-target js-foldable-target-3" style="max-height: 16px;">From 2014 to 2018</h5>
-    #       <div class="js-foldable-target js-foldable-target-3 js-foldable-foldTarget" style="text-align: right; max-height: 33px;">
-    #         <fieldset style="display:inline-block;">
-    #           <ul class="results-page__menu__range-select js-range-select-dateAwarded">
-                
-    #               <li>
-    #                 <input id="dateAwarded-1" type="checkbox" name="dateAwarded" value="2014" checked="" class="show-label">
-    #                 <label for="dateAwarded-1">
-    #                   2014
-    #                 </label>
-    #               </li>
-                
-    #               <li>
-    #                 <input id="dateAwarded-2" type="checkbox" name="dateAwarded" value="2015" checked="">
-    #                 <label for="dateAwarded-2">
-    #                   2015
-    #                 </label>
-    #               </li>
-                
-    #               <li>
-    #                 <input id="dateAwarded-3" type="checkbox" name="dateAwarded" value="2016" checked="">
-    #                 <label for="dateAwarded-3">
-    #                   2016
-    #                 </label>
-    #               </li>
-                
-    #               <li>
-    #                 <input id="dateAwarded-4" type="checkbox" name="dateAwarded" value="2017" checked="">
-    #                 <label for="dateAwarded-4">
-    #                   2017
-    #                 </label>
-    #               </li>
-                
-    #               <li>
-    #                 <input id="dateAwarded-5" type="checkbox" name="dateAwarded" value="2018" checked="" class="show-label">
-    #                 <label for="dateAwarded-5">
-    #                   2018
-    #                 </label>
-    #               </li>
-                
-    #           </ul>
-    #         </fieldset>
-    #       </div>
-    #     </div>
-    #   </form>
-    # </aside>
 
 
 @app.callback(Output('dashboard-output', 'children'),
@@ -262,15 +162,15 @@ def dashboard_output(fileid, *args):
 
     return outputs
 
-@app.callback(Output('award-dates', 'children'),
+@app.callback(Output('award-dates', 'data'),
               [Input('output-data-id', 'data')])
 def award_dates_change(fileid):
     df = get_from_cache(fileid)
     logging.debug("award_dates_change", fileid, df is None)
     if df is None:
-        return json.dumps({f: FILTERS[f]["defaults"] for f in FILTERS})
+        return {f: FILTERS[f]["defaults"] for f in FILTERS}
 
-    return json.dumps({f: FILTERS[f]["get_values"](df) for f in FILTERS}, indent=4)
+    return {f: FILTERS[f]["get_values"](df) for f in FILTERS}
 
 # ================
 # Functions that return a function to be used in callbacks
@@ -280,7 +180,7 @@ def award_dates_change(fileid):
 def dropdown_filter(filter_id, filter_def):
     def dropdown_filter_func(value):
         logging.debug("dropdown", filter_id, filter_def, value)
-        value = json.loads(value) if value else {filter_id: filter_def["defaults"]}
+        value = value if value else {filter_id: filter_def["defaults"]}
         return value[filter_id]
     return dropdown_filter_func
 
@@ -288,7 +188,7 @@ def dropdown_filter(filter_id, filter_def):
 def filter_dropdown_hide(filter_id, filter_def):
     def filter_dropdown_hide_func(value, existing_style):
         existing_style = {} if existing_style is None else existing_style
-        value = json.loads(value) if value else {filter_id: filter_def["defaults"]}
+        value = value if value else {filter_id: filter_def["defaults"]}
         if len(value[filter_id])>1:
             if "display" in existing_style:
                 del existing_style["display"]
@@ -300,21 +200,21 @@ def filter_dropdown_hide(filter_id, filter_def):
 def slider_select_min(filter_id, filter_def):
     def slider_select_min_func(value):
         logging.debug("year_select_min", value)
-        value = json.loads(value) if value else {filter_id: filter_def["defaults"]}
+        value = value if value else {filter_id: filter_def["defaults"]}
         return value[filter_id]["min"]
     return slider_select_min_func
         
 def slider_select_max(filter_id, filter_def):
     def slider_select_max_func(value):
         logging.debug("year_select_max", value)
-        value = json.loads(value) if value else {filter_id: filter_def["defaults"]}
+        value = value if value else {filter_id: filter_def["defaults"]}
         return value[filter_id]["max"]
     return slider_select_max_func
 
 def slider_select_marks(filter_id, filter_def):
     def slider_select_marks_func(value):
         logging.debug("year_select_marks", value)
-        value = json.loads(value) if value else {filter_id: filter_def["defaults"]}
+        value = value if value else {filter_id: filter_def["defaults"]}
         step = 3 if (value[filter_id]["max"] - value[filter_id]["min"]) > 6 else 1
         min_max = range(value[filter_id]["min"], value[filter_id]["max"] + 1, step)
         return {str(i): str(i) for i in min_max}
@@ -323,14 +223,14 @@ def slider_select_marks(filter_id, filter_def):
 def slider_select_value(filter_id, filter_def):
     def slider_select_value_func(value):
         logging.debug("year_select_value", value)
-        value = json.loads(value) if value else {filter_id: filter_def["defaults"]}
+        value = value if value else {filter_id: filter_def["defaults"]}
         return [value[filter_id]["min"], value[filter_id]["max"]]
     return slider_select_value_func
 
 def slider_hide(filter_id, filter_def):
     def slider_hide_func(value, existing_style):
         existing_style = {} if existing_style is None else existing_style
-        value = json.loads(value) if value else {filter_id: filter_def["defaults"]}
+        value = value if value else {filter_id: filter_def["defaults"]}
         if value[filter_id]["min"] != value[filter_id]["max"]:
             if "display" in existing_style:
                 del existing_style["display"]
@@ -344,39 +244,39 @@ for filter_id, filter_def in FILTERS.items():
     if filter_def.get("type") in ['dropdown', 'multidropdown']:
         app.callback(
             Output('df-change-{}'.format(filter_id), 'options'),
-            [Input('award-dates', 'children')])(
+            [Input('award-dates', 'data')])(
                 dropdown_filter(filter_id, filter_def)
             )
 
         app.callback(Output('df-change-{}-wrapper'.format(filter_id), 'style'),
-                    [Input('award-dates', 'children')],
+                    [Input('award-dates', 'data')],
             [State('df-change-{}-wrapper'.format(filter_id), 'style')])(
                 filter_dropdown_hide(filter_id, filter_def)
             )
 
     elif filter_def.get("type") in ['rangeslider']:
         app.callback(Output('df-change-{}'.format(filter_id), 'min'),
-                    [Input('award-dates', 'children')])(
+                    [Input('award-dates', 'data')])(
                         slider_select_min(filter_id, filter_def)
                     )
             
         app.callback(Output('df-change-{}'.format(filter_id), 'max'),
-                    [Input('award-dates', 'children')])(
+                    [Input('award-dates', 'data')])(
                         slider_select_max(filter_id, filter_def)
                     )
             
         app.callback(Output('df-change-{}'.format(filter_id), 'marks'),
-                    [Input('award-dates', 'children')])(
+                    [Input('award-dates', 'data')])(
                         slider_select_marks(filter_id, filter_def)
                     )
             
         app.callback(Output('df-change-{}'.format(filter_id), 'value'),
-                    [Input('award-dates', 'children')])(
+                    [Input('award-dates', 'data')])(
                         slider_select_value(filter_id, filter_def)
                     )
             
         app.callback(Output('df-change-{}-wrapper'.format(filter_id), 'style'),
-                    [Input('award-dates', 'children')],
+                    [Input('award-dates', 'data')],
                     [State('df-change-{}-wrapper'.format(filter_id), 'style')])(
                         slider_hide(filter_id, filter_def)
                     )
