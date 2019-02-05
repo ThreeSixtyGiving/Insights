@@ -416,7 +416,6 @@ def location_map(df):
     return chart_wrapper(
         dcc.Graph(id='grant_location_chart', figure={"data": data, "layout": layout}),
         'Location of grant recipients',
-        width='w-100-ns',
         description='''Showing the location of **{:,.0f}** grants out of {:,.0f}
         
 Based on the registered address of a charity or company
