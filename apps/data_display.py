@@ -14,18 +14,6 @@ from tsg_insights_components import InsightChecklist, InsightDropdown, InsightFo
 
 def filter_html(filter_id, filter_def):
     if filter_def.get("type") == 'rangeslider':
-        # <div class="js-foldable-target js-foldable-target-3 js-foldable-foldTarget" style="text-align: right; max-height: 33px;">
-        #   <fieldset style="display:inline-block;">
-        #     <ul class="results-page__menu__range-select js-range-select-dateAwarded">
-        #         <li>
-        #           <input id="dateAwarded-1" type="checkbox" name="dateAwarded" value="2014" checked="" class="show-label">
-        #           <label for="dateAwarded-1">
-        #             2014
-        #           </label>
-        #         </li>
-        #     </ul>
-        #   </fieldset>
-        # </div>
         min_ = filter_def["defaults"].get("min", 0)
         max_ = filter_def["defaults"].get("max", 100)
         step_ = filter_def["defaults"].get("step", 1)
@@ -227,6 +215,12 @@ def slider_hide(filter_id, filter_def):
 
 def set_dropdown_value(filter_id, filter_def):
     def set_dropdown_value_fund(value, options):
+        if filter_def.get("type")=="rangeslider":
+            if value[0] == value[1]:
+                return str(value[0])
+            else:
+                return "{} to {}".format(value[0], value[1])
+
         value_labels = [re.sub(r' \([0-9,]+\)$', "", o['label'])
                         for o in options if o['value'] in value]
         if len(value_labels) == 0:
@@ -241,6 +235,12 @@ def set_dropdown_value(filter_id, filter_def):
 # Add callbacks for all the filters
 for filter_id, filter_def in FILTERS.items():
 
+    # callback to update the text showing filtered options next to the filter
+    app.callback(Output('df-change-{}-wrapper'.format(filter_id), 'value'),
+                    [Input('df-change-{}'.format(filter_id), 'value')],
+                    [State('df-change-{}'.format(filter_id), 'options')])(
+        set_dropdown_value(filter_id, filter_def)
+    )
 
     if filter_def.get("type") in ['dropdown', 'multidropdown']:
 
@@ -256,13 +256,6 @@ for filter_id, filter_def in FILTERS.items():
                     [Input('award-dates', 'data')],
             [State('df-change-{}-wrapper'.format(filter_id), 'style')])(
                 filter_dropdown_hide(filter_id, filter_def)
-            )
-
-        # callback to update the text showing filtered options next to the filter
-        app.callback(Output('df-change-{}-wrapper'.format(filter_id), 'value'),
-                    [Input('df-change-{}'.format(filter_id), 'value')],
-                    [State('df-change-{}'.format(filter_id), 'options')])(
-                set_dropdown_value(filter_id, filter_def)
             )
 
     elif filter_def.get("type") in ['rangeslider']:
