@@ -54,19 +54,17 @@ def chart_wrapper(chart, title, subtitle=None, description=None):
     ])
 
 def message_box(title, contents, error=False):
-    border = 'b--red' if error else 'b--black'
-    background = 'bg-red' if error else 'bg-black'
     if isinstance(contents, str):
         contents_div = dcc.Markdown(
-            className='f6 f5-ns lh-copy mv0', children=contents)
+            className='', children=contents)
     else:
         contents_div = html.P(
-            className='f6 f5-ns lh-copy mv0', children=contents),
+            className='', children=contents),
 
-    return html.Div(className='center hidden ba mb4 {}'.format(border), children=[
-        html.H1(className='f4 white mv0 pv2 ph3 ostrich {}'.format(background),
+    return html.Div(className='', children=[
+        html.H2(className='results-page__body__section-title',
                 children=title),
-        html.Div(className='pa3', children=contents_div),
+        html.Div(className='', children=contents_div),
     ])
 
 def get_bar_data(values, name="Grants", chart_type='bar', colour=0):
@@ -221,6 +219,15 @@ def region_and_country_chart(df):
         "Amount Awarded": "sum",
         "Title": "size"
     })
+    if (df["__geo_ctry"].count() + df["__geo_rgn"].count()) == 0:
+        return message_box(
+            'Region and Country',
+            '''This chart can\'t be shown as there are no recipients in the data with 
+income data. If your data contains grants to charities, you can add charity
+numbers to your data to show a chart of their latest income.
+            ''',
+            error=True
+        )
     return chart_wrapper(
         dcc.Graph(
             id="region_and_country_chart",
@@ -273,9 +280,8 @@ def organisation_income_chart(df):
     if df["__org_latest_income_bands"].count() == 0:
         return message_box(
             'Latest income of charity recipients',
-            '''This chart can\'t be shown as there are no recipients in the data with 
-income data. If your data contains grants to charities, you can add charity
-numbers to your data to show a chart of their latest income.
+            '''We don't have enough geographical data to show this chart. We can tell the region
+and country of grant recipients if postcodes are included in the data.
             ''',
             error=True
         )
