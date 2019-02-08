@@ -71,6 +71,17 @@ FILTERS = {
         "field": "Grant Programme:Title",
         "apply_filter": apply_field_filter,
     },
+    "award_dates": {
+        "label": "Date awarded",
+        "type": "rangeslider",
+        "defaults": {"min": 2015, "max": 2018},
+        "get_values": (lambda df: {
+            "min": int(df["Award Date"].dt.year.min()),
+            "max": int(df["Award Date"].dt.year.max()),
+        }),
+        "field": "Award Date",
+        "apply_filter": apply_date_range_filter,
+    },
     "area": {
         "label": "Region and country",
         "type": "multidropdown",
@@ -138,16 +149,5 @@ FILTERS = {
         ] if df["__org_age_bands"].value_counts().sum() else []),
         "field": "__org_age_bands",
         "apply_filter": apply_field_filter,
-    },
-    "award_dates": {
-        "label": "Date awarded",
-        "type": "rangeslider",
-        "defaults": {"min": 2015, "max": 2018},
-        "get_values": (lambda df: {
-            "min": int(df["Award Date"].dt.year.min()),
-            "max": int(df["Award Date"].dt.year.max()),
-        }),
-        "field": "Award Date",
-        "apply_filter": apply_date_range_filter,
     },
 }
