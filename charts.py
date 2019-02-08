@@ -225,7 +225,7 @@ charities or companies, or those grants which contain a postcode.'''
     )
 
 def organisation_type_chart(df):
-    values = df["__org_org_type"].fillna("Unknown").value_counts().sort_index()
+    values = df["__org_org_type"].fillna("No organisation identifier").value_counts().sort_index()
     return chart_wrapper(
         dcc.Graph(
             id="organisation_type_chart",
@@ -245,7 +245,9 @@ def organisation_type_chart(df):
             }
         ),
         'Recipient type',
-        '(proportion of grants)'
+        '(proportion of grants)',
+        description='''Organisation type is only available for recipients with a valid
+organisation identifier.'''
     )
 
 
