@@ -122,7 +122,7 @@ FILTERS = {
                 'label': '{} ({})'.format(i[0], i[1]),
                 'value': i[0]
             } for i in df["__org_latest_income_bands"].value_counts().sort_index().iteritems()
-        ]),
+        ] if df["__org_latest_income_bands"].value_counts().sum() else []),
         "field": "__org_latest_income_bands",
         "apply_filter": apply_field_filter,
     },
@@ -135,7 +135,7 @@ FILTERS = {
                 'label': '{} ({})'.format(i[0], i[1]),
                 'value': i[0]
             } for i in df["__org_age_bands"].value_counts().sort_index().iteritems()
-        ]),
+        ] if df["__org_age_bands"].value_counts().sum() else []),
         "field": "__org_age_bands",
         "apply_filter": apply_field_filter,
     },
