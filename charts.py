@@ -26,21 +26,27 @@ DEFAULT_LAYOUT = {
     'yaxis': {
         'automargin': True,
         'visible': False,
+        'showgrid': False,
+        'showline': False,
+        'linewidth': 0,
         'tickfont': {
             'size': 20
         },
     },
     'xaxis': {
         'automargin': True,
+        'showgrid': False,
+        'showline': False,
+        'linewidth': 0,
         'tickfont': {
             'size': 20
         },
     },
     'margin': go.layout.Margin(
         l=40,
-        r=0,
+        r=24,
         b=40,
-        t=0,
+        t=24,
         pad=4
     ),
 }
@@ -165,17 +171,33 @@ def amount_awarded_chart(df):
 
 def awards_over_time_chart(df):
 
+    xbins_sizes = (
+        ('M1', 'by month'),
+        ('M3', 'by quarter'),
+        ('M12', 'by year')
+    )
+
+    data_years = [
+        df['Award Date'].dt.year.min(),
+        df['Award Date'].dt.year.max()
+    ]
+    xbins_size = 'M1'
+    if (data_years[1] - data_years[0]) >= 5:
+        xbins_size = 'M12'
+    elif (data_years[1] - data_years[0]) >= 1:
+        xbins_size = 'M3'
+
     data = [dict(
         x = df['Award Date'],
         autobinx = False,
-        autobiny = True,
+        autobiny=True,
         marker = dict(color = THREESIXTY_COLOURS[1]),
         name = 'date',
         type = 'histogram',
         xbins = dict(
-            start='{}-01-01'.format(df['Award Date'].dt.year.min()),
-            end='{}-12-31'.format(df['Award Date'].dt.year.max()),
-            size = 'M1',
+            start='{}-01-01'.format(data_years[0]),
+            end='{}-12-31'.format(data_years[1]),
+            size=xbins_size,
         )
     )]
 
@@ -185,27 +207,22 @@ def awards_over_time_chart(df):
         xref = 'paper',
         yref = 'paper',
         yanchor = 'top',
-        active = 0,
+        active=[b[0] for b in xbins_sizes].index(xbins_size),
         showactive = True,
         buttons = [
-        dict(
-            args = ['xbins.size', 'M1'],
-            label = 'by month',
-            method = 'restyle',
-        ), dict(
-            args = ['xbins.size', 'M3'],
-            label = 'by quarter',
-            method = 'restyle',
-        ), dict(
-            args = ['xbins.size', 'M12'],
-            label = 'by year',
-            method = 'restyle',
-        )]
+            dict(
+                args = ['xbins.size', b[0]],
+                label = b[1],
+                method = 'restyle',
+            ) 
+            for b in xbins_sizes
+        ]
     )]
 
     layout = copy.deepcopy(DEFAULT_LAYOUT)
     layout['updatemenus'] = updatemenus
     layout['yaxis']['visible'] = True
+    layout['yaxis']['showline'] = False
 
     return chart_wrapper(
         dcc.Graph(
