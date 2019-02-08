@@ -107,6 +107,9 @@ def funder_chart(df):
             figure={
                 'data': [get_bar_data(funders)],
                 'layout': DEFAULT_LAYOUT
+            },
+            config={
+                'displayModeBar': False
             }
         ),
         'Funders', 
@@ -125,6 +128,9 @@ def grant_programme_chart(df):
             figure={
                 'data': [get_bar_data(df["Grant Programme:Title"].value_counts())],
                 'layout': DEFAULT_LAYOUT
+            },
+            config={
+                'displayModeBar': False
             }
         ),
         'Grant programmes',
@@ -139,6 +145,9 @@ def amount_awarded_chart(df):
             figure={
                 'data': [get_bar_data(df["Amount Awarded:Bands"].value_counts().sort_index())],
                 'layout': DEFAULT_LAYOUT
+            },
+            config={
+                'displayModeBar': False
             }
         ),
         'Amount awarded',
@@ -197,7 +206,10 @@ def awards_over_time_chart(df):
             figure={
                 'data': data,
                 'layout': layout
-            } 
+            },
+            config={
+                'displayModeBar': False
+            }
         ),
         'Award Date',
         '(number of grants)'
@@ -215,7 +227,10 @@ def region_and_country_chart(df):
             figure={
                 'data': [get_bar_data(values["Title"], chart_type='column', colour=2)],
                 'layout': DEFAULT_LAYOUT
-            } 
+            },
+            config={
+                'displayModeBar': False
+            }
         ),
         'Region and Country',
         '(number of grants)',
@@ -242,6 +257,9 @@ def organisation_type_chart(df):
                     }
                     )],
                 'layout': DEFAULT_LAYOUT
+            },
+            config={
+                'displayModeBar': False
             }
         ),
         'Recipient type',
@@ -267,7 +285,10 @@ numbers to your data to show a chart of their latest income.
             figure={
                 'data': [get_bar_data(df["__org_latest_income_bands"].value_counts().sort_index(), colour=3)],
                 'layout': DEFAULT_LAYOUT
-            } 
+            },
+            config={
+                'displayModeBar': False
+            }
         ),
         'Latest income of charity recipients',
         '(number of grants)',
@@ -289,6 +310,9 @@ the age of organisations.
             figure={
                 'data': [get_bar_data(df["__org_age_bands"].value_counts().sort_index())],
                 'layout': DEFAULT_LAYOUT
+            },
+            config={
+                'displayModeBar': False
             }
         ),
         'Age of recipient organisations',
@@ -336,6 +360,9 @@ def imd_chart(df):
             figure={
                 'data': [get_bar_data(imd)],
                 'layout': layout
+            },
+            config={
+                'displayModeBar': False
             }
         ),
         'Index of multiple deprivation',
@@ -416,7 +443,13 @@ def location_map(df):
     )
 
     return chart_wrapper(
-        dcc.Graph(id='grant_location_chart', figure={"data": data, "layout": layout}),
+        dcc.Graph(
+            id='grant_location_chart',
+            figure={"data": data, "layout": layout},
+            config={
+                'displayModeBar': False
+            }
+        ),
         'Location of grant recipients',
         description='''Showing the location of **{:,.0f}** grants out of {:,.0f}
         
