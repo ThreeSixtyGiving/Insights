@@ -30,7 +30,6 @@ def filter_html(filter_id, filter_def):
         return InsightChecklist(
             id=filter_id,
             ulClassName="results-page__menu__checkbox",
-            style={"maxHeight": "217px"},
             options=filter_def["defaults"],
             value=[filter_def["defaults"][0]["value"]]
         )
