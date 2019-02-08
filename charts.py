@@ -20,16 +20,21 @@ MAPBOX_ACCESS_TOKEN = os.environ.get("MAPBOX_ACCESS_TOKEN")
 MAPBOX_STYLE = os.environ.get("MAPBOX_STYLE", 'mapbox://styles/davidkane/cjmtr1n101qlz2ruqszjcmhls')
 DEFAULT_LAYOUT = {
     'font': {
-        'family': '"Source Sans Pro",sans-serif;'
-    },
-    'titlefont': {
-        'family': '"Source Sans Pro",sans-serif;'
+        'family': 'neusa-next-std-compact, "Source Sans Pro", sans-serif;',
+        'size': 18
     },
     'yaxis': {
         'automargin': True,
+        'visible': False,
+        'tickfont': {
+            'size': 20
+        },
     },
     'xaxis': {
         'automargin': True,
+        'tickfont': {
+            'size': 20
+        },
     },
     'margin': go.layout.Margin(
         l=40,
@@ -73,6 +78,12 @@ def get_bar_data(values, name="Grants", chart_type='bar', colour=0):
     bar_data = {
         'x': titles, 
         'y': [i[1] for i in values.iteritems()], 
+        'text': [i[1] for i in values.iteritems()],
+        'textposition': 'auto',
+        'textfont': {
+            'size': 18,
+            'family': 'neusa-next-std-compact, sans-serif;',
+        },
         'type': chart_type, 
         'name': name,
         'marker': {
@@ -192,11 +203,9 @@ def awards_over_time_chart(df):
         )]
     )]
 
-    layout = {
-        'updatemenus': updatemenus
-    }
-    for i in DEFAULT_LAYOUT:
-        layout[i] = DEFAULT_LAYOUT[i]
+    layout = copy.deepcopy(DEFAULT_LAYOUT)
+    layout['updatemenus'] = updatemenus
+    layout['yaxis']['visible'] = True
 
     return chart_wrapper(
         dcc.Graph(
@@ -219,6 +228,7 @@ def region_and_country_chart(df):
         "Amount Awarded": "sum",
         "Title": "size"
     })
+
     if (df["__geo_ctry"].count() + df["__geo_rgn"].count()) == 0:
         return message_box(
             'Region and Country',
@@ -228,12 +238,17 @@ numbers to your data to show a chart of their latest income.
             ''',
             error=True
         )
+
+    layout = copy.deepcopy(DEFAULT_LAYOUT)
+    layout['yaxis']['visible'] = True
+    layout['xaxis']['visible'] = False
+
     return chart_wrapper(
         dcc.Graph(
             id="region_and_country_chart",
             figure={
                 'data': [get_bar_data(values["Title"], chart_type='column', colour=2)],
-                'layout': DEFAULT_LAYOUT
+                'layout': layout
             },
             config={
                 'displayModeBar': False
