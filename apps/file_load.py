@@ -401,7 +401,6 @@ def set_job_task(fileNames, regid):
 @app.callback(Output('job-id', 'data'),
               [Input('job-task', 'data')])
 def update_output(job_task):
-    print(job_task)
     if not job_task:
         return None
 
