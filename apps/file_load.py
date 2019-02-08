@@ -17,9 +17,21 @@ import humanize
 from app import app
 from load_data import get_cache, get_from_cache, save_to_cache, get_registry, fetch_reg_file
 from prepare_data import prepare_data, fetch_geocodes
-from charts import list_to_string, message_box, format_currency
+from charts import list_to_string, format_currency
 
 dash_resumable_upload.decorate_server(app.server, "uploads")
+
+
+def upload_progress(title, contents, error=False):
+    return html.Div(
+        className='homepage__data-selection js-homepage-dataset-selection-window',
+        children=[
+            html.Div(className='homepage__data-selection__window', children=[
+                html.Div(className='homepage__data-selection__highlight', children=[title]),
+                html.Ul(className='homepage__data-selection__sets', children=contents),
+            ]),
+        ]
+    )
 
 
 def dataset_selection():
@@ -205,6 +217,10 @@ def footer():
 def homepage():
 
     return [
+        html.Div(
+            id='output-data-upload',
+            children=[]
+        ),
         dataset_selection(),
         dataset_upload(),
         dcc.Interval(
@@ -212,7 +228,6 @@ def homepage():
             interval=60*60*5000,  # in milliseconds
             n_intervals=0
         ),
-        html.Div(id='output-data-upload', className=''),
         homepage_header(),
         homepage_file_selection(),
         homepage_data_sources(),
@@ -421,7 +436,6 @@ def update_output(job_task):
 
     except Exception as e:
         return {"error": str(e)}
-        # message_box("Could not load file", str(e), error=True)
 
 
 def get_queue_job(job_id):
@@ -451,7 +465,7 @@ def update_results_tables(n_intervals, job_status):
 
     # the job id may be an error - in which case return the error
     if "error" in job_status or job_id is None:
-        return message_box("Error fetching file", job_status.get("error", "Unknown error"), error=True)
+        return upload_progress("Error fetching file", job_status.get("error", "Unknown error"), error=True)
 
     job = get_queue_job(job_id)
     if job is None:
@@ -459,7 +473,7 @@ def update_results_tables(n_intervals, job_status):
     
     # check for failed jobs
     if job.is_failed:
-        return message_box(
+        return upload_progress(
             'Error fetching file',
             [
                 html.Div(children=[
@@ -469,7 +483,7 @@ def update_results_tables(n_intervals, job_status):
                 (html.H6(datetime.datetime.fromtimestamp(
                     job.args[2])) if job.args[2] else ""),
                 html.P('Could not fetch file'),
-                html.Div(className='bg-light-gray pa1 f6 ws-pre pre', children=[
+                html.Div(className='', children=[
                     html.Pre(job.exc_info),
                 ]),
             ],
@@ -499,7 +513,7 @@ def update_results_tables(n_intervals, job_status):
                 (job.meta["progress"]["stage"] /
                  len(job.meta["stages"])) * 100
             )
-            return message_box(
+            return upload_progress(
                 'Fetching file',
                 [
                     html.P(html.Strong(job.meta["stages"][job.meta["progress"]["stage"]])),
@@ -507,17 +521,18 @@ def update_results_tables(n_intervals, job_status):
                         job.meta["progress"]["stage"],
                         len(job.meta["stages"])
                     )),
-                    html.Div(className='bg-moon-gray br-pill h1 overflow-y-hidden', children=[
-                        html.Div(className='bg-threesixty-red br-pill h1 shadow-1',
+                    # @TODO: progress bar
+                    html.Div(className='', children=[
+                        html.Div(className='',
                                  style={"width": step_width})
                     ])
                 ] + progress
             )
-        return message_box('Fetching file', [html.P(html.Strong("Starting to fetch file..."))])
+        return upload_progress('Fetching file', [html.P(html.Strong("Starting to fetch file..."))])
 
     # results are ready
     fileid, filename, date = result
-    return message_box(
+    return upload_progress(
         'File fetch results',
         [
             html.Div(children=[
@@ -526,7 +541,7 @@ def update_results_tables(n_intervals, job_status):
             ]),
             (html.H6(datetime.datetime.fromtimestamp(date)) if date else ""),
             dcc.Link(href='/file/{}'.format(fileid),
-                    className='link dim near-black bg-threesixty-yellow pv2 ph3 mv3 dib',
+                    className='',
                     children='Data uploaded - view results >')
         ]
     )
