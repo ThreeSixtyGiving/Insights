@@ -1,3 +1,5 @@
+## Install Dash
+This repo uses Dash. See [Dash installation documentation](https://dash.plot.ly/installation)
 
 
 ## Run development version
