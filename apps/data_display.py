@@ -1,4 +1,5 @@
 import logging
+import re
 
 import dash_core_components as dcc
 import dash_html_components as html
@@ -9,6 +10,7 @@ from app import app
 from load_data import get_filtered_df, get_from_cache, get_cache
 from charts import *
 from filters import FILTERS
+from tsg_insights_components import InsightChecklist, InsightDropdown, InsightFoldable
 
 def filter_html(filter_id, filter_def):
     if filter_def.get("type") == 'rangeslider':
@@ -37,34 +39,22 @@ def filter_html(filter_id, filter_def):
         )
 
     if filter_def.get("type") == 'multidropdown':
-        # <fieldset class="js-foldable-target js-foldable-target-1 js-foldable-foldTarget" style="max-height: 217px;">
-        #   <ul class="results-page__menu__checkbox">
-        #       <li>
-        #         <input id="regionAndCountry-england-east" type="checkbox" name="regionAndCountry" value="england-east">
-        #         <label for="regionAndCountry-england-east">
-        #           England - East of England (3)
-        #         </label>
-        #       </li>
-        #   </ul>
-        # </fieldset>
-        return dcc.Dropdown(
+        return InsightChecklist(
             id=filter_id,
+            ulClassName="results-page__menu__checkbox",
+            style={"maxHeight": "217px"},
             options=filter_def["defaults"],
-            multi=True,
             value=[filter_def["defaults"][0]["value"]]
         )
 
     if filter_def.get("type") == 'dropdown':
-        # <div class="results-page__menu__select-list__wrapper js-foldable-target js-foldable-target-2 js-foldable-foldTarget" style="max-height: 31px;">
-        #   <select id="funders" name="funders" class="results-page__menu__select-list">          
-        #       <option value="arcadia">Arcadia</option>
-        #   </select>
-        # </div>
-        return dcc.Dropdown(
+        return InsightDropdown(
             id=filter_id,
             options=filter_def["defaults"],
             multi=False,
-            value=[filter_def["defaults"][0]["value"]]
+            value=[filter_def["defaults"][0]["value"]],
+            className="results-page__menu__select-list__wrapper",
+            selectClassName="results-page__menu__select-list",
         )
 
 
@@ -91,23 +81,19 @@ layout = html.Div(id="dashboard-container", className='results-page', children=[
                 # @TODO: turn these into new filters
                 html.Div(className="cf", children=[
                     html.Form(id="dashboard-filter", className='', children=[
-                        html.Div(
+                        InsightFoldable(
                             id='df-change-{}-wrapper'.format(filter_id),
                             className='results-page__menu__subsection',
+                            titleClassName='results-page__menu__subsection-title js-foldable js-foldable-more',
+                            titleUnfoldedClassName='js-foldable-less',
+                            title=filter_def.get('label', filter_id),
+                            valueClassName='results-page__menu__subsection-value',
+                            valueStyle={'maxHeight': '16px'},
+                            value="",
                             children=[
-                                html.H4(
-                                    className='results-page__menu__subsection-title js-foldable js-foldable-aim-1 js-foldable-more',
-                                    children=filter_def.get('label', filter_id),
-                                ),
-                                html.H5(
-                                    className='results-page__menu__subsection-value js-foldable-target js-folgable-opposite-target js-foldable-target-1',
-                                    style={'maxHeight': '16px'},
-                                    id='df-change-{}-results'.format(filter_id),
-                                    children="",
-                                ),
                                 filter_html('df-change-{}'.format(filter_id), filter_def),
-                            ])
-                         for filter_id, filter_def in FILTERS.items()
+                            ]
+                        ) for filter_id, filter_def in FILTERS.items()
                     ]),
                 ]),
                 dcc.Store(id='award-dates', data={f: FILTERS[f]["defaults"] for f in FILTERS}),
@@ -239,42 +225,73 @@ def slider_hide(filter_id, filter_def):
         return existing_style
     return slider_hide_func
 
+def set_dropdown_value(filter_id, filter_def):
+    def set_dropdown_value_fund(value, options):
+        value_labels = [re.sub(r' \([0-9,]+\)$', "", o['label'])
+                        for o in options if o['value'] in value]
+        if len(value_labels) == 0:
+            return filter_def.get("defaults", [{}])[0].get("label")
+        elif len(value_labels) == 1:
+            return value_labels[0]
+        elif len(value_labels) <= 3:
+            return ", ".join(value_labels)
+        return "Multiple options selected"
+    return set_dropdown_value_fund
+
+# Add callbacks for all the filters
 for filter_id, filter_def in FILTERS.items():
 
+
     if filter_def.get("type") in ['dropdown', 'multidropdown']:
+
+        # callback adding the filter itself
         app.callback(
             Output('df-change-{}'.format(filter_id), 'options'),
             [Input('award-dates', 'data')])(
                 dropdown_filter(filter_id, filter_def)
             )
 
+        # callback which hides the filter if there's only 1 or 0 options available
         app.callback(Output('df-change-{}-wrapper'.format(filter_id), 'style'),
                     [Input('award-dates', 'data')],
             [State('df-change-{}-wrapper'.format(filter_id), 'style')])(
                 filter_dropdown_hide(filter_id, filter_def)
             )
 
+        # callback to update the text showing filtered options next to the filter
+        app.callback(Output('df-change-{}-wrapper'.format(filter_id), 'value'),
+                    [Input('df-change-{}'.format(filter_id), 'value')],
+                    [State('df-change-{}'.format(filter_id), 'options')])(
+                set_dropdown_value(filter_id, filter_def)
+            )
+
     elif filter_def.get("type") in ['rangeslider']:
+
+        # callback setting the minimum value of a slider
         app.callback(Output('df-change-{}'.format(filter_id), 'min'),
                     [Input('award-dates', 'data')])(
                         slider_select_min(filter_id, filter_def)
                     )
             
+        # callback setting the maximum value of a slider
         app.callback(Output('df-change-{}'.format(filter_id), 'max'),
                     [Input('award-dates', 'data')])(
                         slider_select_max(filter_id, filter_def)
                     )
             
+        # callback setting the marks shown on a slider
         app.callback(Output('df-change-{}'.format(filter_id), 'marks'),
                     [Input('award-dates', 'data')])(
                         slider_select_marks(filter_id, filter_def)
                     )
-            
+
+        # callback for setting the initial value of a slider
         app.callback(Output('df-change-{}'.format(filter_id), 'value'),
                     [Input('award-dates', 'data')])(
                         slider_select_value(filter_id, filter_def)
                     )
-            
+
+        # callback which hides the filter if there's only 1 or 0 options available
         app.callback(Output('df-change-{}-wrapper'.format(filter_id), 'style'),
                     [Input('award-dates', 'data')],
                     [State('df-change-{}-wrapper'.format(filter_id), 'style')])(
