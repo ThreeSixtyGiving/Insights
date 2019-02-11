@@ -171,6 +171,14 @@ def amount_awarded_chart(df):
 
 def awards_over_time_chart(df):
 
+    # check whether all grants were awarded in the same month
+    if df["Award Date"].max().strftime("%Y-%m") == df["Award Date"].min().strftime("%Y-%m"):
+        return message_box(
+            'Award Date',
+            'All grants were awarded in {}.'.format(df["Award Date"].min().strftime("%B %Y")),
+            error=False
+        )
+
     xbins_sizes = (
         ('M1', 'by month'),
         ('M3', 'by quarter'),
