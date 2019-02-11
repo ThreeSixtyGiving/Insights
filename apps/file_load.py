@@ -155,15 +155,29 @@ the [Open Government Licence](http://www.nationalarchives.gov.uk/doc/open-govern
     ])
 
 
-def homepage_newsletter(): 
+def homepage_newsletter():
+    form_action = os.environ.get("NEWSLETTER_FORM_ACTION")
+    form_u = os.environ.get("NEWSLETTER_FORM_U")
+    form_id = os.environ.get("NEWSLETTER_FORM_ID")
+
+    if not form_action:
+        return None
+
     return html.Div(className='homepage__newsletter', children=[
         html.Div(className='wrapper', children=[
-            html.Form(className='homepage__newsletter__form', children=[
-                dcc.Input(type='email',
-                        name='email',
-                        placeholder='Signup for our Newsletter...'),
-                dcc.Input(type="submit", value='send')
-            ])
+            html.Form(
+                className='homepage__newsletter__form',
+                action=form_action,
+                method='get',
+                children=[
+                    dcc.Input(type='hidden', name='u', value=form_u),
+                    dcc.Input(type='hidden', name='id', value=form_id),
+                    dcc.Input(type='email',
+                            name='MERGE0',
+                            placeholder='Signup for our Newsletter...'),
+                    dcc.Input(type="submit", value='send')
+                ]
+            )
         ]),
     ])
 

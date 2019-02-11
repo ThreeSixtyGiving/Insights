@@ -47,3 +47,13 @@ chown -R dokku:dokku /var/lib/dokku/data/storage/explorer-uploads
 chown -R 32767:32767 /var/lib/dokku/data/storage/explorer-uploads
 dokku storage:mount explorer /var/lib/dokku/data/storage/explorer-uploads:/app/uploads
 ```
+
+## Get newsletter section to appear
+
+Add the following environmental variables
+
+```
+NEWSLETTER_FORM_ACTION=https://threesixtygiving.us10.list-manage.com/subscribe
+NEWSLETTER_FORM_U=216b8b926250184f90c7198e8
+NEWSLETTER_FORM_ID=91870dde44
+```

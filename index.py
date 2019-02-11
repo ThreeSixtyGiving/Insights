@@ -158,4 +158,6 @@ def update_file_id(_, pathname):
         return pathname.replace("/file/", "")
 
 if __name__ == '__main__':
+    from dotenv import load_dotenv
+    load_dotenv()
     app.run_server(debug=True)
