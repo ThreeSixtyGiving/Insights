@@ -192,37 +192,44 @@ def footer():
         html.Div(className="flex-wrapper", children=[
             html.Section([
                 html.Div([
-                    "MORE",
-                    html.Br(),
-                    "INFORMATION",
                     html.Ul(className='footer__navigation', children=[
-                            html.Li(html.A(href='#', children='Contact')),
-                            html.Li(html.A(href='#', children='Support')),
-                            html.Li(html.A(href='#', children='Tools')),
-                            ])
+                        html.Li(html.A(href='https://www.threesixtygiving.org/contact/', children='Contact')),
+                        html.Li(html.A(href='https://www.threesixtygiving.org/support/', children='Support')),
+                    ])
                 ]),
             ]),
             html.Section([
                 html.Ul(className='footer__navigation', children=[
-                        html.Li(html.A(href='#', children='Privacy Notice')),
-                        html.Li(html.A(href='#', children='Terms & Conditions')),
-                        html.Li(html.A(href='#', children='License')),
-                        ])
+                    html.Li(html.A(href='http://www.threesixtygiving.org/privacy/', children='Privacy Notice')),
+                    html.Li(html.A(href='http://www.threesixtygiving.org/terms-conditions/', children='Terms & Conditions')),
+                    html.Li(html.A(href='https://creativecommons.org/licenses/by/4.0/', children='License')),
+                ])
             ]),
             html.Section([
                 html.P(style={"fontWeight": "300"}, children=[
-                    html.Img(src='/images/360footer.png'),
+                    html.A(href='https://www.threesixtygiving.org/', children=[
+                        html.Img(src='/images/360footer.png'),
+                    ]),
                     html.Br(),
-                    "A quick line of text about 360Giving."
+                    "Open data for more effective grantmaking"
                 ]),
             ]),
         ]),
         html.Div(className="footer__divider", children=[
             html.Hr(),
             html.Div(className='footer__divider__columns', children=[
-                html.P("Cookie Policy | Take Down Policy"),
+                html.P([
+                    html.A(href='http://www.threesixtygiving.org/cookie-policy/', children="Cookie Policy"),
+                    " | ",
+                    html.A(href='http://www.threesixtygiving.org/take-down-policy/', children="Take Down Policy"),
+                ]),
                 html.P(style={'textAlign': 'right'}, children=[
-                    "360Giving is a company limited by guarantee 09668396 and a registered charity 1164883.",
+                    "360Giving is a company limited by guarantee ",
+                    html.A("09668396", href="https://beta.companieshouse.gov.uk/company/09668396"),
+                    html.Br(),
+                    " and a registered charity ",
+                    html.A("1164883", href='http://beta.charitycommission.gov.uk/charity-details/?regid=1164883&subid=0'),
+                    ".",
                 ]),
             ]),
         ]),
