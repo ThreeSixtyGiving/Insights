@@ -492,7 +492,7 @@ def location_map(df):
         description='''Showing the location of **{:,.0f}** grants out of {:,.0f}
         
 Based on the registered address of a charity or company
-(or a postcode if included with the grant data). Only available for registered
+(or a postcode if included with the grant data). Only available for UK registered
 charities or companies, or those grants which contain a postcode.'''.format(
             grant_count, len(df)
 )
