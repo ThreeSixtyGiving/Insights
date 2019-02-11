@@ -106,9 +106,10 @@ def homepage_header():
         html.Br(),
         html.H2("Discover"),
         html.H1("Grantmaking Insights"),
-        html.P("""The 360Giving Insights tool will check the data for recipients with 
-                charity or company numbers and combine extra data about them, like information 
-                based on the recipients’ postcode.""")
+        html.P([
+            html.Strong("See your grantmaking in new ways", style={'color': '#9c1f61'}),
+            """. Combine and visualise 360Giving, charity and other data to 
+            answer questions about your grantmaking"""])
     ])
 
 
