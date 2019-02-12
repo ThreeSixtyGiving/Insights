@@ -67,27 +67,29 @@ def dataset_upload():
                         id='upload-dataset-close'
                     ),
                 ]),
-                dash_resumable_upload.Upload(
-                    id='upload-data',
-                    maxFiles=1,
-                    maxFileSize=1024*1024*1000,  # 100 MB
-                    filetypes=['csv', 'xlsx'],
-                    service="/upload_resumable",
-                    textLabel="Drop your file here to upload",
-                    startButton=True,
-                    # cancelButton=False,
-                    # pauseButton=False,
+                html.Div(
                     className='homepage__data-selection__upload-drop highlight',
                     children=[
-                            html.P([
-                                html.Span(style={
-                                        "color": "#9c1f61", "fontWeight": "400"}, children="Data Privacy Information:"),
-                                """Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut
-                                labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris
-                                nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit
-                                esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt
-                                in culpa qui officia deserunt mollit anim id est laborum."""
-                            ])
+                        dash_resumable_upload.Upload(
+                            id='upload-data',
+                            maxFiles=1,
+                            maxFileSize=1024*1024*1000,  # 100 MB
+                            filetypes=['csv', 'xlsx'],
+                            service="/upload_resumable",
+                            textLabel="Drop your file here to upload",
+                            startButton=True,
+                            # cancelButton=False,
+                            # pauseButton=False,
+                        ),
+                        html.P([
+                            html.Span(
+                                style={"color": "#9c1f61", "fontWeight": "400"},
+                                children="Data Privacy Information: "
+                            ),
+                            """Any data you upload will be available at the URL created to anyone with the link.
+                            You should ensure that no confidential information is present in the data you upload,
+                            and that you have the appropriate permissions and licence to upload the data."""
+                        ])
                     ]
                 ),
                 html.Div(className="homepage__data-selection__upload-wrapper", children=[
