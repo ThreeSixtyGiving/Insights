@@ -211,7 +211,11 @@ def footer():
             html.Section([
                 html.P(style={"fontWeight": "300"}, children=[
                     html.A(href='https://www.threesixtygiving.org/', children=[
-                        html.Img(src='/images/360footer.png'),
+                        html.Img(
+                            src='/images/360giving-white@4x.png',
+                            width="192",
+                            style={"opacity": "0.5"},
+                        ),
                     ]),
                     html.Br(),
                     "Open data for more effective grantmaking"
