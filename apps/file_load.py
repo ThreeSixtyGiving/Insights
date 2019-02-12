@@ -102,7 +102,7 @@ def dataset_upload():
 
 def homepage_header():
     return html.Div(className="homepage__header", children=[
-        html.Img(src=app.get_asset_url("images/360-insights-logo.png")),
+        html.Img(src=app.get_asset_url("images/360-insights-color.png"), width='256'),
         html.Br(),
         html.H2("Discover"),
         html.H1("Grantmaking Insights"),

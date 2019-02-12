@@ -151,11 +151,14 @@ dd {
   margin-left: 0px; }
 
 .rc-slider-handle {
-  border: 0px;
+  border: 4px solid #f4831f;
   border-radius: 0;
   margin-top: 0px;
   height: 16px;
-  opacity: 0; }
+  opacity: 1;
+  width: 4px;
+  margin-left: 0px;
+  background-color: #f4831f; }
 
 .rc-slider-mark-text {
   top: -28px;
@@ -720,7 +723,7 @@ footer {
 .homepage__header {
   padding-top: 34px;
   padding-bottom: 558px;
-  background-image: url("/images/homepage-header-background.png");
+  background-image: url("/images/homepage-header-background.svg");
   background-repeat: no-repeat;
   background-size: 100%;
   background-position: 40% 75%;
@@ -1169,7 +1172,7 @@ footer {
       .results-page__menu__subsection-value {
         color: rgba(255, 255, 255, 0.4);
         font-family: neusa-next-std-compact, sans-serif;
-        font-size: 0.75em;
+        font-size: 1em;
         font-weight: 300;
         letter-spacing: 0.38px;
         line-height: 16px;
