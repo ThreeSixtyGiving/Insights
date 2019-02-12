@@ -15,13 +15,16 @@ Keyword arguments:
 - style (dict; optional): The style of the container (div)
 - selectStyle (dict; optional): The style of the <select> element
 - selectClassName (string; optional): The class of the <select> element
-- multi (boolean; optional): Whether it's a multi select or not"""
+- multi (boolean; optional): Whether it's a multi select or not
+
+Available events: """
     @_explicitize_args
     def __init__(self, id=Component.UNDEFINED, options=Component.UNDEFINED, value=Component.UNDEFINED, className=Component.UNDEFINED, style=Component.UNDEFINED, selectStyle=Component.UNDEFINED, selectClassName=Component.UNDEFINED, multi=Component.UNDEFINED, **kwargs):
         self._prop_names = ['id', 'options', 'value', 'className', 'style', 'selectStyle', 'selectClassName', 'multi']
         self._type = 'InsightDropdown'
         self._namespace = 'tsg_insights_components'
         self._valid_wildcard_attributes =            []
+        self.available_events = []
         self.available_properties = ['id', 'options', 'value', 'className', 'style', 'selectStyle', 'selectClassName', 'multi']
         self.available_wildcard_properties =            []
 

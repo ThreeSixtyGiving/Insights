@@ -25,13 +25,16 @@ Keyword arguments:
 - labelStyle (dict; optional): The style of the <label> that wraps the checkbox input
  and the option's label
 - labelClassName (string; optional): The class of the <label> that wraps the checkbox input
- and the option's label"""
+ and the option's label
+
+Available events: """
     @_explicitize_args
     def __init__(self, id=Component.UNDEFINED, options=Component.UNDEFINED, value=Component.UNDEFINED, className=Component.UNDEFINED, style=Component.UNDEFINED, ulStyle=Component.UNDEFINED, ulClassName=Component.UNDEFINED, liStyle=Component.UNDEFINED, liClassName=Component.UNDEFINED, inputStyle=Component.UNDEFINED, inputClassName=Component.UNDEFINED, labelStyle=Component.UNDEFINED, labelClassName=Component.UNDEFINED, **kwargs):
         self._prop_names = ['id', 'options', 'value', 'className', 'style', 'ulStyle', 'ulClassName', 'liStyle', 'liClassName', 'inputStyle', 'inputClassName', 'labelStyle', 'labelClassName']
         self._type = 'InsightChecklist'
         self._namespace = 'tsg_insights_components'
         self._valid_wildcard_attributes =            []
+        self.available_events = []
         self.available_properties = ['id', 'options', 'value', 'className', 'style', 'ulStyle', 'ulClassName', 'liStyle', 'liClassName', 'inputStyle', 'inputClassName', 'labelStyle', 'labelClassName']
         self.available_wildcard_properties =            []
 

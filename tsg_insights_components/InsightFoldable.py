@@ -12,23 +12,44 @@ element. The `value` text is shown when hidden, otherwise
 Keyword arguments:
 - children (a list of or a singular dash component, string or number; optional): The children of this component
 - id (string; optional)
-- title (string; optional): The title of the item (click this to toggle)
-- value (string; optional): The item shown if hidden
-- className (string; optional): The class of the container (div)
-- style (dict; optional): The style of the container (div)
-- titleStyle (dict; optional): The style of the <h4> title element
-- titleClassName (string; optional): The class of the <h4> title element
-- titleFoldedClassName (string; optional): The class of the <h4> title element when folded
-- titleUnfoldedClassName (string; optional): The class of the <h4> title element when unfolded
-- valueStyle (dict; optional): The style of the <h5> value element - shown if main element is hidden
-- valueClassName (string; optional): The class of the <h5> value element - shown if main element is hidden"""
+- container (optional): The container for the item. container has the following type: dict containing keys 'value', 'className', 'foldedClassName', 'unfoldedClassName', 'style'.
+Those keys have the following types: 
+  - value (string; optional): string shown in the title (h4)
+  - className (string; optional): name of the class
+  - foldedClassName (string; optional): class applied when folded
+  - unfoldedClassName (string; optional): class applied when unfolded
+  - style (dict; optional): The style applied
+- title (optional): The title of the item (click this to toggle). title has the following type: dict containing keys 'value', 'className', 'foldedClassName', 'unfoldedClassName', 'style'.
+Those keys have the following types: 
+  - value (string; optional): string shown in the title (h4)
+  - className (string; optional): name of the class
+  - foldedClassName (string; optional): class applied when folded
+  - unfoldedClassName (string; optional): class applied when unfolded
+  - style (dict; optional): The style applied
+- value (optional): The value (shown when the children are hidden). value has the following type: dict containing keys 'value', 'className', 'foldedClassName', 'unfoldedClassName', 'style'.
+Those keys have the following types: 
+  - value (string; optional): string shown in the title (h4)
+  - className (string; optional): name of the class
+  - foldedClassName (string; optional): class applied when folded
+  - unfoldedClassName (string; optional): class applied when unfolded
+  - style (dict; optional): The style applied
+- child (optional): The child (shown when the item is toggled). child has the following type: dict containing keys 'value', 'className', 'foldedClassName', 'unfoldedClassName', 'style'.
+Those keys have the following types: 
+  - value (string; optional): string shown in the title (h4)
+  - className (string; optional): name of the class
+  - foldedClassName (string; optional): class applied when folded
+  - unfoldedClassName (string; optional): class applied when unfolded
+  - style (dict; optional): The style applied
+
+Available events: """
     @_explicitize_args
-    def __init__(self, children=None, id=Component.UNDEFINED, title=Component.UNDEFINED, value=Component.UNDEFINED, className=Component.UNDEFINED, style=Component.UNDEFINED, titleStyle=Component.UNDEFINED, titleClassName=Component.UNDEFINED, titleFoldedClassName=Component.UNDEFINED, titleUnfoldedClassName=Component.UNDEFINED, valueStyle=Component.UNDEFINED, valueClassName=Component.UNDEFINED, **kwargs):
-        self._prop_names = ['children', 'id', 'title', 'value', 'className', 'style', 'titleStyle', 'titleClassName', 'titleFoldedClassName', 'titleUnfoldedClassName', 'valueStyle', 'valueClassName']
+    def __init__(self, children=None, id=Component.UNDEFINED, container=Component.UNDEFINED, title=Component.UNDEFINED, value=Component.UNDEFINED, child=Component.UNDEFINED, **kwargs):
+        self._prop_names = ['children', 'id', 'container', 'title', 'value', 'child']
         self._type = 'InsightFoldable'
         self._namespace = 'tsg_insights_components'
         self._valid_wildcard_attributes =            []
-        self.available_properties = ['children', 'id', 'title', 'value', 'className', 'style', 'titleStyle', 'titleClassName', 'titleFoldedClassName', 'titleUnfoldedClassName', 'valueStyle', 'valueClassName']
+        self.available_events = []
+        self.available_properties = ['children', 'id', 'container', 'title', 'value', 'child']
         self.available_wildcard_properties =            []
 
         _explicit_args = kwargs.pop('_explicit_args')

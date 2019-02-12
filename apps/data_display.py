@@ -70,13 +70,24 @@ layout = html.Div(id="dashboard-container", className='results-page', children=[
                     html.Form(id="dashboard-filter", className='', children=[
                         InsightFoldable(
                             id='df-change-{}-wrapper'.format(filter_id),
-                            className='results-page__menu__subsection',
-                            titleClassName='results-page__menu__subsection-title js-foldable js-foldable-more',
-                            titleUnfoldedClassName='js-foldable-less',
-                            title=filter_def.get('label', filter_id),
-                            valueClassName='results-page__menu__subsection-value',
-                            valueStyle={'maxHeight': '16px'},
-                            value="",
+                            container=dict(
+                                className='results-page__menu__subsection',
+                            ),
+                            title=dict(
+                                value=filter_def.get('label', filter_id),
+                                className='results-page__menu__subsection-title js-foldable js-foldable-more',
+                                unfoldedClassName='js-foldable-less',
+                            ),
+                            value=dict(
+                                value="",
+                                className='results-page__menu__subsection-value js-foldable-target',
+                                foldedClassName='js-foldable-foldTarget',
+                                style={'maxHeight': '16px'},
+                            ),
+                            child=dict(
+                                className='js-foldable-target',
+                                foldedClassName='js-foldable-foldTarget',
+                            ),
                             children=[
                                 filter_html('df-change-{}'.format(filter_id), filter_def),
                             ]
@@ -158,15 +169,16 @@ def dropdown_filter(filter_id, filter_def):
 
 
 def filter_dropdown_hide(filter_id, filter_def):
-    def filter_dropdown_hide_func(value, existing_style):
-        existing_style = {} if existing_style is None else existing_style
+    def filter_dropdown_hide_func(value, container):
+        if 'style' not in container:
+            container['style'] = {}
         value = value if value else {filter_id: filter_def["defaults"]}
         if len(value[filter_id])>1:
-            if "display" in existing_style:
-                del existing_style["display"]
+            if "display" in container['style']:
+                del container['style']["display"]
         else:
-            existing_style["display"] = 'none'
-        return existing_style
+            container['style']["display"] = 'none'
+        return container
     return filter_dropdown_hide_func
     
 def slider_select_min(filter_id, filter_def):
@@ -212,22 +224,27 @@ def slider_hide(filter_id, filter_def):
     return slider_hide_func
 
 def set_dropdown_value(filter_id, filter_def):
-    def set_dropdown_value_fund(value, options):
+    def set_dropdown_value_fund(value, options, existingvaluedef):
         if filter_def.get("type")=="rangeslider":
             if value[0] == value[1]:
-                return str(value[0])
+                existingvaluedef['value'] = str(value[0])
             else:
-                return "{} to {}".format(value[0], value[1])
+                existingvaluedef['value'] = "{} to {}".format(
+                    value[0], value[1])
+            return existingvaluedef
 
         value_labels = [re.sub(r' \([0-9,]+\)$', "", o['label'])
                         for o in options if o['value'] in value]
         if len(value_labels) == 0:
-            return filter_def.get("defaults", [{}])[0].get("label")
+            existingvaluedef['value'] = filter_def.get("defaults", [{}])[
+                0].get("label")
         elif len(value_labels) == 1:
-            return value_labels[0]
+            existingvaluedef['value'] = value_labels[0]
         elif len(value_labels) <= 3:
-            return ", ".join(value_labels)
-        return "Multiple options selected"
+            existingvaluedef['value'] = ", ".join(value_labels)
+        else:
+            existingvaluedef['value'] = "Multiple options selected"
+        return existingvaluedef
     return set_dropdown_value_fund
 
 # Add callbacks for all the filters
@@ -236,7 +253,8 @@ for filter_id, filter_def in FILTERS.items():
     # callback to update the text showing filtered options next to the filter
     app.callback(Output('df-change-{}-wrapper'.format(filter_id), 'value'),
                     [Input('df-change-{}'.format(filter_id), 'value')],
-                    [State('df-change-{}'.format(filter_id), 'options')])(
+                    [State('df-change-{}'.format(filter_id), 'options'),
+                     State('df-change-{}-wrapper'.format(filter_id), 'value')])(
         set_dropdown_value(filter_id, filter_def)
     )
 
@@ -250,9 +268,9 @@ for filter_id, filter_def in FILTERS.items():
             )
 
         # callback which hides the filter if there's only 1 or 0 options available
-        app.callback(Output('df-change-{}-wrapper'.format(filter_id), 'style'),
+        app.callback(Output('df-change-{}-wrapper'.format(filter_id), 'container'),
                     [Input('award-dates', 'data')],
-            [State('df-change-{}-wrapper'.format(filter_id), 'style')])(
+                     [State('df-change-{}-wrapper'.format(filter_id), 'container')])(
                 filter_dropdown_hide(filter_id, filter_def)
             )
 
