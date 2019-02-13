@@ -106,11 +106,12 @@ def homepage_header():
     return html.Div(className="homepage__header", children=[
         html.Img(src=app.get_asset_url("images/360-insights-color.png"), width='256'),
         html.Br(),
-        html.H2("Discover"),
-        html.H1("Grantmaking Insights"),
+        html.H2("See your grantmaking"),
+        html.H1("in new ways"),
         html.P([
-            html.Strong("See your grantmaking in new ways", style={'color': '#9c1f61'}),
-            """. Combine and visualise 360Giving, charity and other data to 
+            # html.Strong("See your grantmaking in new ways", style={'color': '#9c1f61'}),
+            # ". ",
+            """Combine and visualise 360Giving, charity and other data to 
             answer questions about your grantmaking"""])
     ])
 
