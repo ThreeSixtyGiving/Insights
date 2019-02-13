@@ -320,8 +320,9 @@ def organisation_income_chart(df):
     if df["__org_latest_income_bands"].count() == 0:
         return message_box(
             'Latest income of charity recipients',
-            '''We don't have enough geographical data to show this chart. We can tell the region
-and country of grant recipients if postcodes are included in the data.
+            '''This chart can\'t be shown as there are no recipients in the data with 
+organisation income data. Add company or charity numbers to your data to show a chart of
+the income of organisations.
             ''',
             error=True
         )
@@ -413,9 +414,9 @@ def imd_chart(df):
         ),
         'Index of multiple deprivation',
         '(number of grants)',
-        description='''Shows the number of grants made in each decile of deprivation in England, 
-        from 1 (most deprived) to 10 (most deprived). Based on the postcode included with the grant
-        or on an organisation's registered postcode, so may not reflect where grant activity took place.'''
+            description='''Shows the number of grants made in each decile of deprivation in England, 
+            from 1 (most deprived) to 10 (most deprived). Based on the postcode included with the grant
+            or on an organisation's registered postcode, so may not reflect where grant activity took place.'''
     )
 
 def location_map(df):
