@@ -4,7 +4,6 @@ import re
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
-import dash_table_experiments as dt
 
 from app import app
 from .data.load_data import get_filtered_df, get_from_cache, get_cache
@@ -133,14 +132,14 @@ def dashboard_output(fileid, *args):
     charts.append(grant_programme_chart(df))
     charts.append(awards_over_time_chart(df))
     charts.append(organisation_type_chart(df))
+    # charts.append(org_identifier_chart(df))
     charts.append(region_and_country_chart(df))
     charts.append(location_map(df))
     charts.append(organisation_age_chart(df))
     charts.append(organisation_income_chart(df))
+    # charts.append(imd_chart(df))
 
     outputs.extend(charts)
-
-    # outputs.append(html.Div(className='flex flex-wrap', children=charts))
 
     return outputs
 

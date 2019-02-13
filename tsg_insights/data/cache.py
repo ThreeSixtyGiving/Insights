@@ -25,7 +25,7 @@ def save_to_cache(fileid, df, prefix=DEFAULT_PREFIX):
 
     metadata = {
         "fileid": fileid,
-        "funders": df["Funding Org:Name"].unique().tolist(),
+        "funders": df["Funding Org:0:Name"].unique().tolist(),
         "max_date": df["Award Date"].max().isoformat(),
         "min_date": df["Award Date"].min().isoformat(),
     }

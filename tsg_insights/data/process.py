@@ -7,6 +7,7 @@ import pandas as pd
 import requests
 from rq import get_current_job
 import tqdm
+from threesixty import ThreeSixtyGiving
 
 from .cache import get_cache, get_from_cache, save_to_cache
 from .utils import get_fileid, charity_number_to_org_id
@@ -21,19 +22,28 @@ def get_dataframe(filename, contents=None, date_=None, fileid=None):
 
         if filename.endswith("csv"):
             # Assume that the user uploaded a CSV file
-            df = pd.read_csv(
-                io.StringIO(contents.decode('utf-8')))
+            df = ThreeSixtyGiving.from_csv(
+                io.StringIO(contents.decode('utf-8'))).to_pandas()
         elif filename.endswith("xls") or filename.endswith("xlsx"):
             # Assume that the user uploaded an excel file
-            df = pd.read_excel(io.BytesIO(contents))
+            df = ThreeSixtyGiving.from_excel(io.BytesIO(contents)).to_pandas()
+        elif filename.endswith("json"):
+            # Assume that the user uploaded a json file
+            df = ThreeSixtyGiving.from_json(io.BytesIO(contents)).to_pandas()
 
     elif os.path.exists(os.path.join("uploads", filename)):
         if filename.endswith("csv"):
             # Assume that the user uploaded a CSV file
-            df = pd.read_csv(os.path.join("uploads", filename))
+            df = ThreeSixtyGiving.from_csv(
+                os.path.join("uploads", filename)).to_pandas()
         elif filename.endswith("xls") or filename.endswith("xlsx"):
             # Assume that the user uploaded an excel file
-            df = pd.read_excel(os.path.join("uploads", filename))
+            df = ThreeSixtyGiving.from_excel(
+                os.path.join("uploads", filename)).to_pandas()
+        elif filename.endswith("json"):
+            # Assume that the user uploaded a json file
+            df = ThreeSixtyGiving.from_json(
+                os.path.join("uploads", filename)).to_pandas()
 
     if df is None:
         raise ValueError("No dataframe loaded")
@@ -128,8 +138,8 @@ def prepare_data(df, cache={}):
 
     # check column names for typos
     columns_to_check = [
-        'Amount Awarded', 'Funding Org:Name', 'Award Date',
-        'Recipient Org:Name', 'Recipient Org:Identifier'
+        'Amount Awarded', 'Funding Org:0:Name', 'Award Date',
+        'Recipient Org:0:Name', 'Recipient Org:0:Identifier'
     ]
     renames = {}
     for c in df.columns:
@@ -142,7 +152,9 @@ def prepare_data(df, cache={}):
     progress_job()
     for c in columns_to_check:
         if c not in df.columns:
-            raise ValueError("Column {} not found in data".format(c))
+            raise ValueError("Column {} not found in data. Columns: [{}]".format(
+                c, ", ".join(df.columns)
+            ))
 
     # ensure correct column types
     progress_job()
@@ -151,30 +163,30 @@ def prepare_data(df, cache={}):
     # add additional columns
     progress_job()
     df.loc[:, "Award Date:Year"] = df["Award Date"].dt.year
-    df.loc[:, "Recipient Org:Identifier:Scheme"] = df["Recipient Org:Identifier"].apply(
+    df.loc[:, "Recipient Org:0:Identifier:Scheme"] = df["Recipient Org:0:Identifier"].apply(
         lambda x: "360G" if x.startswith("360G-") else "-".join(x.split("-")[:2]))
 
     # add a column with a "clean" identifier that can be fetched from find that charity
     progress_job()
     df.loc[
-        df["Recipient Org:Identifier:Scheme"].isin(
-            FTC_SCHEMES), "Recipient Org:Identifier:Clean"
-    ] = df.loc[df["Recipient Org:Identifier:Scheme"].isin(FTC_SCHEMES), "Recipient Org:Identifier"]
-    if "Recipient Org:Company Number" in df.columns:
-        df.loc[:, "Recipient Org:Identifier:Clean"] = df.loc[:, "Recipient Org:Identifier:Clean"].fillna(
-            df["Recipient Org:Company Number"].apply("GB-COH-{}".format))
-    if "Recipient Org:Charity Number" in df.columns:
-        df.loc[:, "Recipient Org:Identifier:Clean"] = df.loc[:, "Recipient Org:Identifier:Clean"].fillna(
-            df["Recipient Org:Charity Number"].apply(charity_number_to_org_id))
-    df.loc[:, "Recipient Org:Identifier:Scheme"] = df["Recipient Org:Identifier:Clean"].apply(
+        df["Recipient Org:0:Identifier:Scheme"].isin(
+            FTC_SCHEMES), "Recipient Org:0:Identifier:Clean"
+    ] = df.loc[df["Recipient Org:0:Identifier:Scheme"].isin(FTC_SCHEMES), "Recipient Org:0:Identifier"]
+    if "Recipient Org:0:Company Number" in df.columns:
+        df.loc[:, "Recipient Org:0:Identifier:Clean"] = df.loc[:, "Recipient Org:0:Identifier:Clean"].fillna(
+            df["Recipient Org:0:Company Number"].apply("GB-COH-{}".format))
+    if "Recipient Org:0:Charity Number" in df.columns:
+        df.loc[:, "Recipient Org:0:Identifier:Clean"] = df.loc[:, "Recipient Org:0:Identifier:Clean"].fillna(
+            df["Recipient Org:0:Charity Number"].apply(charity_number_to_org_id))
+    df.loc[:, "Recipient Org:0:Identifier:Scheme"] = df["Recipient Org:0:Identifier:Clean"].apply(
         lambda x: ("360G" if x.startswith(
             "360G-") else "-".join(x.split("-")[:2])) if isinstance(x, str) else None
-    ).fillna(df["Recipient Org:Identifier:Scheme"])
+    ).fillna(df["Recipient Org:0:Identifier:Scheme"])
 
     # look for any charity details
     progress_job()
-    orgids = df.loc[df["Recipient Org:Identifier:Scheme"].isin(
-        FTC_SCHEMES), "Recipient Org:Identifier:Clean"].dropna().unique()
+    orgids = df.loc[df["Recipient Org:0:Identifier:Scheme"].isin(
+        FTC_SCHEMES), "Recipient Org:0:Identifier:Clean"].dropna().unique()
     print("Finding details for {} charities".format(len(orgids)))
     for k, orgid in tqdm.tqdm(enumerate(orgids)):
         progress_job(0, (k+1, len(orgids)))
@@ -203,8 +215,8 @@ def prepare_data(df, cache={}):
     # look for any company details
     progress_job()
     company_orgids = df.loc[
-        ~df["Recipient Org:Identifier:Clean"].isin(orgid_df.index) &
-        (df["Recipient Org:Identifier:Scheme"] == "GB-COH"), "Recipient Org:Identifier:Clean"].unique()
+        ~df["Recipient Org:0:Identifier:Clean"].isin(orgid_df.index) &
+        (df["Recipient Org:0:Identifier:Scheme"] == "GB-COH"), "Recipient Org:0:Identifier:Clean"].unique()
     print("Finding details for {} companies".format(len(company_orgids)))
     for k, orgid in tqdm.tqdm(enumerate(company_orgids)):
         progress_job(0, (k+1, len(company_orgids)))
@@ -251,20 +263,20 @@ def prepare_data(df, cache={}):
 
     # merge org details into main dataframe
     df = df.join(orgid_df.rename(columns=lambda x: "__org_" + x),
-                 on="Recipient Org:Identifier:Clean", how="left")
+                 on="Recipient Org:0:Identifier:Clean", how="left")
 
     # look for postcode
 
     # check for recipient org postcode field first
-    if "Recipient Org:Postal Code" in df.columns:
-        df.loc[:, "Recipient Org:Postal Code"] = df.loc[:,
-                                                        "Recipient Org:Postal Code"].fillna(df["__org_postcode"])
+    if "Recipient Org:0:Postal Code" in df.columns:
+        df.loc[:, "Recipient Org:0:Postal Code"] = df.loc[:,
+                                                        "Recipient Org:0:Postal Code"].fillna(df["__org_postcode"])
     else:
-        df.loc[:, "Recipient Org:Postal Code"] = df["__org_postcode"]
+        df.loc[:, "Recipient Org:0:Postal Code"] = df["__org_postcode"]
 
     # fetch postcode data
     progress_job()
-    postcodes = df.loc[:, "Recipient Org:Postal Code"].dropna().unique()
+    postcodes = df.loc[:, "Recipient Org:0:Postal Code"].dropna().unique()
     print("Finding details for {} postcodes".format(len(postcodes)))
     for k, pc in tqdm.tqdm(enumerate(postcodes)):
         progress_job(0, (k+1, len(postcodes)))
@@ -293,7 +305,7 @@ def prepare_data(df, cache={}):
 
     # merge into main dataframe
     df = df.join(postcode_df.rename(columns=lambda x: "__geo_" + x),
-                 on="Recipient Org:Postal Code", how="left")
+                 on="Recipient Org:0:Postal Code", how="left")
 
     # add banded fields
     progress_job()
@@ -304,8 +316,8 @@ def prepare_data(df, cache={}):
     df.loc[:, "__org_age_bands"] = pd.cut(
         df["__org_age"], bins=AGE_BINS, labels=AGE_BIN_LABELS)
 
-    if "Grant Programme:Title" not in df.columns:
-        df.loc[:, "Grant Programme:Title"] = "All grants"
+    if "Grant Programme:0:Title" not in df.columns:
+        df.loc[:, "Grant Programme:0:Title"] = "All grants"
 
     return (df, cache)
 

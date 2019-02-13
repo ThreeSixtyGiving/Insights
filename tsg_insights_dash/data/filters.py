@@ -1,3 +1,5 @@
+from .results import get_identifier_schemes
+
 def apply_area_filter(df, filter_args, filter_def):
 
     if not filter_args or filter_args == ['__all']:
@@ -53,9 +55,9 @@ FILTERS = {
             {
                 'label': '{} ({})'.format(i[0], i[1]),
                 'value': i[0]
-            } for i in df["Funding Org:Name"].value_counts().iteritems()
+            } for i in df["Funding Org:0:Name"].value_counts().iteritems()
         ]),
-        "field": "Funding Org:Name",
+        "field": "Funding Org:0:Name",
         "apply_filter": apply_field_filter,
     },
     "grant_programmes": {
@@ -66,9 +68,9 @@ FILTERS = {
             {
                 'label': '{} ({})'.format(i[0], i[1]),
                 'value': i[0]
-            } for i in df["Grant Programme:Title"].value_counts().iteritems()
+            } for i in df["Grant Programme:0:Title"].value_counts().iteritems()
         ]),
-        "field": "Grant Programme:Title",
+        "field": "Grant Programme:0:Title",
         "apply_filter": apply_field_filter,
     },
     "award_dates": {

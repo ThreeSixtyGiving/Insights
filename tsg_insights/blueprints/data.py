@@ -12,9 +12,9 @@ def fetch_file_geojson(fileid):
     # @TODO: fetch filters
     df = get_filtered_df(fileid, **request.form.get("filters", {}))
 
-    popup_col = 'Recipient Org:Name'
-    if popup_col not in df.columns and 'Recipient Org:Identifier' in df.columns:
-        popup_col = 'Recipient Org:Identifier'
+    popup_col = 'Recipient Org:0:Name'
+    if popup_col not in df.columns and 'Recipient Org:0:Identifier' in df.columns:
+        popup_col = 'Recipient Org:0:Identifier'
 
     geo = df[["__geo_lat", "__geo_long", popup_col]].dropna()
     geo = geo.groupby(["__geo_lat", "__geo_long", popup_col]

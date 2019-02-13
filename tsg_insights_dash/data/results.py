@@ -38,7 +38,7 @@ def get_statistics(df):
 
     return {
         "grants": len(df),
-        "recipients": df["Recipient Org:Identifier"].unique().size,
+        "recipients": df["Recipient Org:0:Identifier"].unique().size,
         "amount_awarded": amount_awarded,
         "award_years": {
             "min": df["Award Date"].dt.year.min(),
@@ -58,21 +58,58 @@ def get_ctry_rgn(df):
     return ctry_rgn
 
 
+def get_org_type(df):
+    return get_identifier_schemes(df).value_counts().sort_index()
+
+
+def get_identifier_schemes(df):
+    identifier_map = {
+        "360G": "No organisation identifier",
+        "GB-CHC": "Registered Charity",
+        "GB-SC": "Registered Charity (Scotland)",
+        "GB-NIC": "Registered Charity (Scotland)",
+        "GB-COH": "Registered Company",
+        "GB-GOR": "Government",
+        "GB-MPR": "Mutual",
+        "GB-NHS": "NHS",
+        "GB-UKPRN": "School/University/Education",
+        "GB-EDU": "School/University/Education",
+        "GB-SHPE": "Social Housing Provider",
+        "GB-LAE": "Local Authority",
+    }
+    identifier_schemes = df["Recipient Org:0:Identifier"].apply(
+        lambda x: "360G" if x.startswith("360G-") else "-".join(x.split("-")[:2]))
+
+    return df["__org_org_type"].fillna(
+        identifier_schemes
+    ).fillna(
+        "No organisation identifier"
+    ).apply(
+        lambda x: identifier_map.get(x, x)
+    )
+
+
 CHARTS = dict(
     funders={
         'title': 'Funders',
         'units': '(number of grants)',
-        'get_results': (lambda df: df["Funding Org:Name"].value_counts()),
+        'get_results': (lambda df: df["Funding Org:0:Name"].value_counts()),
     },
     grant_programmes={
         'title': 'Grant programmes',
         'units': '(number of grants)',
-        'get_results': (lambda df: df["Grant Programme:Title"].value_counts()),
+        'get_results': (lambda df: df["Grant Programme:0:Title"].value_counts()),
     },
     amount_awarded={
         'title': 'Amount awarded',
         'units': '(number of grants)',
         'get_results': (lambda df: df["Amount Awarded:Bands"].value_counts().sort_index()),
+    },
+    identifier_scheme={
+        'title': 'Identifier scheme',
+        'units': '(number of grants)',
+        'get_results': (lambda df: df["Recipient Org:0:Identifier"].apply(
+            lambda x: "360G" if x.startswith("360G-") else "-".join(x.split("-")[:2])).value_counts().sort_index()),
     },
     award_date={
         'title': 'Award Date',
@@ -99,8 +136,7 @@ numbers to your data to show a chart of their latest income.''',
         'units': '(proportion of grants)',
         'desc': '''Organisation type is only available for recipients with a valid
 organisation identifier.''',
-        'get_results': (lambda df: df["__org_org_type"].fillna(
-            "No organisation identifier").value_counts().sort_index()),
+        'get_results': get_org_type,
     },
     org_income={
         'title': 'Latest income of charity recipients',

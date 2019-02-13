@@ -3,7 +3,6 @@ import copy
 
 import dash_core_components as dcc
 import dash_html_components as html
-import dash_table_experiments as dt
 import plotly.graph_objs as go
 import pandas as pd
 
@@ -11,8 +10,8 @@ from tsg_insights.data.utils import list_to_string, pluralize, get_unique_list, 
 from .results import CHARTS
 
 DEFAULT_TABLE_FIELDS = ["Title", "Description", "Amount Awarded", 
-                        "Award Date", "Recipient Org:Name", 
-                        "Grant Programme:Title"]
+                        "Award Date", "Recipient Org:0:Name", 
+                        "Grant Programme:0:Title"]
 THREESIXTY_COLOURS = ['#9c2061', '#f48320', '#cddc2b', '#53aadd']
 
 MAPBOX_ACCESS_TOKEN = os.environ.get("MAPBOX_ACCESS_TOKEN")
@@ -85,6 +84,7 @@ def get_bar_data(values, name="Grants", chart_type='bar', colour=0):
         'y': [i[1] for i in values.iteritems()], 
         'text': [i[1] for i in values.iteritems()],
         'textposition': 'auto',
+        'constraintext': 'inside',
         'textfont': {
             'size': 18,
             'family': 'neusa-next-std-compact, sans-serif;',
@@ -163,6 +163,23 @@ def amount_awarded_chart(df):
             }
         ),
         'Amount awarded',
+        '(number of grants)',
+    )
+
+def org_identifier_chart(df):
+    data = CHARTS['identifier_scheme']['get_results'](df)
+    return chart_wrapper(
+        dcc.Graph(
+            id="identifier_scheme_chart",
+            figure={
+                'data': [get_bar_data(data)],
+                'layout': DEFAULT_LAYOUT
+            },
+            config={
+                'displayModeBar': False
+            }
+        ),
+        'Identifier scheme',
         '(number of grants)',
     )
 
@@ -281,6 +298,30 @@ charities or companies, or those grants which contain a postcode.'''
 
 def organisation_type_chart(df):
     data = CHARTS['org_type']['get_results'](df)
+    title = 'Recipient type'
+    subtitle = '(number of grants)'
+    description = '''Organisation type is only available for recipients with a valid
+                           organisation identifier.'''
+
+    if len(data) > 4:
+        layout = copy.deepcopy(DEFAULT_LAYOUT)
+        layout['yaxis']['visible'] = True
+        layout['xaxis']['visible'] = False
+        return chart_wrapper(
+            dcc.Graph(
+                id="organisation_type_chart",
+                figure={
+                    'data': [get_bar_data(data.sort_values(), chart_type='column')],
+                    'layout': layout
+                },
+                config={
+                    'displayModeBar': False
+                }
+            ),
+            title, subtitle, description=description
+        )
+
+
     return chart_wrapper(
         dcc.Graph(
             id="organisation_type_chart",
@@ -302,10 +343,7 @@ def organisation_type_chart(df):
                 'displayModeBar': False
             }
         ),
-        'Recipient type',
-        '(proportion of grants)',
-        description='''Organisation type is only available for recipients with a valid
-organisation identifier.'''
+        title, subtitle, description=description
     )
 
 
@@ -402,9 +440,9 @@ def location_map(df):
     if not MAPBOX_ACCESS_TOKEN:
         return
 
-    popup_col = 'Recipient Org:Name'
-    if popup_col not in df.columns and 'Recipient Org:Identifier' in df.columns:
-        popup_col = 'Recipient Org:Identifier'
+    popup_col = 'Recipient Org:0:Name'
+    if popup_col not in df.columns and 'Recipient Org:0:Identifier' in df.columns:
+        popup_col = 'Recipient Org:0:Identifier'
 
     try:
         geo = df[["__geo_lat", "__geo_long", popup_col]].dropna()
@@ -485,15 +523,6 @@ charities or companies, or those grants which contain a postcode.'''.format(
 )
     )
 
-def dataframe_datatable(df, max_length=50, fields=DEFAULT_TABLE_FIELDS):
-    rows = df.sample(max_length) if len(df)>max_length else df
-    return dt.DataTable(
-        rows=rows.reset_index()[fields].to_dict('records'), 
-        id="df-datatable",
-        editable=False,
-        row_selectable=False
-    )
-
 def get_statistics(df):
     amount_awarded = df.groupby("Currency").sum()["Amount Awarded"]
     amount_awarded = [format_currency(amount, currency) for currency, amount in amount_awarded.items()]
@@ -513,8 +542,8 @@ def get_statistics(df):
                 className='results-page__body__content__sphere',
                 style={'backgroundColor': '#f4831f'},
                 children=[
-                    html.P(className='', children="{:,.0f}".format(df["Recipient Org:Identifier"].unique().size)),
-                    html.H4(className='', children=pluralize("recipient", df["Recipient Org:Identifier"].unique().size))
+                    html.P(className='', children="{:,.0f}".format(df["Recipient Org:0:Identifier"].unique().size)),
+                    html.H4(className='', children=pluralize("recipient", df["Recipient Org:0:Identifier"].unique().size))
                 ]
             ),
         ] + [
@@ -532,7 +561,7 @@ def get_statistics(df):
 def get_funder_output(df, grant_programme=[]):
     
     funder_class = ''
-    funder_names = sorted(df["Funding Org:Name"].unique().tolist())
+    funder_names = sorted(df["Funding Org:0:Name"].unique().tolist())
     subtitle = []
     if len(funder_names)>5:
         funders = html.Span("{:,.0f} funders".format(len(funder_names)), className=funder_class)
