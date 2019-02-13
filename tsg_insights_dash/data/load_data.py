@@ -6,49 +6,20 @@ import datetime
 import dateutil
 
 from flask import g, Flask
-from cache import redis_cache
+from tsg_insights.data.cache import redis_cache, get_cache, save_to_cache, get_from_cache
 
 import pandas as pd
 import requests
 
-from filters import FILTERS
+from .filters import FILTERS
 
 THREESIXTY_STATUS_JSON = 'https://storage.googleapis.com/datagetter-360giving-output/branch/master/status.json'
 DEFAULT_PREFIX    = 'file_'
 
-def get_cache():
-    return redis_cache()
-
-
-def save_to_cache(fileid, df, prefix=DEFAULT_PREFIX):
-    r = get_cache()
-    r.set("{}{}".format(prefix, fileid), pickle.dumps(df))
-    logging.info("Dataframe [{}] saved to redis".format(fileid))
-
-    metadata = {
-        "fileid": fileid,
-        "funders": df["Funding Org:Name"].unique().tolist(),
-        "max_date": df["Award Date"].max().isoformat(),
-        "min_date": df["Award Date"].min().isoformat(),
-    }
-    r.hset("files", fileid, json.dumps(metadata))
-    logging.info("Dataframe [{}] metadata saved to redis".format(fileid))
-
-
-def get_from_cache(fileid, prefix=DEFAULT_PREFIX):
-    r = get_cache()
-    
-    if not r.hexists("files", fileid):
-        return None
-
-    df = r.get("{}{}".format(prefix, fileid))
-    if df:
-        logging.info("Retrieved dataframe [{}] from redis".format(fileid))
-        return pickle.loads(df)
-
 
 # fetch the 360Giving registry
 def get_registry(reg_url=THREESIXTY_STATUS_JSON, cache_expire=60*60*24):
+    # @TODO: duplicate with flask app
     reg_key = "threesixty_status"
     r = get_cache()
     reg = r.get(reg_key)
@@ -111,6 +82,7 @@ def get_registry_by_publisher(filters={}, **kwargs):
 
 
 def fetch_reg_file(url):
+    # @TODO: duplicate with flask app
     user_agents = {
         "findthatcharity": 'FindThatCharity.uk',
         'spoof': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:63.0) Gecko/20100101 Firefox/63.0',

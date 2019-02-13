@@ -7,9 +7,9 @@ from dash.dependencies import Input, Output, State
 import dash_table_experiments as dt
 
 from app import app
-from load_data import get_filtered_df, get_from_cache, get_cache
-from charts import *
-from filters import FILTERS
+from .data.load_data import get_filtered_df, get_from_cache, get_cache
+from .data.charts import *
+from .data.filters import FILTERS
 from tsg_insights_components import InsightChecklist, InsightDropdown, InsightFoldable
 
 def filter_html(filter_id, filter_def):
@@ -55,7 +55,7 @@ layout = html.Div(id="dashboard-container", className='results-page', children=[
     ]),
     html.Div(className='results-page__app', children=[
         html.Aside(className='results-page__menu', children=[
-            dcc.Link(
+            html.A(
                 className='results-page__menu__back',
                 href='/',
                 children=[
@@ -104,7 +104,6 @@ layout = html.Div(id="dashboard-container", className='results-page', children=[
         ]),
     ]),
 ])
-
 
 @app.callback(Output('dashboard-output', 'children'),
               [Input('output-data-id', 'data')] + [

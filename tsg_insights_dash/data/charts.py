@@ -5,11 +5,10 @@ import dash_core_components as dcc
 import dash_html_components as html
 import dash_table_experiments as dt
 import plotly.graph_objs as go
-import inflect
-import humanize
-import babel.numbers
 import pandas as pd
 
+from tsg_insights.data.utils import list_to_string, pluralize, get_unique_list, format_currency
+from .results import CHARTS
 
 DEFAULT_TABLE_FIELDS = ["Title", "Description", "Amount Awarded", 
                         "Award Date", "Recipient Org:Name", 
@@ -105,22 +104,17 @@ def get_bar_data(values, name="Grants", chart_type='bar', colour=0):
         bar_data['y'] = x
     return bar_data
 
-def get_unique_list(l):
-    # from https://stackoverflow.com/a/37163210/715621
-    used = set()
-    return [x.strip() for x in l if x.strip() not in used and (used.add(x.strip()) or True)]
-
 def funder_chart(df):
 
-    funders = df["Funding Org:Name"].value_counts()
-    if len(funders) <= 1:
+    data = CHARTS['funders']['get_results'](df)
+    if len(data) <= 1:
         return
 
     return chart_wrapper(
         dcc.Graph(
             id="funding_org_chart",
             figure={
-                'data': [get_bar_data(funders)],
+                'data': [get_bar_data(data)],
                 'layout': DEFAULT_LAYOUT
             },
             config={
@@ -137,11 +131,13 @@ def grant_programme_chart(df):
     if "Grant Programmes:Title" not in df.columns or len(df["Grant Programmes:Title"].unique()) <= 1:
         return
 
+    data = CHARTS['grant_programmes']['get_results'](df)
+
     return chart_wrapper(
         dcc.Graph(
             id="grant_programme_chart",
             figure={
-                'data': [get_bar_data(df["Grant Programme:Title"].value_counts())],
+                'data': [get_bar_data(data)],
                 'layout': DEFAULT_LAYOUT
             },
             config={
@@ -154,11 +150,12 @@ def grant_programme_chart(df):
 
 
 def amount_awarded_chart(df):
+    data = CHARTS['amount_awarded']['get_results'](df)
     return chart_wrapper(
         dcc.Graph(
             id="amount_awarded_chart",
             figure={
-                'data': [get_bar_data(df["Amount Awarded:Bands"].value_counts().sort_index())],
+                'data': [get_bar_data(data)],
                 'layout': DEFAULT_LAYOUT
             },
             config={
@@ -179,32 +176,30 @@ def awards_over_time_chart(df):
             error=False
         )
 
+    data = CHARTS['award_date']['get_results'](df)
+
     xbins_sizes = (
         ('M1', 'by month'),
         ('M3', 'by quarter'),
         ('M12', 'by year')
     )
 
-    data_years = [
-        df['Award Date'].dt.year.min(),
-        df['Award Date'].dt.year.max()
-    ]
     xbins_size = 'M1'
-    if (data_years[1] - data_years[0]) >= 5:
+    if (data['max'] - data['min']) >= 5:
         xbins_size = 'M12'
-    elif (data_years[1] - data_years[0]) >= 1:
+    elif (data['max'] - data['min']) >= 1:
         xbins_size = 'M3'
 
     data = [dict(
-        x = df['Award Date'],
+        x = data['all'],
         autobinx = False,
         autobiny=True,
         marker = dict(color = THREESIXTY_COLOURS[1]),
         name = 'date',
         type = 'histogram',
         xbins = dict(
-            start='{}-01-01'.format(data_years[0]),
-            end='{}-12-31'.format(data_years[1]),
+            start='{}-01-01'.format(data['min']),
+            end='{}-12-31'.format(data['max']),
             size=xbins_size,
         )
     )]
@@ -249,10 +244,7 @@ def awards_over_time_chart(df):
 
 
 def region_and_country_chart(df):
-    values = df.fillna({"__geo_ctry": "Unknown", "__geo_rgn": "Unknown"}).groupby(["__geo_ctry", "__geo_rgn"]).agg({
-        "Amount Awarded": "sum",
-        "Title": "size"
-    })
+    data = CHARTS['ctry_rgn']['get_results'](df)
 
     if (df["__geo_ctry"].count() + df["__geo_rgn"].count()) == 0:
         return message_box(
@@ -272,7 +264,7 @@ numbers to your data to show a chart of their latest income.
         dcc.Graph(
             id="region_and_country_chart",
             figure={
-                'data': [get_bar_data(values["Title"], chart_type='column', colour=2)],
+                'data': [get_bar_data(data["Grants"], chart_type='column', colour=2)],
                 'layout': layout
             },
             config={
@@ -286,15 +278,16 @@ numbers to your data to show a chart of their latest income.
 charities or companies, or those grants which contain a postcode.'''
     )
 
+
 def organisation_type_chart(df):
-    values = df["__org_org_type"].fillna("No organisation identifier").value_counts().sort_index()
+    data = CHARTS['org_type']['get_results'](df)
     return chart_wrapper(
         dcc.Graph(
             id="organisation_type_chart",
             figure={
                 "data": [go.Pie(
-                    labels=[i[0] for i in values.iteritems()],
-                    values=[i[1] for i in values.iteritems()],
+                    labels=[i[0] for i in data.iteritems()],
+                    values=[i[1] for i in data.iteritems()],
                     hole=0.4,
                     marker={
                         'colors': THREESIXTY_COLOURS
@@ -326,11 +319,13 @@ the income of organisations.
             ''',
             error=True
         )
+
+    data = CHARTS['org_income']['get_results'](df)
     return chart_wrapper(
         dcc.Graph(
             id="organisation_income_chart",
             figure={
-                'data': [get_bar_data(df["__org_latest_income_bands"].value_counts().sort_index(), colour=3)],
+                'data': [get_bar_data(data, colour=3)],
                 'layout': DEFAULT_LAYOUT
             },
             config={
@@ -351,11 +346,13 @@ the age of organisations.
             ''',
             error=True
         )
+
+    data = CHARTS['org_age']['get_results'](df)
     return chart_wrapper(
         dcc.Graph(
             id="organisation_age_chart",
             figure={
-                'data': [get_bar_data(df["__org_age_bands"].value_counts().sort_index())],
+                'data': [get_bar_data(data)],
                 'layout': DEFAULT_LAYOUT
             },
             config={
@@ -369,9 +366,8 @@ the age of organisations.
 
 def imd_chart(df):
     # @TODO: expand to include non-English IMD too
-    df.to_pickle("test_imd.pkl")
-    imd = df.loc[df['__geo_ctry']=='England', '__geo_imd']
-    if imd.count()==0:
+    data = CHARTS['org_age']['get_results'](df)
+    if not data:
         return message_box(
             'Index of multiple deprivation',
             '''We can't show this chart as we couldn't find any details of the index of multiple deprivation 
@@ -379,24 +375,6 @@ def imd_chart(df):
             ''',
             error=True
         )
-    
-    # maximum rank of LSOAs by IMD
-    # from: https://www.arcgis.com/sharing/rest/content/items/0a404beab6f544be8fb72d0c2b12d62b/data
-    # NSPL user guid
-    # 1 = most deprived, this number = most deprived
-    imd_total_eng = 32844
-    imd_total_scot = 6976
-    imd_total_wal = 1909
-    imd_total_ni = 890
-
-    # work out the IMD decile
-    imd = ((imd / imd_total_eng) * 10).apply(pd.np.ceil).value_counts().sort_index().reindex(
-        pd.np.arange(1, 11)
-    ).fillna(0)
-
-    imd.index = pd.Series([
-        '1: most deprived', '2', '3', '4', '5', '6', '7', '8', '9', '10: least deprived'
-    ])
 
     layout = copy.deepcopy(DEFAULT_LAYOUT)
     layout['xaxis']['type'] = 'category'
@@ -405,7 +383,7 @@ def imd_chart(df):
         dcc.Graph(
             id="imd_chart",
             figure={
-                'data': [get_bar_data(imd)],
+                'data': [get_bar_data(data)],
                 'layout': layout
             },
             config={
@@ -551,39 +529,6 @@ def get_statistics(df):
         ]
     )
 
-def format_currency(amount, currency='GBP', humanize_=True, int_format="{:,.0f}", abbreviate=False):
-    abbreviations = {
-        'million': 'M',
-        'billion': 'bn'
-    }
-
-    if humanize_:
-        amount_str = humanize.intword(amount).split(" ")
-        if len(amount_str) == 2:
-            return (
-                babel.numbers.format_currency(
-                    float(amount_str[0]),
-                    currency,
-                    format="¤#,##0.0",
-                    currency_digits=False,
-                    locale='en_UK'
-                ), 
-                abbreviations.get(
-                    amount_str[1], amount_str[1]) if abbreviate else amount_str[1]
-            )
-
-    return (
-        babel.numbers.format_currency(
-            amount,
-            currency,
-            format="¤#,##0",
-            currency_digits=False,
-            locale='en_UK'
-        ),
-        ""
-    )
-
-
 def get_funder_output(df, grant_programme=[]):
     
     funder_class = ''
@@ -645,36 +590,3 @@ def get_funder_output(df, grant_programme=[]):
     # @todo: STYLING FOR subbtitle listing funders
     # return return_str + subtitle
     return return_str
-
-    
-
-def list_to_string(l, oxford_comma='auto', separator=", ", as_list=False):
-    if len(l)==1:
-        return l[0]
-    # if oxford_comma == "auto" then if any items contain "and" it is set to true
-    if oxford_comma=="auto":
-        if len([x for x in l if " and " in x]):
-            oxford_comma=True
-        else:
-            oxford_comma=False
-
-    if as_list:
-        return_list = [l[0]]
-        for i in l[1:-1]:
-            return_list.append(i)
-            return_list.append(separator)
-        if oxford_comma:
-            return_list.append(separator)
-        return_list.append(" and ")
-        return_list.append(l[-1])
-        return return_list
-
-    return "{}{} and {}".format(
-        separator.join(l[0:-1]),
-        separator if oxford_comma else "",
-        l[-1]
-    )
-
-def pluralize(string, count):
-    p = inflect.engine()
-    return p.plural(string, count)

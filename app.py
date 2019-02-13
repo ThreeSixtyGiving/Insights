@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 import dash
 
+from tsg_insights import create_app
+
+server = create_app()
+
 app = dash.Dash(
     __name__,
     meta_tags=[
@@ -10,8 +14,12 @@ app = dash.Dash(
     ],
     external_stylesheets=[
         "https://use.typekit.net/nri0jbb.css",
-        "https://fonts.googleapis.com/icon?family=Material+Icons"
-    ]
+        "https://fonts.googleapis.com/icon?family=Material+Icons",
+        "/static/css/sanitize.css",
+        "/static/css/styles.css",
+    ],
+    server=server,
+    url_base_pathname='/file/'
 )
 app.config.suppress_callback_exceptions = True
 
@@ -31,3 +39,5 @@ app.index_string = '''
     </body>
 </html>
 '''
+
+app.title = '360Giving Insights'

@@ -5,7 +5,7 @@ long jobs.  Nothing to change or modify here.
 import os
 from rq import Worker, Queue, Connection
 from rq_win import WindowsWorker
-from cache import redis_cache
+from tsg_insights.data.cache import redis_cache
 
 listen = ['high', 'default', 'low']
 

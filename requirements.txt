@@ -8,7 +8,6 @@ dash-core-components==0.43.0
 dash-html-components==0.13.5
 dash-renderer==0.17.0
 dash-resumable-upload==0.0.3
-dash-table-experiments==0.6.0
 decorator==4.3.0
 Flask==1.0.2
 Flask-Compress==1.4.0

@@ -1,60 +1,122 @@
-import io
+import base64
 import json
+import io
 import os
 
 import pandas as pd
 import requests
-import tqdm
 from rq import get_current_job
+import tqdm
 
-FTC_URL  = 'https://findthatcharity.uk/orgid/{}.json'
-CH_URL   = 'http://data.companieshouse.gov.uk/doc/company/{}.json'
-PC_URL   = 'https://postcodes.findthatcharity.uk/postcodes/{}.json'
+from .cache import get_cache, get_from_cache, save_to_cache
+from .utils import get_fileid, charity_number_to_org_id
+
+def get_dataframe(filename, contents=None, date_=None, fileid=None):
+    df = None
+    if contents:
+        if isinstance(contents, str):
+            # if it's a string we assume it's dataurl/base64 encoded
+            content_type, content_string = contents.split(',')
+            contents = base64.b64decode(content_string)
+
+        if filename.endswith("csv"):
+            # Assume that the user uploaded a CSV file
+            df = pd.read_csv(
+                io.StringIO(contents.decode('utf-8')))
+        elif filename.endswith("xls") or filename.endswith("xlsx"):
+            # Assume that the user uploaded an excel file
+            df = pd.read_excel(io.BytesIO(contents))
+
+    elif os.path.exists(os.path.join("uploads", filename)):
+        if filename.endswith("csv"):
+            # Assume that the user uploaded a CSV file
+            df = pd.read_csv(os.path.join("uploads", filename))
+        elif filename.endswith("xls") or filename.endswith("xlsx"):
+            # Assume that the user uploaded an excel file
+            df = pd.read_excel(os.path.join("uploads", filename))
+
+    if df is None:
+        raise ValueError("No dataframe loaded")
+
+    # prepare the cache
+    r = get_cache()
+    cache = r.get("lookup_cache")
+
+    if cache is None:
+        cache = {
+            "charity": {},
+            "company": {},
+            "postcode": {},
+            "geocodes": {}
+        }
+    else:
+        cache = json.loads(cache.decode("utf8"))
+    if "geocodes" not in cache or len(cache["geocodes"]) == 0:
+        cache["geocodes"] = fetch_geocodes()
+
+    # prepare the data
+    df, cache = prepare_data(df, cache)
+
+    r.set("lookup_cache", json.dumps(cache))
+
+    return df
+
+
+
+# https://dash.plot.ly/dash-core-components/upload
+def parse_contents(contents, filename, date):
+    fileid = get_fileid(contents, filename, date)
+    df = get_from_cache(fileid)
+    if df is None:
+        df = get_dataframe(filename, contents, date)
+        save_to_cache(fileid, df)
+
+    return (fileid, filename, date)
+
+
+FTC_URL = 'https://findthatcharity.uk/orgid/{}.json'
+CH_URL = 'http://data.companieshouse.gov.uk/doc/company/{}.json'
+PC_URL = 'https://postcodes.findthatcharity.uk/postcodes/{}.json'
 
 # config
-FTC_SCHEMES = ["GB-CHC", "GB-NIC", "GB-SC", "GB-COH"] # schemes with data on findthatcharity
+# schemes with data on findthatcharity
+FTC_SCHEMES = ["GB-CHC", "GB-NIC", "GB-SC", "GB-COH"]
 COMPANY_REPLACE = {
     "PRI/LBG/NSC (Private, Limited by guarantee, no share capital, use of 'Limited' exemption)": "Company Limited by Guarantee",
     "PRI/LTD BY GUAR/NSC (Private, limited by guarantee, no share capital)": "Company Limited by Guarantee",
     "PRIV LTD SECT. 30 (Private limited company, section 30 of the Companies Act)": "Private Limited Company",
-} # replacement values for companycategory
-POSTCODE_FIELDS = ['ctry', 'cty', 'laua', 'pcon', 'rgn', 'imd', 'ru11ind', 'oac11', 'lat', 'long'] # fields to care about from the postcodes)
+}  # replacement values for companycategory
+POSTCODE_FIELDS = ['ctry', 'cty', 'laua', 'pcon', 'rgn', 'imd', 'ru11ind',
+                   'oac11', 'lat', 'long']  # fields to care about from the postcodes)
 
 # Bins used for numeric fields
-AMOUNT_BINS = [0,500,1000,2000,5000,10000,100000,1000000,float("inf")]
+AMOUNT_BINS = [0, 500, 1000, 2000, 5000, 10000, 100000, 1000000, float("inf")]
 AMOUNT_BIN_LABELS = ["Under £500", "£500 - £1,000", "£1,000 - £2,000", "£2k - £5k", "£5k - £10k",
-                    "£10k - £100k", "£100k - £1m", "Over £1m"]
-INCOME_BINS = [0,10000,100000,1000000,10000000,float("inf")]
-INCOME_BIN_LABELS = ["Under £10k", "£10k - £100k", "£100k - £1m", "£1m - £10m", "Over £10m"]
-AGE_BINS = pd.to_timedelta([x * 365 for x in [0,1,2,5,10,25,200]], unit="D")
-AGE_BIN_LABELS = ["Under 1 year", "1-2 years", "2-5 years", "5-10 years", "10-25 years", "Over 25 years"]
+                     "£10k - £100k", "£100k - £1m", "Over £1m"]
+INCOME_BINS = [0, 10000, 100000, 1000000, 10000000, float("inf")]
+INCOME_BIN_LABELS = ["Under £10k", "£10k - £100k",
+                     "£100k - £1m", "£1m - £10m", "Over £10m"]
+AGE_BINS = pd.to_timedelta(
+    [x * 365 for x in [0, 1, 2, 5, 10, 25, 200]], unit="D")
+AGE_BIN_LABELS = ["Under 1 year", "1-2 years", "2-5 years",
+                  "5-10 years", "10-25 years", "Over 25 years"]
 
 # utils
-def charity_number_to_org_id(regno):
-    if not isinstance(regno, str):
-        return None
-    if regno.startswith("S"):
-        return "GB-SC-{}".format(regno)
-    elif regno.startswith("N"):
-        return "GB-NIC-{}".format(regno)
-    else:
-        return "GB-CHC-{}".format(regno)
-
-
 def get_charity(orgid, ftc_url=FTC_URL):
     return requests.get(ftc_url.format(orgid)).json()
+
 
 def get_company(orgid, ch_url=CH_URL):
     return requests.get(ch_url.format(orgid.replace("GB-COH-", ""))).json()
 
 
 def prepare_data(df, cache={}):
-    
+
     job = get_current_job()
     job.meta['stages'] = [
         'Check column names', 'Check columns exist', 'Check column types',
         'Add extra columns', 'Clean recipient identifiers', 'Look up charity data',
-        'Look up company data', 'Add charity and company details to data', 
+        'Look up company data', 'Add charity and company details to data',
         'Look up postcode data', 'Add geo data', 'Add extra fields from external data'
     ]
     job.meta['progress'] = {"stage": 0, "progress": None}
@@ -66,13 +128,13 @@ def prepare_data(df, cache={}):
 
     # check column names for typos
     columns_to_check = [
-        'Amount Awarded', 'Funding Org:Name', 'Award Date', 
+        'Amount Awarded', 'Funding Org:Name', 'Award Date',
         'Recipient Org:Name', 'Recipient Org:Identifier'
     ]
     renames = {}
     for c in df.columns:
         for w in columns_to_check:
-            if c.replace(" ","").lower() == w.replace(" ","").lower() and c != w:
+            if c.replace(" ", "").lower() == w.replace(" ", "").lower() and c != w:
                 renames[c] = w
     df = df.rename(columns=renames)
 
@@ -95,7 +157,8 @@ def prepare_data(df, cache={}):
     # add a column with a "clean" identifier that can be fetched from find that charity
     progress_job()
     df.loc[
-        df["Recipient Org:Identifier:Scheme"].isin(FTC_SCHEMES), "Recipient Org:Identifier:Clean"
+        df["Recipient Org:Identifier:Scheme"].isin(
+            FTC_SCHEMES), "Recipient Org:Identifier:Clean"
     ] = df.loc[df["Recipient Org:Identifier:Scheme"].isin(FTC_SCHEMES), "Recipient Org:Identifier"]
     if "Recipient Org:Company Number" in df.columns:
         df.loc[:, "Recipient Org:Identifier:Clean"] = df.loc[:, "Recipient Org:Identifier:Clean"].fillna(
@@ -104,8 +167,9 @@ def prepare_data(df, cache={}):
         df.loc[:, "Recipient Org:Identifier:Clean"] = df.loc[:, "Recipient Org:Identifier:Clean"].fillna(
             df["Recipient Org:Charity Number"].apply(charity_number_to_org_id))
     df.loc[:, "Recipient Org:Identifier:Scheme"] = df["Recipient Org:Identifier:Clean"].apply(
-        lambda x: ("360G" if x.startswith("360G-") else "-".join(x.split("-")[:2])) if isinstance(x, str) else None
-        ).fillna(df["Recipient Org:Identifier:Scheme"])
+        lambda x: ("360G" if x.startswith(
+            "360G-") else "-".join(x.split("-")[:2])) if isinstance(x, str) else None
+    ).fillna(df["Recipient Org:Identifier:Scheme"])
 
     # look for any charity details
     progress_job()
@@ -140,7 +204,7 @@ def prepare_data(df, cache={}):
     progress_job()
     company_orgids = df.loc[
         ~df["Recipient Org:Identifier:Clean"].isin(orgid_df.index) &
-        (df["Recipient Org:Identifier:Scheme"]=="GB-COH"), "Recipient Org:Identifier:Clean"].unique()
+        (df["Recipient Org:Identifier:Scheme"] == "GB-COH"), "Recipient Org:Identifier:Clean"].unique()
     print("Finding details for {} companies".format(len(company_orgids)))
     for k, orgid in tqdm.tqdm(enumerate(company_orgids)):
         progress_job(0, (k+1, len(company_orgids)))
@@ -187,14 +251,14 @@ def prepare_data(df, cache={}):
 
     # merge org details into main dataframe
     df = df.join(orgid_df.rename(columns=lambda x: "__org_" + x),
-                on="Recipient Org:Identifier:Clean", how="left")
-
+                 on="Recipient Org:Identifier:Clean", how="left")
 
     # look for postcode
 
     # check for recipient org postcode field first
     if "Recipient Org:Postal Code" in df.columns:
-        df.loc[:, "Recipient Org:Postal Code"] = df.loc[:, "Recipient Org:Postal Code"].fillna(df["__org_postcode"])
+        df.loc[:, "Recipient Org:Postal Code"] = df.loc[:,
+                                                        "Recipient Org:Postal Code"].fillna(df["__org_postcode"])
     else:
         df.loc[:, "Recipient Org:Postal Code"] = df["__org_postcode"]
 
@@ -213,37 +277,45 @@ def prepare_data(df, cache={}):
     # turn into a dataframe
     progress_job()
     postcode_df = pd.DataFrame([{
-        **{"postcode": k}, 
+        **{"postcode": k},
         **{j: c.get("data", {}).get("attributes", {}).get(j) for j in POSTCODE_FIELDS}
     } for k, c in cache["postcode"].items()]).set_index("postcode")[POSTCODE_FIELDS]
 
     # swap out codes for names
     for c in postcode_df.columns:
-        postcode_df.loc[:, c] = postcode_df[c].apply(lambda x: cache["geocodes"].get("-".join([c, str(x)]), x))
+        postcode_df.loc[:, c] = postcode_df[c].apply(
+            lambda x: cache["geocodes"].get("-".join([c, str(x)]), x))
         if postcode_df[c].dtype == 'object':
-            postcode_df.loc[:, c] = postcode_df[c].str.replace(r"\(pseudo\)", "")
-            postcode_df.loc[postcode_df[c].fillna("").str.endswith("99999999"), c] = None
+            postcode_df.loc[:, c] = postcode_df[c].str.replace(
+                r"\(pseudo\)", "")
+            postcode_df.loc[postcode_df[c].fillna(
+                "").str.endswith("99999999"), c] = None
 
     # merge into main dataframe
-    df = df.join(postcode_df.rename(columns=lambda x: "__geo_" + x), on="Recipient Org:Postal Code", how="left")
+    df = df.join(postcode_df.rename(columns=lambda x: "__geo_" + x),
+                 on="Recipient Org:Postal Code", how="left")
 
     # add banded fields
     progress_job()
-    df.loc[:, "Amount Awarded:Bands"] = pd.cut(df["Amount Awarded"], bins=AMOUNT_BINS, labels=AMOUNT_BIN_LABELS)
-    df.loc[:, "__org_latest_income_bands"] = pd.cut(df["__org_latest_income"].astype(float), 
-                                                bins=INCOME_BINS, labels=INCOME_BIN_LABELS)
-    df.loc[:, "__org_age_bands"] = pd.cut(df["__org_age"], bins=AGE_BINS, labels=AGE_BIN_LABELS)
+    df.loc[:, "Amount Awarded:Bands"] = pd.cut(
+        df["Amount Awarded"], bins=AMOUNT_BINS, labels=AMOUNT_BIN_LABELS)
+    df.loc[:, "__org_latest_income_bands"] = pd.cut(df["__org_latest_income"].astype(float),
+                                                    bins=INCOME_BINS, labels=INCOME_BIN_LABELS)
+    df.loc[:, "__org_age_bands"] = pd.cut(
+        df["__org_age"], bins=AGE_BINS, labels=AGE_BIN_LABELS)
 
     if "Grant Programme:Title" not in df.columns:
         df.loc[:, "Grant Programme:Title"] = "All grants"
 
     return (df, cache)
 
+
 def fetch_geocodes():
-    r = requests.get("https://postcodes.findthatcharity.uk/areas/names.csv", params={"types": ",".join(POSTCODE_FIELDS)})
+    r = requests.get("https://postcodes.findthatcharity.uk/areas/names.csv",
+                     params={"types": ",".join(POSTCODE_FIELDS)})
     pc_names = pd.read_csv(io.StringIO(r.text)).set_index(
         ["type", "code"]).sort_index()
     geocodes = pc_names["name"].to_dict()
-    geocodes = {"-".join(c): d for c,d in geocodes.items()}
+    geocodes = {"-".join(c): d for c, d in geocodes.items()}
     return geocodes
 
