@@ -99,7 +99,6 @@ def charity_number_to_org_id(regno):
 class CustomJSONEncoder(JSONEncoder):
     def default(self, obj):
         # handling numpy numbers:
-        print("Serializing object {} of type {}".format(obj, type(obj)))
         if isinstance(obj, pd.np.generic):
             return pd.np.asscalar(obj)
 

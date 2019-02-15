@@ -243,7 +243,6 @@ def test_postcode_lookup(m):
     stage = FetchPostcodes(df, cache, None)
     result_df = stage.run()
     assert len(cache["postcode"]) == 2
-    print(cache["postcode"])
     assert json.loads(cache["postcode"]["L4 0TH"])["data"]["attributes"]["laua_name"] == "Liverpool"
 
 
