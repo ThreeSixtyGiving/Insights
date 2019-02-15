@@ -1,13 +1,15 @@
 // modals
-const modalTriggers = document.getElementsByClassName('modal-open');
+const modals = document.getElementsByClassName('js-modal');
 const urlParams = new URLSearchParams(window.location.search);
-for (const trigger of modalTriggers) {
-    const modal = document.getElementById(trigger.dataset.modal);
-    trigger.addEventListener('click', (event) => {
-        event.preventDefault();
-        modal.classList.remove("hidden");
-        
-    });
+for (const modal of modals) {
+    const trigger = document.getElementById(modal.dataset.trigger);
+    if(trigger){
+        trigger.addEventListener('click', (event) => {
+            event.preventDefault();
+            modal.classList.remove("hidden");
+            
+        });
+    }
 
     for (const close_button of modal.getElementsByClassName('close-button')) {
         close_button.addEventListener('click', (event) => {
@@ -15,8 +17,9 @@ for (const trigger of modalTriggers) {
             modal.classList.add("hidden");
         });
     }
+    console.log(modal.id);
 
-    if(urlParams.has(trigger.dataset.modal)){
+    if(urlParams.has(modal.id)){
         trigger.click();
     }
 }
