@@ -57,7 +57,9 @@ def process_registry(reg=None, reg_url=THREESIXTY_STATUS_JSON, cache_expire=DEFA
             'grant_count': grant_count,
             'award_date': award_date_str,
             'grant_amount': grant_amount,
-            # @TODO: add file type
+            'file_size': v.get("datagetter_metadata", {}).get("file_size"),
+            'file_type': v.get("datagetter_metadata", {}).get("file_type"),
+            'download_url': v.get("distribution", [{}])[0].get("downloadURL"),
         })
 
     return publishers

@@ -3,6 +3,8 @@ import hashlib
 import inflect
 import humanize
 import babel.numbers
+import pandas as pd
+from requests.structures import CaseInsensitiveDict
 
 
 def list_to_string(l, oxford_comma='auto', separator=", ", as_list=False):
@@ -108,6 +110,10 @@ class CustomJSONEncoder(JSONEncoder):
             if isinstance(obj.index, pd.core.index.MultiIndex):
                 obj.index = obj.index.map(" - ".join)
             return obj.to_dict()
+
+        # handling request dicts
+        elif isinstance(obj, CaseInsensitiveDict):
+            return dict(obj)
 
         else:
             raise TypeError(

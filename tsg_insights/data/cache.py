@@ -19,7 +19,7 @@ def get_cache():
     return redis_cache()
 
 
-def save_to_cache(fileid, df, prefix=CACHE_DEFAULT_PREFIX):
+def save_to_cache(fileid, df, prefix=CACHE_DEFAULT_PREFIX, headers=None, url=None):
     r = get_cache()
     r.set("{}{}".format(prefix, fileid), pickle.dumps(df))
     logging.info("Dataframe [{}] saved to redis".format(fileid))
@@ -29,6 +29,8 @@ def save_to_cache(fileid, df, prefix=CACHE_DEFAULT_PREFIX):
         "funders": df["Funding Org:0:Name"].unique().tolist(),
         "max_date": df["Award Date"].max().isoformat(),
         "min_date": df["Award Date"].min().isoformat(),
+        "headers": headers,
+        "url": url,
     }
     r.hset("files", fileid, json.dumps(metadata))
     logging.info("Dataframe [{}] metadata saved to redis".format(fileid))

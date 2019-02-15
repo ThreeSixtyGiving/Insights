@@ -58,7 +58,7 @@ def get_dataframe_from_url(url):
     # 2. Check cache for file
     df = get_from_cache(fileid)
     if df is not None:
-        return (fileid, url)
+        return (fileid, url, headers)
 
     # 3. Fetch and prepare the data
     df = None
@@ -70,9 +70,9 @@ def get_dataframe_from_url(url):
     df = data_preparation.run()
 
     # 5. save to cache
-    save_to_cache(fileid, df) # dataframe
+    save_to_cache(fileid, df, headers=headers, url=url) # dataframe
 
-    return (fileid, url)
+    return (fileid, url, headers)
 
 
 def prepare_lookup_cache():

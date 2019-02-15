@@ -5,6 +5,8 @@ import click
 from flask import Flask, url_for
 from flask.cli import AppGroup
 from tqdm import tqdm
+import requests
+import pandas as pd
 
 from ..data.registry import process_registry
 from ..data.process import get_dataframe_from_url
@@ -29,17 +31,49 @@ def cli_header(title:str):
 @cli.command('fetch')
 @click.argument('url')
 def cli_fetch_file(url):
-    fileid, filename = get_dataframe_from_url(url)
+    fileid, filename, headers = get_dataframe_from_url(url)
     click.echo("File loaded")
     click.echo('/file/{}'.format(fileid))
 
+
 @cli.command('fetchall')
-def cli_fetch_all_files():
+@click.argument('output', type=click.Path())
+def cli_fetch_all_files(output):
     reg = process_registry()
-    for publisher, files in reg.items():
+    results = {}
+    for publisher, files in list(reg.items()):
         cli_header(publisher)
         for file_ in files:
-            click.echo(file_["title"])
+            click.echo("{} ({})".format(file_['title'], file_["file_size"]))
+            click.echo(file_['download_url'])
+            error = None
+            fileid = None
+            headers = None
+            if file_['file_size'] < 50000000:
+                try:
+                    fileid, filename, headers = get_dataframe_from_url(file_["download_url"])
+                except Exception as e:
+                    error = str(e)
+            else:
+                error = "Skipped due to file size ({})".format(file_['file_size'])
+
+            results[file_["identifier"]] = {
+                "publisher": publisher,
+                "fileid": fileid,
+                "headers": headers,
+                "error": error,
+                **file_
+            }
+    
+            result_df = pd.DataFrame(results).T
+            result_df.index.rename("FileIdentifier", inplace=True)
+            if output.endswith(".json"):
+                result_df.to_json(output)
+            elif output.endswith(".xlsx"):
+                result_df.to_excel(output)
+            else:
+                result_df.to_csv(output)
+            
 
 
 @cli.command('remove')
