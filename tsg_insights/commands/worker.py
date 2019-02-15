@@ -1,17 +1,27 @@
 """
-Generic worker.py for enabling background workers to run
-long jobs.  Nothing to change or modify here.
+worker for enabling background workers to run
 """
 import os
+
+import click
+from flask import Flask
+from flask.cli import AppGroup
+
 from rq import Worker, Queue, Connection
 from rq_win import WindowsWorker
+
 from tsg_insights.data.cache import redis_cache
 
-listen = ['high', 'default', 'low']
+cli = AppGroup('worker')
 
-conn = redis_cache()
 
-if __name__ == '__main__':
+@cli.command('start')
+def cli_start_worker():
+
+    listen = ['high', 'default', 'low']
+
+    conn = redis_cache()
+
     with Connection(conn):
         if hasattr(os, 'fork'):
             worker = Worker(map(Queue, listen))

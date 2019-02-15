@@ -4,24 +4,24 @@ import requests
 import pandas as pd
 
 from .cache import get_cache, save_to_cache, get_from_cache
-from .process import get_dataframe
 from .utils import format_currency, get_fileid
 
 THREESIXTY_STATUS_JSON = 'https://storage.googleapis.com/datagetter-360giving-output/branch/master/status.json'
 DEFAULT_CACHE = 60*60*24
+REG_KEY = "threesixty_status"
 
 # fetch the 360Giving registry
 
 
-def get_registry(reg_url=THREESIXTY_STATUS_JSON, cache_expire=DEFAULT_CACHE):
-    reg_key = "threesixty_status"
+def get_registry(reg_url=THREESIXTY_STATUS_JSON, cache_expire=DEFAULT_CACHE, skip_cache=False):
     r = get_cache()
-    reg = r.get(reg_key)
-    if reg:
-        return json.loads(reg.decode('utf8'))
+    if not skip_cache:
+        reg = r.get(REG_KEY)
+        if reg:
+            return json.loads(reg.decode('utf8'))
 
     reg = requests.get(reg_url).json()
-    r.set(reg_key, json.dumps(reg), ex=cache_expire)
+    r.set(REG_KEY, json.dumps(reg), ex=cache_expire)
     return reg
 
 
@@ -75,42 +75,24 @@ def get_reg_file(identifier):
     )
 
 
-def fetch_reg_file(url):
+def fetch_reg_file(url, method='GET'):
     user_agents = {
         "findthatcharity": 'FindThatCharity.uk',
         'spoof': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:63.0) Gecko/20100101 Firefox/63.0',
     }
-    reg_file = requests.get(
-        url, headers={'User-Agent': user_agents['findthatcharity']})
+    if method not in ["GET", "HEAD"]:
+        raise ValueError("Request method [{}] not recognised".format(method))
+    reg_file = requests.request(
+        method, url, headers={'User-Agent': user_agents['findthatcharity']})
     try:
         reg_file.raise_for_status()
     except:
-        reg_file = requests.get(
-            url, headers={'User-Agent': user_agents['spoof']})
+        reg_file = requests.request(
+            method, url, headers={'User-Agent': user_agents['spoof']})
         reg_file.raise_for_status()
+    if method=="HEAD":
+        return reg_file.headers
     return reg_file.content
-
-
-def fetch_and_parse(filename, content=None):
-    # 1. fetch file
-    if not content and filename:
-        content = fetch_reg_file(filename)
-
-    fileid = get_fileid(content, filename)
-
-    # 1a. Check cache for file
-    df = get_from_cache(fileid)
-    if df is not None:
-        return (fileid, filename)
-
-    # 2. prepare data
-    df = get_dataframe(filename, content)
-
-    # 3. save to cache
-    save_to_cache(fileid, df)
-
-    # 4. return the fileid and filename
-    return (fileid, filename)
 
 
 def get_registry_by_publisher(filters={}, **kwargs):

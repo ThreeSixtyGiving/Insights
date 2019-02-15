@@ -1,10 +1,12 @@
 import os
 
 from flask import Flask, send_from_directory
-from flask.json import JSONEncoder
 import pandas as pd
 
 from .data.registry import THREESIXTY_STATUS_JSON
+from .blueprints import home, fetch, job, data, cache
+from .commands import registry, worker, datafile
+from .data.utils import CustomJSONEncoder
 
 def create_app(test_config=None):
     # create and configure the app
@@ -49,7 +51,7 @@ def create_app(test_config=None):
     # overwrite default JSON encoder
     app.json_encoder = CustomJSONEncoder
 
-    from .blueprints import home, fetch, job, data, cache
+    # register blueprints for pages
     app.register_blueprint(home.bp)
     app.register_blueprint(fetch.bp, url_prefix='/fetch')
     app.register_blueprint(job.bp, url_prefix='/job')
@@ -57,26 +59,13 @@ def create_app(test_config=None):
     app.register_blueprint(cache.bp, url_prefix='/cache')
     app.add_url_rule('/', endpoint='index')
 
+    # register command line interface
+    app.cli.add_command(registry.cli)
+    app.cli.add_command(worker.cli)
+    app.cli.add_command(datafile.cli)
+
     @app.route('/images/<path:path>')
     def send_images(path):
         return send_from_directory('static/images', path)
 
     return app
-
-
-class CustomJSONEncoder(JSONEncoder):
-    def default(self, obj):
-        # handling numpy numbers:
-        if isinstance(obj, pd.np.generic):
-            return pd.np.asscalar(obj)
-
-        # handling pandas dataframes:
-        if isinstance(obj, (pd.Series, pd.DataFrame)):
-
-            # handling dataframes with multiindex
-            if isinstance(obj.index, pd.core.index.MultiIndex):
-                obj.index = obj.index.map(" - ".join)
-            return obj.to_dict()
-
-        # else let the base class do the work
-        return JSONEncoder.default(self, obj)

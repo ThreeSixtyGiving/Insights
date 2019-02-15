@@ -33,6 +33,15 @@ def save_to_cache(fileid, df, prefix=CACHE_DEFAULT_PREFIX):
     r.hset("files", fileid, json.dumps(metadata))
     logging.info("Dataframe [{}] metadata saved to redis".format(fileid))
 
+
+def delete_from_cache(fileid, prefix=CACHE_DEFAULT_PREFIX):
+    r = get_cache()
+    r.delete("{}{}".format(prefix, fileid))
+    logging.info("Dataframe [{}] removed from redis".format(fileid))
+
+    r.hdel("files", fileid)
+    logging.info("Dataframe [{}] metadata removed from redis".format(fileid))
+
 def get_from_cache(fileid, prefix=CACHE_DEFAULT_PREFIX):
     r = get_cache()
 

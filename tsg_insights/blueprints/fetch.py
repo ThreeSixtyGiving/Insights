@@ -5,7 +5,8 @@ from werkzeug.utils import secure_filename
 from rq import Queue
 
 from ..data.cache import get_cache
-from ..data.registry import get_reg_file, fetch_and_parse
+from ..data.registry import get_reg_file
+from ..data.process import get_dataframe_from_url, get_dataframe_from_file
 
 bp = Blueprint('fetch', __name__)
 
@@ -21,7 +22,7 @@ def get_registry_file(fileid):
     q = Queue(connection=get_cache())
     job_id = str(uuid.uuid4())
 
-    job = q.enqueue_call(func=fetch_and_parse,
+    job = q.enqueue_call(func=get_dataframe_from_url,
                          args=(file_url, ),
                          timeout='15m',
                          job_id=job_id)
@@ -37,7 +38,7 @@ def get_file_from_url():
     q = Queue(connection=get_cache())
     job_id = str(uuid.uuid4())
 
-    job = q.enqueue_call(func=fetch_and_parse,
+    job = q.enqueue_call(func=get_dataframe_from_url,
                          args=(file_url, ),
                          timeout='15m',
                          job_id=job_id)
@@ -61,7 +62,7 @@ def process_uploaded_file():
     q = Queue(connection=get_cache())
     job_id = str(uuid.uuid4())
 
-    job = q.enqueue_call(func=fetch_and_parse,
+    job = q.enqueue_call(func=get_dataframe_from_file,
                          args=(filename, content),
                          timeout='15m',
                          job_id=job_id)

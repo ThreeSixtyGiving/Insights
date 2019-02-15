@@ -1,3 +1,4 @@
+from flask.json import JSONEncoder
 import hashlib
 import inflect
 import humanize
@@ -91,3 +92,26 @@ def charity_number_to_org_id(regno):
         return "GB-NIC-{}".format(regno)
     else:
         return "GB-CHC-{}".format(regno)
+
+
+class CustomJSONEncoder(JSONEncoder):
+    def default(self, obj):
+        # handling numpy numbers:
+        print("Serializing object {} of type {}".format(obj, type(obj)))
+        if isinstance(obj, pd.np.generic):
+            return pd.np.asscalar(obj)
+
+        # handling pandas dataframes:
+        elif isinstance(obj, (pd.Series, pd.DataFrame)):
+
+            # handling dataframes with multiindex
+            if isinstance(obj.index, pd.core.index.MultiIndex):
+                obj.index = obj.index.map(" - ".join)
+            return obj.to_dict()
+
+        else:
+            raise TypeError(
+                "Unserializable object {} of type {}".format(obj, type(obj))
+            )
+        # else let the base class do the work
+        return JSONEncoder.default(self, obj)

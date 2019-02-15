@@ -7,8 +7,8 @@ This repo uses Dash. See [Dash installation documentation](https://dash.plot.ly/
 Run in two different command lines.
 
 ```sh
-python index.py
-python worker.py
+flask run
+flask worker start
 ```
 
 ## Configuration variables
@@ -21,6 +21,10 @@ In dokku you can set these variables using the `dokku config:set explorer CONFIG
 command.
 
 ```
+# flask app
+FLASK_APP=tsg_insights
+FLASK_END=development # if you're developing
+
 # configuration for the newsletter signup box
 NEWSLETTER_FORM_ACTION=https://threesixtygiving.us10.list-manage.com/subscribe
 NEWSLETTER_FORM_U=216b8b926250184f90c7198e8
