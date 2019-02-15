@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 
-from tsg_insights_dash.data.load_data import get_filtered_df
+from tsg_insights_dash.data.filters import get_filtered_df
 from tsg_insights_dash.data.results import get_statistics, CHARTS
 
 bp = Blueprint('data', __name__)

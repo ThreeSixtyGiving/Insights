@@ -1,4 +1,21 @@
 from .results import get_identifier_schemes
+from tsg_insights.data.cache import get_from_cache
+
+
+def get_filtered_df(fileid, **filters):
+    df = get_from_cache(fileid)
+
+    for filter_id, filter_def in FILTERS.items():
+        new_df = filter_def["apply_filter"](
+            df,
+            filters.get(filter_id),
+            filter_def
+        )
+        if new_df is not None:
+            df = new_df
+
+    return df
+
 
 def apply_area_filter(df, filter_args, filter_def):
 

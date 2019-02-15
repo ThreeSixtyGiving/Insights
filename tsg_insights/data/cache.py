@@ -7,7 +7,7 @@ from redis import StrictRedis, from_url
 
 REDIS_DEFAULT_URL = 'redis://localhost:6379/0'
 REDIS_ENV_VAR = 'REDIS_URL'
-DEFAULT_PREFIX = 'file_'
+CACHE_DEFAULT_PREFIX = 'file_'
 
 def redis_cache(strict=False):
     redis_url = os.environ.get(REDIS_ENV_VAR, REDIS_DEFAULT_URL)
@@ -18,7 +18,8 @@ def redis_cache(strict=False):
 def get_cache():
     return redis_cache()
 
-def save_to_cache(fileid, df, prefix=DEFAULT_PREFIX):
+
+def save_to_cache(fileid, df, prefix=CACHE_DEFAULT_PREFIX):
     r = get_cache()
     r.set("{}{}".format(prefix, fileid), pickle.dumps(df))
     logging.info("Dataframe [{}] saved to redis".format(fileid))
@@ -32,7 +33,7 @@ def save_to_cache(fileid, df, prefix=DEFAULT_PREFIX):
     r.hset("files", fileid, json.dumps(metadata))
     logging.info("Dataframe [{}] metadata saved to redis".format(fileid))
 
-def get_from_cache(fileid, prefix=DEFAULT_PREFIX):
+def get_from_cache(fileid, prefix=CACHE_DEFAULT_PREFIX):
     r = get_cache()
 
     if not r.hexists("files", fileid):
@@ -40,5 +41,8 @@ def get_from_cache(fileid, prefix=DEFAULT_PREFIX):
 
     df = r.get("{}{}".format(prefix, fileid))
     if df:
-        logging.info("Retrieved dataframe [{}] from redis".format(fileid))
-        return pickle.loads(df)
+        try:
+            logging.info("Retrieved dataframe [{}] from redis".format(fileid))
+            return pickle.loads(df)
+        except ImportError as error:
+            return None

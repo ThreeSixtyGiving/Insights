@@ -111,3 +111,52 @@ def fetch_and_parse(filename, content=None):
 
     # 4. return the fileid and filename
     return (fileid, filename)
+
+
+def get_registry_by_publisher(filters={}, **kwargs):
+    reg = get_registry(**kwargs)
+
+    reg_ = {}
+    for r in reg:
+
+        p = r.get("publisher", {}).get("name")
+
+        # filter
+        if filters.get("licence"):
+            if r.get("license", "") not in filters["licence"]:
+                continue
+
+        if filters.get("search"):
+            if filters.get("search", "").lower() not in p.lower():
+                continue
+
+        if filters.get("last_modified"):
+            last_modified_poss = {
+                "lastmonth": datetime.datetime.now() - datetime.timedelta(days=30),
+                "6month": datetime.datetime.now() - datetime.timedelta(days=30*6),
+                "12month": datetime.datetime.now() - datetime.timedelta(days=365),
+            }
+            if last_modified_poss.get(filters.get("last_modified")):
+                last_modified = dateutil.parser.parse(
+                    r.get("modified"), ignoretz=True)
+                if last_modified < last_modified_poss.get(filters.get("last_modified")):
+                    continue
+
+        if filters.get("currency"):
+            choose_this = False
+            for c in filters.get("currency", []):
+                if c in r.get("datagetter_aggregates", {}).get("currencies", {}).keys():
+                    choose_this = True
+            if not choose_this:
+                continue
+
+        if filters.get("filetype"):
+            if r.get('datagetter_metadata', {}).get("file_type") not in filters["filetype"]:
+                continue
+
+        if p not in reg_:
+            reg_[p] = []
+
+        reg_[p].append(r)
+
+    return reg_

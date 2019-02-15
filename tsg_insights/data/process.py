@@ -12,6 +12,33 @@ from threesixty import ThreeSixtyGiving
 from .cache import get_cache, get_from_cache, save_to_cache
 from .utils import get_fileid, charity_number_to_org_id
 
+FTC_URL = 'https://findthatcharity.uk/orgid/{}.json'
+CH_URL = 'http://data.companieshouse.gov.uk/doc/company/{}.json'
+PC_URL = 'https://postcodes.findthatcharity.uk/postcodes/{}.json'
+
+# config
+# schemes with data on findthatcharity
+FTC_SCHEMES = ["GB-CHC", "GB-NIC", "GB-SC", "GB-COH"]
+COMPANY_REPLACE = {
+    "PRI/LBG/NSC (Private, Limited by guarantee, no share capital, use of 'Limited' exemption)": "Company Limited by Guarantee",
+    "PRI/LTD BY GUAR/NSC (Private, limited by guarantee, no share capital)": "Company Limited by Guarantee",
+    "PRIV LTD SECT. 30 (Private limited company, section 30 of the Companies Act)": "Private Limited Company",
+}  # replacement values for companycategory
+POSTCODE_FIELDS = ['ctry', 'cty', 'laua', 'pcon', 'rgn', 'imd', 'ru11ind',
+                   'oac11', 'lat', 'long']  # fields to care about from the postcodes)
+
+# Bins used for numeric fields
+AMOUNT_BINS = [0, 500, 1000, 2000, 5000, 10000, 100000, 1000000, float("inf")]
+AMOUNT_BIN_LABELS = ["Under £500", "£500 - £1,000", "£1,000 - £2,000", "£2k - £5k", "£5k - £10k",
+                     "£10k - £100k", "£100k - £1m", "Over £1m"]
+INCOME_BINS = [0, 10000, 100000, 1000000, 10000000, float("inf")]
+INCOME_BIN_LABELS = ["Under £10k", "£10k - £100k",
+                     "£100k - £1m", "£1m - £10m", "Over £10m"]
+AGE_BINS = pd.to_timedelta(
+    [x * 365 for x in [0, 1, 2, 5, 10, 25, 200]], unit="D")
+AGE_BIN_LABELS = ["Under 1 year", "1-2 years", "2-5 years",
+                  "5-10 years", "10-25 years", "Over 25 years"]
+
 def get_dataframe(filename, contents=None, date_=None, fileid=None):
     df = None
     if contents:
@@ -70,45 +97,6 @@ def get_dataframe(filename, contents=None, date_=None, fileid=None):
 
     return df
 
-
-
-# https://dash.plot.ly/dash-core-components/upload
-def parse_contents(contents, filename, date):
-    fileid = get_fileid(contents, filename, date)
-    df = get_from_cache(fileid)
-    if df is None:
-        df = get_dataframe(filename, contents, date)
-        save_to_cache(fileid, df)
-
-    return (fileid, filename, date)
-
-
-FTC_URL = 'https://findthatcharity.uk/orgid/{}.json'
-CH_URL = 'http://data.companieshouse.gov.uk/doc/company/{}.json'
-PC_URL = 'https://postcodes.findthatcharity.uk/postcodes/{}.json'
-
-# config
-# schemes with data on findthatcharity
-FTC_SCHEMES = ["GB-CHC", "GB-NIC", "GB-SC", "GB-COH"]
-COMPANY_REPLACE = {
-    "PRI/LBG/NSC (Private, Limited by guarantee, no share capital, use of 'Limited' exemption)": "Company Limited by Guarantee",
-    "PRI/LTD BY GUAR/NSC (Private, limited by guarantee, no share capital)": "Company Limited by Guarantee",
-    "PRIV LTD SECT. 30 (Private limited company, section 30 of the Companies Act)": "Private Limited Company",
-}  # replacement values for companycategory
-POSTCODE_FIELDS = ['ctry', 'cty', 'laua', 'pcon', 'rgn', 'imd', 'ru11ind',
-                   'oac11', 'lat', 'long']  # fields to care about from the postcodes)
-
-# Bins used for numeric fields
-AMOUNT_BINS = [0, 500, 1000, 2000, 5000, 10000, 100000, 1000000, float("inf")]
-AMOUNT_BIN_LABELS = ["Under £500", "£500 - £1,000", "£1,000 - £2,000", "£2k - £5k", "£5k - £10k",
-                     "£10k - £100k", "£100k - £1m", "Over £1m"]
-INCOME_BINS = [0, 10000, 100000, 1000000, 10000000, float("inf")]
-INCOME_BIN_LABELS = ["Under £10k", "£10k - £100k",
-                     "£100k - £1m", "£1m - £10m", "Over £10m"]
-AGE_BINS = pd.to_timedelta(
-    [x * 365 for x in [0, 1, 2, 5, 10, 25, 200]], unit="D")
-AGE_BIN_LABELS = ["Under 1 year", "1-2 years", "2-5 years",
-                  "5-10 years", "10-25 years", "Over 25 years"]
 
 # utils
 def get_charity(orgid, ftc_url=FTC_URL):

@@ -6,9 +6,9 @@ import dash_html_components as html
 from dash.dependencies import Input, Output, State
 
 from app import app
-from .data.load_data import get_filtered_df, get_from_cache, get_cache
+from tsg_insights.data.cache import get_from_cache, get_cache
 from .data.charts import *
-from .data.filters import FILTERS
+from .data.filters import FILTERS, get_filtered_df
 from tsg_insights_components import InsightChecklist, InsightDropdown, InsightFoldable
 
 def filter_html(filter_id, filter_def):
@@ -126,7 +126,7 @@ def dashboard_output(fileid, *args):
     outputs.append(get_statistics(df))
 
     charts = []
-
+    
     charts.append(funder_chart(df))
     charts.append(amount_awarded_chart(df))
     charts.append(grant_programme_chart(df))
@@ -134,7 +134,11 @@ def dashboard_output(fileid, *args):
     charts.append(organisation_type_chart(df))
     # charts.append(org_identifier_chart(df))
     charts.append(region_and_country_chart(df))
-    charts.append(location_map(df))
+    charts.append(location_map(
+        df,
+        app.server.config.get("MAPBOX_ACCESS_TOKEN"),
+        app.server.config.get("MAPBOX_STYLE")
+    ))
     charts.append(organisation_age_chart(df))
     charts.append(organisation_income_chart(df))
     # charts.append(imd_chart(df))

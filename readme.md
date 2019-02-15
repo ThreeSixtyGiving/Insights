@@ -11,16 +11,48 @@ python index.py
 python worker.py
 ```
 
-## Get mapbox to work
+## Configuration variables
 
-For the maps to show you need to have a mapbox personal access token set to the
-`MAPBOX_ACCESS_TOKEN` environmental variable. On dokku this would be something
-like:
+The following configuration variables need to be set to get parts of the site
+working. You can do this in a development version by including a `.env` file
+in the root directory. 
 
-```bash
-dokku config:set explorer MAPBOX_ACCESS_TOKEN="insert_access_token_here"
+In dokku you can set these variables using the `dokku config:set explorer CONFIG_VAR=value`
+command.
+
+```
+# configuration for the newsletter signup box
+NEWSLETTER_FORM_ACTION=https://threesixtygiving.us10.list-manage.com/subscribe
+NEWSLETTER_FORM_U=216b8b926250184f90c7198e8
+NEWSLETTER_FORM_ID=91870dde44
+
+# file from which the 360Giving registry will be loaded
+THREESIXTY_STATUS_JSON=https://storage.googleapis.com/datagetter-360giving-output/branch/master/status.json
+
+# configuration for the mapbox map - an access token is needed for the map to work
+MAPBOX_ACCESS_TOKEN=token_goes_here
+MAPBOX_STYLE=mapbox://styles/davidkane/cjmtr1n101qlz2ruqszjcmhls
 ```
 
+### Find your mapbox access token
+
+You'll need to [sign up to mapbox](https://account.mapbox.com/auth/signup/) to create a token.
+Once you've created an account you can find and create access tokens
+through <https://account.mapbox.com/>.
+
+### Find the newsletter configuration variables
+
+The newsletter section is set up to send variables to a mailchimp signup form.
+The different parts needed can be found in the URL that you go to when you visit
+the "Join this mailing list" page:
+
+`https://threesixtygiving.us10.list-manage.com/subscribe?u=216b8b926250184f90c7198e8&id=91870dde44`
+
+From the URL above you find the following variables:
+
+- NEWSLETTER_FORM_ACTION = `https://threesixtygiving.us10.list-manage.com/subscribe`
+- NEWSLETTER_FORM_U = `216b8b926250184f90c7198e8`
+- NEWSLETTER_FORM_ID = `91870dde44`
 
 ## Setup on dokku
 

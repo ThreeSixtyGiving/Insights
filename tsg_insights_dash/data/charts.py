@@ -13,9 +13,6 @@ DEFAULT_TABLE_FIELDS = ["Title", "Description", "Amount Awarded",
                         "Award Date", "Recipient Org:0:Name", 
                         "Grant Programme:0:Title"]
 THREESIXTY_COLOURS = ['#9c2061', '#f48320', '#cddc2b', '#53aadd']
-
-MAPBOX_ACCESS_TOKEN = os.environ.get("MAPBOX_ACCESS_TOKEN")
-MAPBOX_STYLE = os.environ.get("MAPBOX_STYLE", 'mapbox://styles/davidkane/cjmtr1n101qlz2ruqszjcmhls')
 DEFAULT_LAYOUT = {
     'font': {
         'family': 'neusa-next-std-compact, "Source Sans Pro", sans-serif;',
@@ -435,9 +432,9 @@ def imd_chart(df):
             or on an organisation's registered postcode, so may not reflect where grant activity took place.'''
     )
 
-def location_map(df):
+def location_map(df, mapbox_access_token=None, mapbox_style=None):
 
-    if not MAPBOX_ACCESS_TOKEN:
+    if not mapbox_access_token:
         return
 
     popup_col = 'Recipient Org:0:Name'
@@ -486,7 +483,7 @@ def location_map(df):
         height=800,
         hovermode='closest',
         mapbox=dict(
-            accesstoken=MAPBOX_ACCESS_TOKEN,
+            accesstoken=mapbox_access_token,
             bearing=0,
             center=dict(
                 lat=54.093409,
@@ -494,7 +491,7 @@ def location_map(df):
             ),
             pitch=0,
             zoom=5,
-            style=MAPBOX_STYLE
+            style=mapbox_style
         ),
         margin=go.layout.Margin(
             l=0,

@@ -15,7 +15,7 @@ import babel.numbers
 import humanize
 
 from app import app
-from load_data import get_registry_by_publisher, get_registry
+from tsg_insights.data.registry import get_registry_by_publisher, get_registry
 from charts import pluralize, format_currency, message_box
 
 FILE_TYPES = {
