@@ -1,3 +1,4 @@
+import requests_cache
 import os
 
 from flask import Flask, send_from_directory
@@ -6,6 +7,7 @@ import pandas as pd
 from .data.registry import THREESIXTY_STATUS_JSON
 from .blueprints import home, fetch, job, data, cache
 from .commands import registry, worker, datafile
+from .data.cache import get_cache
 from .data.utils import CustomJSONEncoder
 
 def create_app(test_config=None):
@@ -67,5 +69,12 @@ def create_app(test_config=None):
     @app.route('/images/<path:path>')
     def send_images(path):
         return send_from_directory('static/images', path)
+
+    one_week_in_seconds = 60*60*24*7
+    requests_cache.install_cache(
+        backend='redis',
+        connection=get_cache(),
+        expire_after=one_week_in_seconds
+    )
 
     return app

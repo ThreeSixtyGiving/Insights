@@ -5,13 +5,10 @@ import click
 from flask import Flask, url_for
 from flask.cli import AppGroup
 from tqdm import tqdm
-import requests_cache
 
 from ..data.registry import process_registry
 from ..data.process import get_dataframe_from_url
 from ..data.cache import delete_from_cache, get_from_cache, get_cache
-
-requests_cache.install_cache(backend='redis', connection=get_cache())
 
 cli = AppGroup('data')
 

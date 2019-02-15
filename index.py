@@ -5,11 +5,6 @@ from dash.dependencies import Input, Output, State
 from app import app
 
 from tsg_insights_dash import data_display
-from tsg_insights.data.cache import get_cache
-
-import requests_cache
-
-requests_cache.install_cache(backend='redis', connection=get_cache())
 
 app.layout = html.Div(children=[
     dcc.Location(id='url', refresh=False),
