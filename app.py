@@ -29,7 +29,7 @@ app.index_string = '''
     <head>
         {%metas%}
         <title>{%title%}</title>
-        {%favicon%}
+        <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
         {%css%}
     </head>
     <body>
