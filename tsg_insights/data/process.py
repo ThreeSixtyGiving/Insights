@@ -22,8 +22,7 @@ def get_dataframe(filename, contents=None, date_=None, fileid=None):
 
         if filename.endswith("csv"):
             # Assume that the user uploaded a CSV file
-            df = ThreeSixtyGiving.from_csv(
-                io.StringIO(contents.decode('utf-8'))).to_pandas()
+            df = ThreeSixtyGiving.from_csv(io.BytesIO(contents)).to_pandas()
         elif filename.endswith("xls") or filename.endswith("xlsx"):
             # Assume that the user uploaded an excel file
             df = ThreeSixtyGiving.from_excel(io.BytesIO(contents)).to_pandas()
