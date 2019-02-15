@@ -1,18 +1,24 @@
 // modals
 const modalTriggers = document.getElementsByClassName('modal-open');
+const urlParams = new URLSearchParams(window.location.search);
 for (const trigger of modalTriggers) {
+    const modal = document.getElementById(trigger.dataset.modal);
     trigger.addEventListener('click', (event) => {
         event.preventDefault();
-        const modal = document.getElementById(trigger.dataset.modal);
         modal.classList.remove("hidden");
         
-        for (const close_button of modal.getElementsByClassName('close-button')){
-            close_button.addEventListener('click', (event) => {
-                event.preventDefault();
-                modal.classList.add("hidden");
-            });
-        }
     });
+
+    for (const close_button of modal.getElementsByClassName('close-button')) {
+        close_button.addEventListener('click', (event) => {
+            event.preventDefault();
+            modal.classList.add("hidden");
+        });
+    }
+
+    if(urlParams.has(trigger.dataset.modal)){
+        trigger.click();
+    }
 }
 
 // filter by publisher

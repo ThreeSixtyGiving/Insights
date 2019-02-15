@@ -47,16 +47,21 @@ def filter_html(filter_id, filter_def):
 layout = html.Div(id="dashboard-container", className='results-page', children=[
     html.Div(className='results-page__header', children=[
         html.Div(className='wrapper', children=[
-            "360Giving ",
-            html.Span(style={"color": "#9c1f61"}, children="Insights"),
-            html.Span(style={"color": "rgba(11, 40, 51, 0.3)"}, children="Beta"),
+            html.A(
+                href='/',
+                children=[
+                    "360Giving ",
+                    html.Span(style={"color": "#9c1f61"}, children="Insights"),
+                    html.Span(style={"color": "rgba(11, 40, 51, 0.3)"}, children="Beta"),
+                ]
+            )
         ]),
     ]),
     html.Div(className='results-page__app', children=[
         html.Aside(className='results-page__menu', children=[
             html.A(
                 className='results-page__menu__back',
-                href='/',
+                href='/?file-selection-modal',
                 children=[
                     html.I(className='material-icons', children='arrow_back'),
                     " Select another dataset",
