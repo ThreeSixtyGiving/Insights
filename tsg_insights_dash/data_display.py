@@ -160,7 +160,10 @@ def award_dates_change(fileid):
     if df is None:
         return {f: FILTERS[f]["defaults"] for f in FILTERS}
 
-    return {f: FILTERS[f]["get_values"](df) for f in FILTERS}
+    try:
+        return {f: FILTERS[f]["get_values"](df) for f in FILTERS}
+    except Exception as e:
+        return {f: FILTERS[f]["defaults"] for f in FILTERS}
 
 # ================
 # Functions that return a function to be used in callbacks

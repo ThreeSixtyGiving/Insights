@@ -78,6 +78,9 @@ def get_statistics(df):
 
 def get_ctry_rgn(df):
 
+    if "__geo_ctry" not in df.columns or "__geo_rgn" not in df.columns:
+        return None
+
     ctry_rgn = df.fillna({"__geo_ctry": "Unknown", "__geo_rgn": "Unknown"}).groupby(["__geo_ctry", "__geo_rgn"]).agg({
         "Amount Awarded": "sum",
         "Title": "size"
@@ -94,10 +97,13 @@ def get_org_type(df):
 def get_identifier_schemes(df):
     identifier_schemes = df["Recipient Org:0:Identifier"].apply(
         lambda x: "360G" if x.startswith("360G-") else "-".join(x.split("-")[:2]))
+    
+    if "__org_org_type" in df:
+        identifier_schemes = df["__org_org_type"].fillna(
+            identifier_schemes
+        )
 
-    return df["__org_org_type"].fillna(
-        identifier_schemes
-    ).fillna(
+    return identifier_schemes.fillna(
         "No organisation identifier"
     ).apply(
         lambda x: IDENTIFIER_MAP.get(x, x)

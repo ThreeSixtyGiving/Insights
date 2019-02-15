@@ -260,7 +260,7 @@ def awards_over_time_chart(df):
 def region_and_country_chart(df):
     data = CHARTS['ctry_rgn']['get_results'](df)
 
-    if (df["__geo_ctry"].count() + df["__geo_rgn"].count()) == 0:
+    if not data or (df["__geo_ctry"].count() + df["__geo_rgn"].count()) == 0:
         return message_box(
             'Region and Country',
             '''This chart can\'t be shown as there are no recipients in the data with 
@@ -345,7 +345,7 @@ def organisation_type_chart(df):
 
 
 def organisation_income_chart(df):
-    if df["__org_latest_income_bands"].count() == 0:
+    if "__org_latest_income_bands" not in df.columns or df["__org_latest_income_bands"].count() == 0:
         return message_box(
             'Latest income of charity recipients',
             '''This chart can\'t be shown as there are no recipients in the data with 
@@ -372,7 +372,7 @@ the income of organisations.
     )
 
 def organisation_age_chart(df):
-    if df["__org_age_bands"].count()==0:
+    if "__org_age_bands" not in df.columns or df["__org_age_bands"].count()==0:
         return message_box(
             'Age of recipient organisations',
             '''This chart can\'t be shown as there are no recipients in the data with 
@@ -435,6 +435,9 @@ def imd_chart(df):
 def location_map(df, mapbox_access_token=None, mapbox_style=None):
 
     if not mapbox_access_token:
+        return
+
+    if "__geo_lat" not in df.columns or "__geo_long" not in df.columns:
         return
 
     popup_col = 'Recipient Org:0:Name'
