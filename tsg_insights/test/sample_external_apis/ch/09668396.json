@@ -1,0 +1,33 @@
+{
+   "primaryTopic" : {
+      "CompanyName" : "360 GIVING",
+      "CompanyNumber" : "09668396",
+      "RegAddress" : {
+         "AddressLine1" : "THE FOUNDRY",
+         "AddressLine2" : "17 OVAL WAY",
+         "PostTown" : "LONDON",
+         "Country" : "ENGLAND",
+         "Postcode" : "SE11 5RR"
+      },
+      "CompanyCategory" : "PRI/LBG/NSC (Private, Limited by guarantee, no share capital, use of 'Limited' exemption)",
+      "CompanyStatus" : "Active",
+      "CountryOfOrigin" : "United Kingdom",
+      "IncorporationDate" : "02/07/2015",
+      "Accounts" : {
+         "AccountRefDay" : "31",
+         "AccountRefMonth" : "03",
+         "NextDueDate" : "31/12/2019",
+         "LastMadeUpDate" : "31/03/2018",
+         "AccountCategory" : "FULL"
+      },
+      "Returns" : {
+         "NextDueDate" : "15/07/2019",
+         "LastMadeUpDate" : "01/07/2018"
+      },
+      "SICCodes" : {
+         "SicText" : [
+            "94990 - Activities of other membership organizations not elsewhere classified"
+         ]
+      }
+   }
+}

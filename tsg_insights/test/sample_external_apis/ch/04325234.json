@@ -1,0 +1,38 @@
+{
+   "primaryTopic" : {
+      "CompanyName" : "CANCER RESEARCH UK",
+      "CompanyNumber" : "04325234",
+      "RegAddress" : {
+         "AddressLine1" : "ANGEL BUILDING",
+         "AddressLine2" : "407 ST. JOHN STREET",
+         "PostTown" : "LONDON",
+         "Postcode" : "EC1V 4AD"
+      },
+      "CompanyCategory" : "PRI/LBG/NSC (Private, Limited by guarantee, no share capital, use of 'Limited' exemption)",
+      "CompanyStatus" : "Active",
+      "CountryOfOrigin" : "United Kingdom",
+      "IncorporationDate" : "20/11/2001",
+      "Accounts" : {
+         "AccountRefDay" : "31",
+         "AccountRefMonth" : "03",
+         "NextDueDate" : "31/12/2019",
+         "LastMadeUpDate" : "31/03/2018",
+         "AccountCategory" : "GROUP"
+      },
+      "Returns" : {
+         "NextDueDate" : "04/12/2019",
+         "LastMadeUpDate" : "20/11/2018"
+      },
+      "Mortgages" : {
+         "NumMortCharges" : "1",
+         "NumMortOutstanding" : "0",
+         "NumMortPartSatisfied" : "0",
+         "NumMortSatisfied" : "1"
+      },
+      "SICCodes" : {
+         "SicText" : [
+            "86900 - Other human health activities"
+         ]
+      }
+   }
+}

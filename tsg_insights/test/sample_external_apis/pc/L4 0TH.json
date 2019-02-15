@@ -1,0 +1,186 @@
+{
+    "data": {
+        "type": "postcodes",
+        "id": "L4 0TH",
+        "attributes": {
+            "pcd": "L4  0TH",
+            "pcd2": "L4   0TH",
+            "pcds": "L4 0TH",
+            "dointr": "1980-01-01",
+            "doterm": null,
+            "usertype": 1,
+            "oseast1m": 336209,
+            "osnrth1m": 393151,
+            "osgrdind": 1,
+            "oa11": "E00033178",
+            "cty": "E99999999",
+            "ced": "E99999999",
+            "laua": "E08000012",
+            "ward": "E05000887",
+            "hlthau": "E18000002",
+            "nhser": "E40000001",
+            "ctry": "E92000001",
+            "rgn": "E12000002",
+            "pcon": "E14000794",
+            "eer": "E15000002",
+            "teclec": "E24000023",
+            "ttwa": "E30000233",
+            "pct": "E16000092",
+            "nuts": "E05000887",
+            "park": "E99999999",
+            "lsoa11": "E01006542",
+            "msoa11": "E02001364",
+            "wz11": "E33006276",
+            "ccg": "E38000101",
+            "bua11": "E34004801",
+            "buasd11": "E35001470",
+            "ru11ind": "A1",
+            "oac11": "7A2",
+            "lat": 53.431267,
+            "long": -2.961584,
+            "lep1": "E37000022",
+            "lep2": null,
+            "pfa": "E23000004",
+            "imd": 1167,
+            "calncv": "E56000005",
+            "stp": "E54000008",
+            "location": {
+                "lat": 53.431267,
+                "lon": -2.961584
+            },
+            "cty_name": "(pseudo) England (non-National Park)",
+            "ced_name": "(pseudo) England (non-National Park)",
+            "laua_name": "Liverpool",
+            "ward_name": "Anfield",
+            "hlthau_name": "North West",
+            "ctry_name": "England",
+            "rgn_name": "North West",
+            "pcon_name": "Liverpool, Walton",
+            "eer_name": "North West",
+            "teclec_name": "Greater Merseyside",
+            "ttwa_name": "Liverpool",
+            "pct_name": "Liverpool",
+            "nuts_name": "Anfield",
+            "park_name": "(pseudo) England (non-National Park)",
+            "lsoa11_name": "Liverpool 018A",
+            "msoa11_name": "Liverpool 018",
+            "ccg_name": "NHS Liverpool CCG",
+            "bua11_name": "Liverpool BUA",
+            "buasd11_name": "Liverpool BUASD",
+            "ru11ind_name": "(England/Wales) Urban major conurbation",
+            "oac11_name": "Hampered aspiration",
+            "lep1_name": "Liverpool City Region",
+            "pfa_name": "Merseyside"
+        },
+        "links": {
+            "self": "https://postcodes.findthatcharity.uk/postcodes/L4+0TH",
+            "html": "https://postcodes.findthatcharity.uk/postcodes/L4+0TH.html"
+        },
+        "relationships": {
+            "areas": {
+                "links": {
+                    "self": "https://postcodes.findthatcharity.uk/postcodes/L4+0TH/relationships/areas",
+                    "related": "https://postcodes.findthatcharity.uk/postcodes/L4+0TH/areas"
+                },
+                "data": [
+                    {
+                        "type": "areas",
+                        "id": "E99999999"
+                    },
+                    {
+                        "type": "areas",
+                        "id": "E99999999"
+                    },
+                    {
+                        "type": "areas",
+                        "id": "E08000012"
+                    },
+                    {
+                        "type": "areas",
+                        "id": "E05000887"
+                    },
+                    {
+                        "type": "areas",
+                        "id": "E18000002"
+                    },
+                    {
+                        "type": "areas",
+                        "id": "E92000001"
+                    },
+                    {
+                        "type": "areas",
+                        "id": "E12000002"
+                    },
+                    {
+                        "type": "areas",
+                        "id": "E14000794"
+                    },
+                    {
+                        "type": "areas",
+                        "id": "E15000002"
+                    },
+                    {
+                        "type": "areas",
+                        "id": "E24000023"
+                    },
+                    {
+                        "type": "areas",
+                        "id": "E30000233"
+                    },
+                    {
+                        "type": "areas",
+                        "id": "E16000092"
+                    },
+                    {
+                        "type": "areas",
+                        "id": "E05000887"
+                    },
+                    {
+                        "type": "areas",
+                        "id": "E99999999"
+                    },
+                    {
+                        "type": "areas",
+                        "id": "E01006542"
+                    },
+                    {
+                        "type": "areas",
+                        "id": "E02001364"
+                    },
+                    {
+                        "type": "areas",
+                        "id": "E38000101"
+                    },
+                    {
+                        "type": "areas",
+                        "id": "E34004801"
+                    },
+                    {
+                        "type": "areas",
+                        "id": "E35001470"
+                    },
+                    {
+                        "type": "areas",
+                        "id": "A1"
+                    },
+                    {
+                        "type": "areas",
+                        "id": "7A2"
+                    },
+                    {
+                        "type": "areas",
+                        "id": "E37000022"
+                    },
+                    {
+                        "type": "areas",
+                        "id": "E23000004"
+                    }
+                ]
+            }
+        }
+    },
+    "links": {
+        "self": "https://postcodes.findthatcharity.uk/postcodes/L4+0TH",
+        "html": "https://postcodes.findthatcharity.uk/postcodes/L4+0TH.html"
+    }
+}

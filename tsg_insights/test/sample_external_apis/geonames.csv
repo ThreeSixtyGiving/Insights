@@ -1,0 +1,1184 @@
+code,name,type
+F2,(England/Wales) Rural hamlet and isolated dwellings in a sparse setting,ru11ind
+5,(Scotland) Very Remote Small Town,ru11ind
+8,(Scotland) Very Remote Rural,ru11ind
+E14000941,South Norfolk,pcon
+E14000942,South Northamptonshire,pcon
+E14000935,South Derbyshire,pcon
+E14000999,Torbay,pcon
+E14001001,Totnes,pcon
+E14000986,Tamworth,pcon
+E14000900,Romford,pcon
+S14000035,Glasgow South West,pcon
+E14000907,Runnymede and Weybridge,pcon
+E14000916,Sefton Central,pcon
+E14000987,Tatton,pcon
+E14001006,Tynemouth,pcon
+E14000992,The Wrekin,pcon
+E14000944,South Shields,pcon
+E14000951,South West Hertfordshire,pcon
+E14000875,Pendle,pcon
+E14000889,Reading East,pcon
+E14000881,Poole,pcon
+E14000882,Poplar and Limehouse,pcon
+E14000931,Solihull,pcon
+E14000886,Pudsey,pcon
+E14000897,Rochdale,pcon
+E14000953,South West Surrey,pcon
+E14000968,Stevenage,pcon
+E14000857,North West Hampshire,pcon
+E14000851,North Swindon,pcon
+W07000059,Clwyd West,pcon
+W07000060,Vale of Clwyd,pcon
+W07000063,Montgomeryshire,pcon
+W07000064,Ceredigion,pcon
+E10000016,Kent,cty
+E10000017,Lancashire,cty
+E10000023,North Yorkshire,cty
+E06000041,Wokingham,laua
+E06000042,Milton Keynes,laua
+E06000043,Brighton and Hove,laua
+E06000044,Portsmouth,laua
+E06000046,Isle of Wight,laua
+E06000056,Central Bedfordshire,laua
+E08000011,Knowsley,laua
+E08000018,Rotherham,laua
+E08000025,Birmingham,laua
+E08000028,Sandwell,laua
+E08000029,Solihull,laua
+E08000035,Leeds,laua
+E10000011,East Sussex,cty
+E06000013,North Lincolnshire,laua
+E06000018,Nottingham,laua
+E09000015,Harrow,laua
+E09000001,City of London,laua
+E09000016,Havering,laua
+E09000018,Hounslow,laua
+E09000027,Richmond upon Thames,laua
+W07000074,Ogmore,pcon
+W07000076,Caerphilly,pcon
+E06000001,Hartlepool,laua
+E06000002,Middlesbrough,laua
+E07000218,North Warwickshire,laua
+E07000220,Rugby,laua
+E07000227,Horsham,laua
+E07000228,Mid Sussex,laua
+E07000242,East Hertfordshire,laua
+E07000124,Ribble Valley,laua
+E07000129,Blaby,laua
+E07000131,Harborough,laua
+E07000133,Melton,laua
+E07000106,Canterbury,laua
+E07000110,Maidstone,laua
+E07000111,Sevenoaks,laua
+E07000112,Shepway,laua
+E07000142,West Lindsey,laua
+E07000143,Breckland,laua
+E07000177,Cherwell,laua
+E07000180,Vale of White Horse,laua
+E07000204,St Edmundsbury,laua
+E07000207,Elmbridge,laua
+E07000166,Richmondshire,laua
+E07000153,Kettering,laua
+E07000154,Northampton,laua
+E07000145,Great Yarmouth,laua
+N09000002,"Armagh City, Banbridge and Craigavon",laua
+N09000008,Mid and East Antrim,laua
+N09000009,Mid Ulster,laua
+N09000011,Ards and North Down,laua
+L93000001,Channel Islands,ctry
+1B2,Rural white-collar workers,oac11
+2B1,Students and commuters,oac11
+3B3,Multi-ethnic professional service workers,oac11
+3D1,New EU tech workers,oac11
+4B2,Pakistani communities,oac11
+7B1,Eastern European communities,oac11
+7B3,Endeavouring flat dwellers,oac11
+E14000544,Basildon and Billericay,pcon
+E14000543,Barrow and Furness,pcon
+E14000551,Beckenham,pcon
+E14000557,Bexhill and Battle,pcon
+E14000625,Charnwood,pcon
+E14000624,Central Suffolk and North Ipswich,pcon
+E14000632,Chesterfield,pcon
+E14000635,Chippenham,pcon
+E14000561,"Birmingham, Erdington",pcon
+E14000565,"Birmingham, Northfield",pcon
+E14000567,"Birmingham, Selly Oak",pcon
+E14000575,Blyth Valley,pcon
+E14000578,Bolton North East,pcon
+E14000590,Braintree,pcon
+L99999999,(pseudo) Channel Islands,pcon
+N06000003,Belfast South,pcon
+N06000006,East Londonderry,pcon
+N06000010,Mid Ulster,pcon
+N06000013,North Down,pcon
+N06000015,South Down,pcon
+N06000016,Strangford,pcon
+W07000046,Gower,pcon
+W07000061,Dwyfor Meirionnydd,pcon
+E14000597,"Brighton, Kemptown",pcon
+E14000598,"Brighton, Pavilion",pcon
+E14000617,Cambridge,pcon
+E14000532,Altrincham and Sale West,pcon
+E14000910,Saffron Walden,pcon
+E14000911,Salford and Eccles,pcon
+E14000913,Scarborough and Whitby,pcon
+E14000919,Sheffield Central,pcon
+E14000922,"Sheffield, Hallam",pcon
+E14000924,Sherwood,pcon
+E14000927,Sittingbourne and Sheppey,pcon
+E14001037,Westmorland and Lonsdale,pcon
+E14001041,Winchester,pcon
+E14001038,Weston-Super-Mare,pcon
+E14001046,Witney,pcon
+E14001048,Wokingham,pcon
+E14001050,Wolverhampton South East,pcon
+S14000025,Edinburgh South West,pcon
+W07000048,Swansea East,pcon
+W07000050,Cardiff Central,pcon
+W07000053,Torfaen,pcon
+W07000057,Arfon,pcon
+W07000069,Neath,pcon
+W07000058,Aberconwy,pcon
+E14001032,West Ham,pcon
+E14001051,Wolverhampton South West,pcon
+E14001034,West Suffolk,pcon
+S14000041,Kirkcaldy and Cowdenbeath,pcon
+S14000046,Moray,pcon
+S14000042,Lanark and Hamilton East,pcon
+S14000007,Banff and Buchan,pcon
+E14000997,Tonbridge and Malling,pcon
+E14001024,Weaver Vale,pcon
+E14001028,Wentworth and Dearne,pcon
+S14000011,"Coatbridge, Chryston and Bellshill",pcon
+S14000056,Rutherglen and Hamilton West,pcon
+S14000021,East Renfrewshire,pcon
+S14000052,Paisley and Renfrewshire North,pcon
+E07000031,South Lakeland,laua
+E07000036,Erewash,laua
+E07000043,North Devon,laua
+E07000044,South Hams,laua
+E07000071,Colchester,laua
+E07000072,Epping Forest,laua
+E07000074,Maldon,laua
+E07000081,Gloucester,laua
+E07000006,South Bucks,laua
+E07000008,Cambridge,laua
+E07000010,Fenland,laua
+E07000028,Carlisle,laua
+W06000001,Isle of Anglesey,laua
+W06000004,Denbighshire,laua
+E07000085,East Hampshire,laua
+E07000086,Eastleigh,laua
+E07000092,Rushmoor,laua
+E07000117,Burnley,laua
+E07000098,Hertsmere,laua
+E07000051,Purbeck,laua
+E07000069,Castle Point,laua
+W06000014,Vale of Glamorgan,laua
+W06000016,Rhondda Cynon Taf,laua
+W06000020,Torfaen,laua
+W06000022,Newport,laua
+W06000023,Powys,laua
+E07000005,Chiltern,laua
+S12000013,Na h-Eileanan Siar,laua
+S12000027,Shetland Islands,laua
+S12000028,South Ayrshire,laua
+S12000033,Aberdeen City,laua
+S12000034,Aberdeenshire,laua
+E12000005,West Midlands,rgn
+E14000693,Epping Forest,pcon
+E14000709,Gateshead,pcon
+E14000701,Feltham and Heston,pcon
+E14000710,Gedling,pcon
+E14000702,Filton and Bradley Stoke,pcon
+E14000705,Forest of Dean,pcon
+E14000711,Gillingham and Rainham,pcon
+E14000712,Gloucester,pcon
+E14000661,Denton and Reddish,pcon
+E14000664,Derbyshire Dales,pcon
+E14000666,Dewsbury,pcon
+E14000665,Devizes,pcon
+E14000671,Dudley North,pcon
+E14000638,Christchurch,pcon
+E14000643,Cleethorpes,pcon
+E14000642,Clacton,pcon
+E14000646,Congleton,pcon
+E14000647,Copeland,pcon
+E14000759,Ilford North,pcon
+E14000761,Ipswich,pcon
+E14000763,Islington North,pcon
+E14000775,Knowsley,pcon
+E14000765,Jarrow,pcon
+E14000743,Hereford and South Herefordshire,pcon
+E14000756,Huddersfield,pcon
+E14000757,Huntingdon,pcon
+E14000668,Doncaster Central,pcon
+E14000674,Ealing Central and Acton,pcon
+E14000675,Ealing North,pcon
+E14000648,Corby,pcon
+E14000657,Dagenham and Rainham,pcon
+E14000708,Garston and Halewood,pcon
+E14000732,Harrow West,pcon
+E14000733,Hartlepool,pcon
+E14000739,Hemel Hempstead,pcon
+E14000744,Hertford and Stortford,pcon
+E12000001,North East,rgn
+S12000008,East Ayrshire,laua
+S12000011,East Renfrewshire,laua
+S12000018,Inverclyde,laua
+E14000845,North East Hertfordshire,pcon
+E14000862,Northampton South,pcon
+E14000846,North East Somerset,pcon
+E14000847,North Herefordshire,pcon
+E14000782,Leicester East,pcon
+E14000785,Leigh,pcon
+E14000787,Lewisham East,pcon
+E14000789,"Lewisham, Deptford",pcon
+E14000790,Leyton and Wanstead,pcon
+E14000794,"Liverpool, Walton",pcon
+E14000798,Louth and Horncastle,pcon
+E14000805,Makerfield,pcon
+E14000849,North Shropshire,pcon
+E14000850,North Somerset,pcon
+E14000873,Oxford East,pcon
+E14000816,Mid Norfolk,pcon
+E14000767,Kenilworth and Southam,pcon
+E14000855,North West Cambridgeshire,pcon
+E14001003,Truro and Falmouth,pcon
+E14000988,Taunton Deane,pcon
+E14001007,Uxbridge and South Ruislip,pcon
+E14000991,The Cotswolds,pcon
+E14001011,Walsall North,pcon
+E14000940,South Leicestershire,pcon
+E14000937,South East Cambridgeshire,pcon
+E14000938,South East Cornwall,pcon
+E14000939,South Holland and The Deepings,pcon
+E14000958,Southport,pcon
+E14000943,South Ribble,pcon
+E14000998,Tooting,pcon
+E14001004,Tunbridge Wells,pcon
+E14001015,Wantage,pcon
+E14001021,Watford,pcon
+E14001023,Wealden,pcon
+E14001025,Wellingborough,pcon
+E14001044,Wirral West,pcon
+E14001026,Wells,pcon
+E14001031,West Dorset,pcon
+E14000952,South West Norfolk,pcon
+E14000954,South West Wiltshire,pcon
+E14000967,Stalybridge and Hyde,pcon
+E14000966,Staffordshire Moorlands,pcon
+E14000971,Stockton South,pcon
+E14000984,Sutton and Cheam,pcon
+E14001060,Yeovil,pcon
+E14001061,York Central,pcon
+E14001035,West Worcestershire,pcon
+S14000012,"Cumbernauld, Kilsyth and Kirkintilloch East",pcon
+S14000018,East Dunbartonshire,pcon
+S14000028,Falkirk,pcon
+W06000009,Pembrokeshire,laua
+W06000015,Cardiff,laua
+E09000017,Hillingdon,laua
+E09000025,Newham,laua
+E09000032,Wandsworth,laua
+E09000029,Sutton,laua
+W06000002,Gwynedd,laua
+W06000003,Conwy,laua
+E06000057,Northumberland,laua
+E08000007,Stockport,laua
+E08000014,Sefton,laua
+E08000024,Sunderland,laua
+E08000026,Coventry,laua
+E08000027,Dudley,laua
+E09000006,Bromley,laua
+E08000036,Wakefield,laua
+E09000004,Bexley,laua
+E10000020,Norfolk,cty
+E07000061,Eastbourne,laua
+E07000062,Hastings,laua
+E07000033,Bolsover,laua
+E07000012,South Cambridgeshire,laua
+E10000015,Hertfordshire,cty
+E10000025,Oxfordshire,cty
+E12000006,East of England,rgn
+E12000002,North West,rgn
+E07000210,Mole Valley,laua
+E07000211,Reigate and Banstead,laua
+E07000219,Nuneaton and Bedworth,laua
+E07000221,Stratford-on-Avon,laua
+E07000222,Warwick,laua
+E07000226,Crawley,laua
+E07000229,Worthing,laua
+E07000235,Malvern Hills,laua
+E07000236,Redditch,laua
+S12000015,Fife,laua
+S12000021,North Ayrshire,laua
+E07000165,Harrogate,laua
+E07000193,East Staffordshire,laua
+E07000175,Newark and Sherwood,laua
+E92000001,England,ctry
+E14000563,"Birmingham, Hodge Hill",pcon
+E14000581,Bootle,pcon
+E14000571,Blackley and Broughton,pcon
+E14000572,Blackpool North and Cleveleys,pcon
+E14000580,Bolton West,pcon
+E14000978,Streatham,pcon
+E14000589,Bradford West,pcon
+E14000591,Brent Central,pcon
+E14000592,Brent North,pcon
+E14000594,Brentwood and Ongar,pcon
+E14000599,Bristol East,pcon
+E14000534,Arundel and South Downs,pcon
+E14000553,Bermondsey and Old Southwark,pcon
+E14000555,Bethnal Green and Bow,pcon
+E14000550,Beaconsfield,pcon
+E14000560,"Birmingham, Edgbaston",pcon
+N06000002,Belfast North,pcon
+N06000004,Belfast West,pcon
+N06000011,Newry and Armagh,pcon
+N06000018,West Tyrone,pcon
+C2,(England/Wales) Urban city and town in a sparse setting,ru11ind
+E14000602,Bristol West,pcon
+E14000603,Broadland,pcon
+E14000605,Bromsgrove,pcon
+E14000610,Burton,pcon
+E14000611,Bury North,pcon
+E14000614,Calder Valley,pcon
+E14000615,Camberwell and Peckham,pcon
+E14000670,Dover,pcon
+E14000680,East Hampshire,pcon
+E14000681,East Surrey,pcon
+E14000682,East Worthing and Shoreham,pcon
+E14000687,Edmonton,pcon
+E14000689,Elmet and Rothwell,pcon
+E14000697,Esher and Walton,pcon
+E14000717,Great Yarmouth,pcon
+E14000724,Haltemprice and Howden,pcon
+E14000734,Harwich and North Essex,pcon
+E14000716,Great Grimsby,pcon
+E14000704,Folkestone and Hythe,pcon
+E14000707,Gainsborough,pcon
+E14000796,"Liverpool, West Derby",pcon
+E14000655,Croydon North,pcon
+E14000660,Daventry,pcon
+E14000662,Derby North,pcon
+E14000667,Don Valley,pcon
+E14000673,Dulwich and West Norwood,pcon
+E14000644,Colchester,pcon
+E14000650,Coventry North West,pcon
+E14000651,Coventry South,pcon
+E14000639,Cities of London and Westminster,pcon
+E14000631,Chesham and Amersham,pcon
+E14000636,Chipping Barnet,pcon
+E14000637,Chorley,pcon
+E14000620,Carlisle,pcon
+E14000929,Sleaford and North Hykeham,pcon
+E14000930,Slough,pcon
+E14000932,Somerton and Frome,pcon
+E14000856,North West Durham,pcon
+E14000869,Old Bexley and Sidcup,pcon
+E14000858,North West Leicestershire,pcon
+E14000871,Oldham West and Royton,pcon
+E14000909,Rutland and Melton,pcon
+E14000912,Salisbury,pcon
+E14000874,Oxford West and Abingdon,pcon
+E14000877,Penrith and The Border,pcon
+E14000894,Ribble Valley,pcon
+E14000863,Norwich North,pcon
+S14000034,Glasgow South,pcon
+E14000879,"Plymouth, Moor View",pcon
+E14000832,Newcastle upon Tyne East,pcon
+E14000752,Hornsey and Wood Green,pcon
+S14000051,Orkney and Shetland,pcon
+E09000005,Brent,laua
+E06000007,Warrington,laua
+E06000008,Blackburn with Darwen,laua
+E06000014,York,laua
+E06000016,Leicester,laua
+E06000019,"Herefordshire, County of",laua
+E06000024,North Somerset,laua
+E06000033,Southend-on-Sea,laua
+S14000049,North East Fife,pcon
+S14000050,Ochil and South Perthshire,pcon
+W07000045,Llanelli,pcon
+E06000003,Redcar and Cleveland,laua
+E06000004,Stockton-on-Tees,laua
+W07000056,Newport West,pcon
+W07000070,Cynon Valley,pcon
+S14000039,"Inverness, Nairn, Badenoch and Strathspey",pcon
+W07000080,Cardiff South and Penarth,pcon
+E06000036,Bracknell Forest,laua
+E07000064,Rother,laua
+E07000065,Wealden,laua
+E07000067,Braintree,laua
+E07000070,Chelmsford,laua
+E07000075,Rochford,laua
+E07000076,Tendring,laua
+E07000078,Cheltenham,laua
+E07000080,Forest of Dean,laua
+E07000089,Hart,laua
+E07000094,Winchester,laua
+E07000096,Dacorum,laua
+E07000149,South Norfolk,laua
+E07000151,Daventry,laua
+E07000039,South Derbyshire,laua
+E07000066,Basildon,laua
+E07000063,Lewes,laua
+E07000102,Three Rivers,laua
+E07000105,Ashford,laua
+E07000107,Dartford,laua
+E07000123,Preston,laua
+E07000116,Tunbridge Wells,laua
+E07000130,Charnwood,laua
+E07000173,Gedling,laua
+E07000174,Mansfield,laua
+E07000208,Epsom and Ewell,laua
+E07000032,Amber Valley,laua
+E07000041,Exeter,laua
+E12000009,South West,rgn
+E12000008,South East,rgn
+E14000780,Leeds North West,pcon
+E14000781,Leeds West,pcon
+E14000799,Ludlow,pcon
+E14000818,Mid Worcestershire,pcon
+E14000819,Middlesbrough,pcon
+E14000827,New Forest East,pcon
+E14000768,Kensington,pcon
+E14000769,Kettering,pcon
+E14000779,Leeds North East,pcon
+E14000801,Luton South,pcon
+E14000809,"Manchester, Withington",pcon
+E14000810,Mansfield,pcon
+E14000811,Meon Valley,pcon
+E14000838,North Devon,pcon
+E14000762,Isle of Wight,pcon
+E14000741,Hendon,pcon
+1A1,Rural workers and families,oac11
+1B1,Rural life,oac11
+1C1,Rural employment and retirees,oac11
+1C2,Renting rural retirement,oac11
+1C3,Detached rural retirement,oac11
+2C2,Migrant commuters,oac11
+2C3,Professional service cosmopolitans,oac11
+2D1,Urban cultural mix,oac11
+2D3,EU white-collar workers,oac11
+3B2,Bangladeshi mixed employment,oac11
+3C1,Constrained neighbourhoods,oac11
+3C2,Constrained commuters,oac11
+3D3,Old EU tech workers,oac11
+4A3,Commuters with young families,oac11
+4C3,Inner city ethnic mix,oac11
+5A1,White professionals,oac11
+6B4,Older workers and retirement,oac11
+7A1,Transitional Eastern European neighbourhood,oac11
+7A2,Hampered aspiration,oac11
+7D4,Retired city hardship,oac11
+8D1,Young hard-pressed families,oac11
+8D2,Hard-pressed ethnic mix,oac11
+E10000012,Essex,cty
+E10000013,Gloucestershire,cty
+E10000024,Nottinghamshire,cty
+E10000028,Staffordshire,cty
+E06000039,Slough,laua
+E09000009,Ealing,laua
+E06000047,County Durham,laua
+E06000020,Telford and Wrekin,laua
+E09000021,Kingston upon Thames,laua
+E06000026,Plymouth,laua
+E06000034,Thurrock,laua
+E08000034,Kirklees,laua
+E08000037,Gateshead,laua
+E08000004,Oldham,laua
+E08000015,Wirral,laua
+E09000008,Croydon,laua
+E09000007,Camden,laua
+E06000006,Halton,laua
+W07000077,Islwyn,pcon
+S14000047,Motherwell and Wishaw,pcon
+E09000031,Waltham Forest,laua
+E07000203,Mid Suffolk,laua
+E07000205,Suffolk Coastal,laua
+E07000209,Guildford,laua
+E07000217,Woking,laua
+S12000006,Dumfries and Galloway,laua
+E07000137,East Lindsey,laua
+E07000138,Lincoln,laua
+E07000140,South Holland,laua
+E07000178,Oxford,laua
+E07000169,Selby,laua
+E07000171,Bassetlaw,laua
+E07000115,Tonbridge and Malling,laua
+E07000125,Rossendale,laua
+E07000132,Hinckley and Bosworth,laua
+E07000150,Corby,laua
+E07000187,Mendip,laua
+E07000191,West Somerset,laua
+E07000223,Adur,laua
+E07000240,St Albans,laua
+E07000243,Stevenage,laua
+E07000152,East Northamptonshire,laua
+E07000214,Surrey Heath,laua
+E07000109,Gravesham,laua
+S92000003,Scotland,ctry
+E14000585,Bournemouth West,pcon
+E14000586,Bracknell,pcon
+E14000595,Bridgwater and West Somerset,pcon
+E14000600,Bristol North West,pcon
+E14000596,Brigg and Goole,pcon
+E14000817,Mid Sussex,pcon
+E14000825,Morecambe and Lunesdale,pcon
+E14000840,North Durham,pcon
+E14000788,Lewisham West and Penge,pcon
+E14000797,Loughborough,pcon
+E14000800,Luton North,pcon
+E14000870,Oldham East and Saddleworth,pcon
+E14000860,North Wiltshire,pcon
+E14000854,North Warwickshire,pcon
+E14000865,Nottingham East,pcon
+E14000808,"Manchester, Gorton",pcon
+E14000814,Mid Derbyshire,pcon
+E14000844,North East Hampshire,pcon
+E14000853,North Tyneside,pcon
+E14000831,Newcastle upon Tyne Central,pcon
+E14000833,Newcastle upon Tyne North,pcon
+E14000771,Kingston upon Hull East,pcon
+E14000979,Stretford and Urmston,pcon
+E10000031,Warwickshire,cty
+E10000034,Worcestershire,cty
+E07000049,East Dorset,laua
+E07000050,North Dorset,laua
+E07000052,West Dorset,laua
+E07000068,Brentwood,laua
+W06000006,Wrexham,laua
+W06000008,Ceredigion,laua
+E07000090,Havant,laua
+E07000091,New Forest,laua
+E07000103,Watford,laua
+E07000122,Pendle,laua
+E07000009,East Cambridgeshire,laua
+E07000011,Huntingdonshire,laua
+E07000073,Harlow,laua
+E07000083,Tewkesbury,laua
+E07000038,North East Derbyshire,laua
+W06000019,Blaenau Gwent,laua
+E07000034,Chesterfield,laua
+E14000531,Aldridge-Brownhills,pcon
+E14000533,Amber Valley,pcon
+E14000536,Ashford,pcon
+E14000606,Broxbourne,pcon
+E14000618,Cannock Chase,pcon
+E14000616,Camborne and Redruth,pcon
+E14000633,Chichester,pcon
+W99999999,(pseudo) Wales,rgn
+S99999999,(pseudo) Scotland,rgn
+D1,(England/Wales) Rural town and fringe,ru11ind
+D2,(England/Wales) Rural town and fringe in a sparse setting,ru11ind
+E1,(England/Wales) Rural village,ru11ind
+E2,(England/Wales) Rural village in a sparse setting,ru11ind
+1,(Scotland) Large Urban Area,ru11ind
+7,(Scotland) Remote Rural,ru11ind
+Z9,(pseudo) Channel Islands/Isle of Man,ru11ind
+E14000859,North West Norfolk,pcon
+E14000950,South West Devon,pcon
+M99999999,(pseudo) Isle of Man,pcon
+N06000005,East Antrim,pcon
+N06000014,South Antrim,pcon
+S14000005,Argyll and Bute,pcon
+S14000009,"Caithness, Sutherland and Easter Ross",pcon
+E14000558,Bexleyheath and Crayford,pcon
+E14000568,"Birmingham, Yardley",pcon
+W92000004,Wales,ctry
+S14000013,Dumfries and Galloway,pcon
+S14000014,"Dumfriesshire, Clydesdale and Tweeddale",pcon
+S14000016,Dundee West,pcon
+S14000026,Edinburgh West,pcon
+E14001047,Woking,pcon
+E14001056,Wycombe,pcon
+E14001057,Wyre and Preston North,pcon
+S14000001,Aberdeen North,pcon
+S14000003,Airdrie and Shotts,pcon
+E14001039,Wigan,pcon
+E14001052,Worcester,pcon
+E14001045,Witham,pcon
+W07000043,Alyn and Deeside,pcon
+W07000044,Wrexham,pcon
+W07000055,Newport East,pcon
+W07000072,Blaenau Gwent,pcon
+S14000030,Glasgow East,pcon
+S14000031,Glasgow North,pcon
+W07000068,Brecon and Radnorshire,pcon
+W07000073,Bridgend,pcon
+S14000008,"Berwickshire, Roxburgh and Selkirk",pcon
+S14000053,Paisley and Renfrewshire South,pcon
+E14000677,Easington,pcon
+E14000678,East Devon,pcon
+E14000679,East Ham,pcon
+E14000684,Eastbourne,pcon
+E14000694,Epsom and Ewell,pcon
+E14000695,Erewash,pcon
+E14000696,Erith and Thamesmead,pcon
+E14000698,Exeter,pcon
+E14000745,Hertsmere,pcon
+E14000746,Hexham,pcon
+E14000748,High Peak,pcon
+E14000539,Banbury,pcon
+E14000554,Berwick-upon-Tweed,pcon
+E14000540,Barking,pcon
+E14000619,Canterbury,pcon
+E14000622,Castle Point,pcon
+E14000626,Chatham and Aylesford,pcon
+E14000653,Crewe and Nantwich,pcon
+E14000654,Croydon Central,pcon
+E14000658,Darlington,pcon
+E14000659,Dartford,pcon
+E14000751,Hornchurch and Upminster,pcon
+E14000778,Leeds East,pcon
+E14000760,Ilford South,pcon
+E14000676,"Ealing, Southall",pcon
+E14000649,Coventry North East,pcon
+E14000703,Finchley and Golders Green,pcon
+E14000737,Hayes and Harlington,pcon
+E14000672,Dudley South,pcon
+E14000766,Keighley,pcon
+1B3,Ageing rural flat tenants,oac11
+2C1,Migrant families,oac11
+4A1,Social renting young families,oac11
+5B1,Delayed retirement,oac11
+5B2,Communal retirement,oac11
+5B3,Self-sufficient retirement,oac11
+6A1,Indian tech achievers,oac11
+6A3,Detached retirement living,oac11
+6B3,Semi-detached ageing,oac11
+7B2,Deprived neighbourhoods,oac11
+7C2,Constrained young families,oac11
+7D2,Retired independent city dwellers,oac11
+7D3,Retired communal city dwellers,oac11
+8A1,Industrious transitions,oac11
+8C2,Ageing rural industry workers,oac11
+8C3,Renting hard-pressed workers,oac11
+S12000035,Argyll and Bute,laua
+S12000030,Stirling,laua
+S12000019,Midlothian,laua
+S12000020,Moray,laua
+S12000042,Dundee City,laua
+E14000969,Stockport,pcon
+E14000970,Stockton North,pcon
+E14000972,Stoke-on-Trent Central,pcon
+E14000974,Stoke-on-Trent South,pcon
+E14000975,Stone,pcon
+E14000983,Surrey Heath,pcon
+E14000722,Halesowen and Rowley Regis,pcon
+E14000728,Harborough,pcon
+E14000729,Harlow,pcon
+E14000731,Harrow East,pcon
+E14000735,Hastings and Rye,pcon
+E14000736,Havant,pcon
+E14000777,Leeds Central,pcon
+E14000895,Richmond (Yorks),pcon
+E14000896,Richmond Park,pcon
+E14000898,Rochester and Strood,pcon
+E14000901,Romsey and Southampton North,pcon
+E14000904,Rotherham,pcon
+E14000902,Rossendale and Darwen,pcon
+E14001012,Walsall South,pcon
+E14000995,Thurrock,pcon
+E14000996,Tiverton and Honiton,pcon
+E14001005,Twickenham,pcon
+E14000883,Portsmouth North ,pcon
+E14000884,Portsmouth South,pcon
+E14000887,Putney,pcon
+E14000920,Sheffield South East,pcon
+E14000905,Rugby,pcon
+E14000918,Sevenoaks,pcon
+E14000947,South Swindon,pcon
+E14000965,Stafford,pcon
+E14000945,South Staffordshire,pcon
+E14000861,Northampton North,pcon
+E14001008,Vauxhall,pcon
+N09000003,Belfast,laua
+N09000010,"Newry, Mourne and Down",laua
+1A2,Established farming communities,oac11
+1A3,Agricultural communities,oac11
+2A1,Student communal living,oac11
+2A3,Students and professionals,oac11
+2B2,Multicultural student neighbourhood,oac11
+2D2,Highly-qualified quaternary workers,oac11
+3A1,Established renting families,oac11
+3A2,Young families and students,oac11
+3B1,Striving service workers,oac11
+4A2,Private renting new arrivals,oac11
+5A3,Families in terraces and flats,oac11
+6A4,Ageing in suburbia,oac11
+6B1,Multi-ethnic suburbia,oac11
+7A3,Multi-ethnic hardship,oac11
+7C1,Challenged transitionaries,oac11
+7C3,Outer city hardship,oac11
+7D1,Ageing communities and families,oac11
+8B2,Hard pressed rented terraces,oac11
+E07000029,Copeland,laua
+E07000030,Eden,laua
+E07000037,High Peak,laua
+E07000042,Mid Devon,laua
+E07000189,South Somerset,laua
+E07000197,Stafford,laua
+E07000198,Staffordshire Moorlands,laua
+E07000199,Tamworth,laua
+E07000146,King's Lynn and West Norfolk,laua
+E07000147,North Norfolk,laua
+E07000172,Broxtowe,laua
+E07000176,Rushcliffe,laua
+E07000215,Tandridge,laua
+E07000179,South Oxfordshire,laua
+E07000181,West Oxfordshire,laua
+E07000155,South Northamptonshire,laua
+E07000164,Hambleton,laua
+E07000234,Bromsgrove,laua
+E07000238,Wychavon,laua
+S12000029,South Lanarkshire,laua
+S12000026,Scottish Borders,laua
+E07000216,Waverley,laua
+E07000239,Wyre Forest,laua
+S12000014,Falkirk,laua
+S14000002,Aberdeen South,pcon
+S14000004,Angus,pcon
+S14000006,"Ayr, Carrick and Cumnock",pcon
+E14000570,Blackburn,pcon
+E14000574,Blaydon,pcon
+E14000577,Bolsover,pcon
+E14000579,Bolton South East,pcon
+E14000587,Bradford East,pcon
+E14000715,Gravesham,pcon
+E14000718,Greenwich and Woolwich,pcon
+E14000720,Hackney North and Stoke Newington,pcon
+E14000721,Hackney South and Shoreditch,pcon
+E14000726,Hammersmith,pcon
+E14000727,Hampstead and Kilburn,pcon
+E14000730,Harrogate and Knaresborough,pcon
+E14000990,Tewkesbury,pcon
+E14000993,Thirsk and Malton,pcon
+E14001013,Walthamstow,pcon
+E14001014,Wansbeck,pcon
+E14001018,Warrington South,pcon
+E14001020,Washington and Sunderland West,pcon
+E14001043,Wirral South,pcon
+E14001029,West Bromwich East,pcon
+E14001040,Wimbledon,pcon
+E14001054,Worsley and Eccles South,pcon
+E14001055,Worthing West,pcon
+E14001049,Wolverhampton North East,pcon
+E14001059,Wythenshawe and Sale East,pcon
+E14000934,South Cambridgeshire,pcon
+E14000957,Southend West,pcon
+S14000015,Dundee East,pcon
+S14000017,Dunfermline and West Fife,pcon
+E14000959,Spelthorne,pcon
+E14000948,South Thanet,pcon
+E14000962,St Helens North,pcon
+E14000963,St Helens South and Whiston,pcon
+E14000973,Stoke-on-Trent North,pcon
+E14000538,Aylesbury,pcon
+E14000566,"Birmingham, Perry Barr",pcon
+E14000569,Bishop Auckland,pcon
+E14000645,Colne Valley,pcon
+E14000640,City of Chester,pcon
+E14000593,Brentford and Isleworth,pcon
+E14000601,Bristol South,pcon
+E14000663,Derby South,pcon
+E14000541,Barnsley Central,pcon
+E14000545,Basingstoke,pcon
+E14000552,Bedford,pcon
+E14000776,Lancaster and Fleetwood,pcon
+N06000007,Fermanagh and South Tyrone,pcon
+N06000012,North Antrim,pcon
+N06000017,Upper Bann,pcon
+S14000055,"Ross, Skye and Lochaber",pcon
+E06000050,Cheshire West and Chester,laua
+E06000052,Cornwall,laua
+E06000022,Bath and North East Somerset,laua
+E06000023,"Bristol, City of",laua
+E06000029,Poole,laua
+E06000032,Luton,laua
+E06000025,South Gloucestershire,laua
+E06000027,Torbay,laua
+E06000030,Swindon,laua
+E06000035,Medway,laua
+E06000037,West Berkshire,laua
+E06000038,Reading,laua
+E14000604,Bromley and Chislehurst,pcon
+E14000607,Broxtowe,pcon
+E14000608,Buckingham,pcon
+E14000609,Burnley,pcon
+E14000613,Bury St Edmunds,pcon
+E14000621,Carshalton and Wallington,pcon
+E14000630,Cheltenham,pcon
+E10000014,Hampshire,cty
+E10000018,Leicestershire,cty
+E10000021,Northamptonshire,cty
+E10000007,Derbyshire,cty
+E10000008,Devon,cty
+E06000053,Isles of Scilly,laua
+E08000009,Trafford,laua
+E06000045,Southampton,laua
+E06000055,Bedford,laua
+E08000001,Bolton,laua
+E08000005,Rochdale,laua
+E08000010,Wigan,laua
+E08000012,Liverpool,laua
+E08000013,St. Helens,laua
+E10000032,West Sussex,cty
+W06000013,Bridgend,laua
+W06000012,Neath Port Talbot,laua
+W06000024,Merthyr Tydfil,laua
+W06000021,Monmouthshire,laua
+E09000002,Barking and Dagenham,laua
+E09000003,Barnet,laua
+E09000023,Lewisham,laua
+E09000033,Westminster,laua
+E14000921,"Sheffield, Brightside and Hillsborough",pcon
+E14000923,"Sheffield, Heeley",pcon
+E14000928,Skipton and Ripon,pcon
+E14000804,Maidstone and The Weald,pcon
+E14000806,Maldon,pcon
+E14000872,Orpington,pcon
+E14000820,Middlesbrough South and East Cleveland,pcon
+E14000623,Central Devon,pcon
+E14000627,Cheadle,pcon
+E14000628,Chelmsford,pcon
+E14000629,Chelsea and Fulham,pcon
+E14000903,Rother Valley,pcon
+E14000914,Scunthorpe,pcon
+E14000917,Selby and Ainsty,pcon
+E14000841,North East Bedfordshire,pcon
+E14000842,North East Cambridgeshire,pcon
+E14000852,North Thanet,pcon
+E14000864,Norwich South,pcon
+E14000866,Nottingham North,pcon
+E14000891,Redcar,pcon
+E14000893,Reigate,pcon
+E14000899,Rochford and Southend East,pcon
+E14000876,Penistone and Stocksbridge,pcon
+E14000878,Peterborough,pcon
+E14000830,Newbury,pcon
+E14000868,Nuneaton,pcon
+E14000692,"Enfield, Southgate",pcon
+E14000683,East Yorkshire,pcon
+E14000688,Ellesmere Port and Neston,pcon
+E14000813,Mid Bedfordshire,pcon
+E14000815,Mid Dorset and North Poole,pcon
+E14000823,Mitcham and Morden,pcon
+E14000834,Newcastle-under-Lyme,pcon
+E14000750,Holborn and St Pancras,pcon
+E14000753,Horsham,pcon
+E14000754,Houghton and Sunderland South,pcon
+E14000758,Hyndburn,pcon
+A1,(England/Wales) Urban major conurbation,ru11ind
+3,(Scotland) Accessible Small Town,ru11ind
+E14000770,Kingston and Surbiton,pcon
+E14000772,Kingston upon Hull North,pcon
+E14000784,Leicester West,pcon
+E14000792,Lincoln,pcon
+E14000795,"Liverpool, Wavertree",pcon
+E14000669,Doncaster North,pcon
+E14000764,Islington South and Finsbury,pcon
+E12000004,East Midlands,rgn
+S12000038,Renfrewshire,laua
+S12000041,Angus,laua
+S12000036,City of Edinburgh,laua
+E07000004,Aylesbury Vale,laua
+E07000007,Wycombe,laua
+E07000026,Allerdale,laua
+E07000095,Broxbourne,laua
+E07000120,Hyndburn,laua
+E07000121,Lancaster,laua
+E07000099,North Hertfordshire,laua
+E07000108,Dover,laua
+E07000046,Torridge,laua
+E07000047,West Devon,laua
+E07000141,South Kesteven,laua
+E07000144,Broadland,laua
+E07000113,Swale,laua
+E07000114,Thanet,laua
+E07000119,Fylde,laua
+E07000126,South Ribble,laua
+E07000127,West Lancashire,laua
+E07000156,Wellingborough,laua
+E07000170,Ashfield,laua
+E10000029,Suffolk,cty
+E08000019,Sheffield,laua
+E08000021,Newcastle upon Tyne,laua
+E09000014,Haringey,laua
+E07000093,Test Valley,laua
+E07000087,Fareham,laua
+E14000980,Stroud,pcon
+E14000981,Suffolk Coastal,pcon
+E14000985,Sutton Coldfield,pcon
+E14001000,Torridge and West Devon,pcon
+E14001010,Wallasey,pcon
+E14000835,Newton Abbot,pcon
+E14000836,"Normanton, Pontefract and Castleford",pcon
+E14000837,North Cornwall,pcon
+E14000839,North Dorset,pcon
+S14000040,Kilmarnock and Loudoun,pcon
+S14000048,North Ayrshire and Arran,pcon
+S14000043,Linlithgow and East Falkirk,pcon
+S14000044,Livingston,pcon
+E06000010,"Kingston upon Hull, City of",laua
+E06000011,East Riding of Yorkshire,laua
+E06000005,Darlington,laua
+E06000009,Blackpool,laua
+E06000012,North East Lincolnshire,laua
+E06000015,Derby,laua
+E06000017,Rutland,laua
+E06000021,Stoke-on-Trent,laua
+W07000066,Carmarthen West and South Pembrokeshire,pcon
+W07000075,Pontypridd,pcon
+W07000078,Vale of Glamorgan,pcon
+S14000023,Edinburgh North and Leith,pcon
+S14000033,Glasgow North West,pcon
+S14000029,Glasgow Central,pcon
+S14000032,Glasgow North East,pcon
+S14000059,West Dunbartonshire,pcon
+W07000041,Ynys Môn,pcon
+W07000042,Delyn,pcon
+W07000051,Cardiff North,pcon
+W07000052,Rhondda,pcon
+W07000062,Clwyd South,pcon
+S14000022,Edinburgh East,pcon
+S14000058,West Aberdeenshire and Kincardine,pcon
+S14000036,Glenrothes,pcon
+S14000037,Gordon,pcon
+S14000038,Inverclyde,pcon
+E14000783,Leicester South,pcon
+E14000786,Lewes,pcon
+E14000791,Lichfield,pcon
+E14000793,"Liverpool, Riverside",pcon
+E14000807,Manchester Central,pcon
+E14000994,Thornbury and Yate,pcon
+E14001017,Warrington North,pcon
+E14001016,Warley,pcon
+E14001019,Warwick and Leamington,pcon
+E14001042,Windsor,pcon
+E14001022,Waveney,pcon
+S14000057,Stirling,pcon
+S14000024,Edinburgh South,pcon
+E14001036,Westminster North,pcon
+E14001053,Workington,pcon
+S14000054,Perth and North Perthshire,pcon
+W07000071,Merthyr Tydfil and Rhymney,pcon
+E14001058,Wyre Forest,pcon
+E14001062,York Outer,pcon
+S14000019,"East Kilbride, Strathaven and Lesmahagow",pcon
+S14000010,Central Ayrshire,pcon
+S14000045,Midlothian,pcon
+E14000742,Henley,pcon
+E14000773,Kingston upon Hull West and Hessle,pcon
+E14000747,Heywood and Middleton,pcon
+E14000749,Hitchin and Harpenden,pcon
+E14000685,Eastleigh,pcon
+E14000686,Eddisbury,pcon
+E14000699,Fareham,pcon
+E14000700,Faversham and Mid Kent,pcon
+E14000824,Mole Valley,pcon
+E14000828,New Forest West,pcon
+E14000829,Newark,pcon
+E14000936,South Dorset,pcon
+E14000946,South Suffolk,pcon
+E14000977,Stratford-on-Avon,pcon
+E14000982,Sunderland Central,pcon
+E14000925,Shipley,pcon
+E14000926,Shrewsbury and Atcham,pcon
+E14000933,South Basildon and East Thurrock,pcon
+E14001027,Welwyn Hatfield,pcon
+E14001030,West Bromwich West,pcon
+E14001033,West Lancashire,pcon
+E14000906,"Ruislip, Northwood and Pinner",pcon
+E14000908,Rushcliffe,pcon
+E14000915,Sedgefield,pcon
+E14000888,Rayleigh and Wickford,pcon
+E14000892,Redditch,pcon
+E14001002,Tottenham,pcon
+E14001009,Wakefield,pcon
+E14000989,Telford,pcon
+S12000023,Orkney Islands,laua
+S12000024,Perth and Kinross,laua
+S12000039,West Dunbartonshire,laua
+S12000045,East Dunbartonshire,laua
+S12000040,West Lothian,laua
+S12000044,North Lanarkshire,laua
+S12000046,Glasgow City,laua
+E12000003,Yorkshire and The Humber,rgn
+E12000007,London,rgn
+E07000148,Norwich,laua
+E07000212,Runnymede,laua
+E07000213,Spelthorne,laua
+S12000017,Highland,laua
+M83000003,Isle of Man,ctry
+N09000001,Antrim and Newtownabbey,laua
+N09000005,Derry City and Strabane,laua
+N09000007,Lisburn and Castlereagh,laua
+1A4,Older farming communities,oac11
+2A2,Student digs,oac11
+3D2,Established tech workers,oac11
+4B1,Asian terraces and flats,oac11
+4C1,Achieving minorities,oac11
+4C2,Multicultural new arrivals,oac11
+5A2,Multi-ethnic professionals with families,oac11
+6A2,Comfortable suburbia,oac11
+6B2,White suburban communities,oac11
+8A2,Industrious hardship,oac11
+8B1,Deprived blue-collar terraces,oac11
+8C1,Ageing industrious workers,oac11
+8D3,Hard-Pressed European Settlers,oac11
+9Z9,"(pseudo) CI, IoM",oac11
+E14000542,Barnsley East,pcon
+E14000546,Bassetlaw,pcon
+E14000547,Bath,pcon
+E14000548,Batley and Spen,pcon
+E14000549,Battersea,pcon
+E14000556,Beverley and Holderness,pcon
+E14000576,Bognor Regis and Littlehampton,pcon
+E14000582,Boston and Skegness,pcon
+E14000583,Bosworth,pcon
+E14000584,Bournemouth East,pcon
+E14000588,Bradford South,pcon
+N09000004,Causeway Coast and Glens,laua
+N09000006,Fermanagh and Omagh,laua
+E14000559,Birkenhead,pcon
+E14000562,"Birmingham, Hall Green",pcon
+E14000564,"Birmingham, Ladywood",pcon
+E14000573,Blackpool South,pcon
+E09000028,Southwark,laua
+E09000030,Tower Hamlets,laua
+E10000002,Buckinghamshire,cty
+E10000003,Cambridgeshire,cty
+E10000006,Cumbria,cty
+E10000009,Dorset,cty
+W06000005,Flintshire,laua
+W06000010,Carmarthenshire,laua
+W06000011,Swansea,laua
+E07000088,Gosport,laua
+E07000077,Uttlesford,laua
+E07000079,Cotswold,laua
+E07000040,East Devon,laua
+E07000045,Teignbridge,laua
+E07000053,Weymouth and Portland,laua
+E07000027,Barrow-in-Furness,laua
+E07000035,Derbyshire Dales,laua
+E07000082,Stroud,laua
+E07000084,Basingstoke and Deane,laua
+E10000030,Surrey,cty
+E10000027,Somerset,cty
+W06000018,Caerphilly,laua
+E07000048,Christchurch,laua
+N92000002,Northern Ireland,ctry
+E14000706,Fylde,pcon
+N06000001,Belfast East,pcon
+N06000008,Foyle,pcon
+N06000009,Lagan Valley,pcon
+S14000020,East Lothian,pcon
+S14000027,Na h-Eileanan an Iar,pcon
+E14000530,Aldershot,pcon
+E14000535,Ashfield,pcon
+E14000537,Ashton-under-Lyne,pcon
+B1,(England/Wales) Urban minor conurbation,ru11ind
+C1,(England/Wales) Urban city and town,ru11ind
+F1,(England/Wales) Rural hamlet and isolated dwellings,ru11ind
+2,(Scotland) Other Urban Area,ru11ind
+4,(Scotland) Remote Small Town,ru11ind
+6,(Scotland) Accessible Rural,ru11ind
+E14000713,Gosport,pcon
+E14000714,Grantham and Stamford,pcon
+E14000634,Chingford and Woodford Green,pcon
+E14000641,City of Durham,pcon
+E14000690,Eltham,pcon
+E14000656,Croydon South,pcon
+E14000691,Enfield North,pcon
+E14000755,Hove,pcon
+E14000802,Macclesfield,pcon
+E14000803,Maidenhead,pcon
+E14000812,Meriden,pcon
+E14000821,Milton Keynes North,pcon
+E14000822,Milton Keynes South,pcon
+E14000826,Morley and Outwood,pcon
+E14000723,Halifax,pcon
+E14000719,Guildford,pcon
+E14000725,Halton,pcon
+E14000738,Hazel Grove,pcon
+E14000740,Hemsworth,pcon
+E14000843,North East Derbyshire,pcon
+E14000885,Preston,pcon
+E14000848,North Norfolk,pcon
+E14000880,"Plymouth, Sutton and Devonport",pcon
+E14000774,Kingswood,pcon
+E14000612,Bury South,pcon
+E14000890,Reading West,pcon
+E14000867,Nottingham South,pcon
+E14000652,Crawley,pcon
+E07000190,Taunton Deane,laua
+E07000192,Cannock Chase,laua
+E07000194,Lichfield,laua
+E07000195,Newcastle-under-Lyme,laua
+E07000196,South Staffordshire,laua
+E07000200,Babergh,laua
+E07000201,Forest Heath,laua
+E07000202,Ipswich,laua
+E07000128,Wyre,laua
+E07000134,North West Leicestershire,laua
+E07000135,Oadby and Wigston,laua
+E07000136,Boston,laua
+E07000139,North Kesteven,laua
+E07000167,Ryedale,laua
+E07000168,Scarborough,laua
+E07000188,Sedgemoor,laua
+E07000206,Waveney,laua
+E07000224,Arun,laua
+E07000225,Chichester,laua
+E07000237,Worcester,laua
+S12000005,Clackmannanshire,laua
+S12000010,East Lothian,laua
+E07000163,Craven,laua
+E07000241,Welwyn Hatfield,laua
+E07000118,Chorley,laua
+E09000022,Lambeth,laua
+E08000002,Bury,laua
+E09000011,Greenwich,laua
+E08000003,Manchester,laua
+E08000008,Tameside,laua
+E08000006,Salford,laua
+E09000012,Hackney,laua
+E08000016,Barnsley,laua
+E09000013,Hammersmith and Fulham,laua
+E08000017,Doncaster,laua
+E08000022,North Tyneside,laua
+E08000023,South Tyneside,laua
+E14000949,South West Bedfordshire,pcon
+E14000955,"Southampton, Itchen",pcon
+E14000956,"Southampton, Test",pcon
+E14000960,St Albans,pcon
+E14000961,St Austell and Newquay,pcon
+E14000964,St Ives,pcon
+E14000976,Stourbridge,pcon
+W07000047,Swansea West,pcon
+W07000049,Aberavon,pcon
+W07000054,Monmouth,pcon
+W07000067,Carmarthen East and Dinefwr,pcon
+E06000049,Cheshire East,laua
+E06000051,Shropshire,laua
+E08000030,Walsall,laua
+E08000031,Wolverhampton,laua
+E08000032,Bradford,laua
+E08000033,Calderdale,laua
+E09000019,Islington,laua
+E09000024,Merton,laua
+E09000026,Redbridge,laua
+W07000065,Preseli Pembrokeshire,pcon
+E10000019,Lincolnshire,cty
+E06000054,Wiltshire,laua
+E06000040,Windsor and Maidenhead,laua
+E09000010,Enfield,laua
+E06000028,Bournemouth,laua
+E09000020,Kensington and Chelsea,laua
+E06000031,Peterborough,laua
+W07000079,Cardiff West,pcon
