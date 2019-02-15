@@ -2,6 +2,35 @@ import pandas as pd
 
 from tsg_insights.data.utils import format_currency
 
+IDENTIFIER_MAP = {
+    "360G": "No organisation identifier",       # 360G          41190
+    "GB-CHC": "Registered Charity",             # GB-CHC        42190
+    "GB-SC": "Registered Charity (Scotland)",   # GB-SC          7134
+    "GB-NIC": "Registered Charity (NI)",        # GB-NIC          718
+    "GB-COH": "Registered Company",             # GB-COH        11698
+    "GB-GOR": "Government",                     # GB-GOR           13
+    "GB-MPR": "Mutual",                         # GB-MPR           32
+    "GB-NHS": "NHS",                            # GB-NHS           14
+    "GB-UKPRN": "School/University/Education",  # GB-UKPRN         48
+    "GB-EDU": "School/University/Education",    # GB-EDU          255
+    "GB-SHPE": "Social Housing Provider",
+    "GB-LAE": "Local Authority",                # GB-LAE           39
+    "GB-LAS": "Local Authority",                # GB-LAS            2
+    "GB-REV": "Registered Charity (HMRC)",      # GB-REV           92
+    "US-EIN": "US - registered with IRS",       # US-EIN           38
+    "ZA-NPO": "South Africa - registered with Nonprofit Organisation Directorate", # ZA-NPO           12
+    # IM-GR             8
+    # NL-KVK            3
+    # GG-RCE            3
+    # XM-DAC            2
+    # IL-ROC            2
+    # BE-BCE_KBO        2
+    # CA-CRA_ACR        2
+    # ZA-PBO            2
+    # SE-BLV            1
+    # CH-FDJP           1
+    # JE-FSC            1
+}
 
 def get_imd_data(df):
 
@@ -63,20 +92,6 @@ def get_org_type(df):
 
 
 def get_identifier_schemes(df):
-    identifier_map = {
-        "360G": "No organisation identifier",
-        "GB-CHC": "Registered Charity",
-        "GB-SC": "Registered Charity (Scotland)",
-        "GB-NIC": "Registered Charity (Scotland)",
-        "GB-COH": "Registered Company",
-        "GB-GOR": "Government",
-        "GB-MPR": "Mutual",
-        "GB-NHS": "NHS",
-        "GB-UKPRN": "School/University/Education",
-        "GB-EDU": "School/University/Education",
-        "GB-SHPE": "Social Housing Provider",
-        "GB-LAE": "Local Authority",
-    }
     identifier_schemes = df["Recipient Org:0:Identifier"].apply(
         lambda x: "360G" if x.startswith("360G-") else "-".join(x.split("-")[:2]))
 
@@ -85,7 +100,7 @@ def get_identifier_schemes(df):
     ).fillna(
         "No organisation identifier"
     ).apply(
-        lambda x: identifier_map.get(x, x)
+        lambda x: IDENTIFIER_MAP.get(x, x)
     )
 
 
