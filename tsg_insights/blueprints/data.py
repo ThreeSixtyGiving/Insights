@@ -1,4 +1,7 @@
-from flask import Blueprint, jsonify, request
+import io
+
+from flask import Blueprint, jsonify, request, Response, abort
+import pandas as pd
 
 from tsg_insights_dash.data.filters import get_filtered_df
 from tsg_insights_dash.data.results import get_statistics, CHARTS
@@ -62,7 +65,7 @@ def download_file(fileid, format):
     if df is not None:
         if format == "csv":
             csvdata = df.to_csv(index=False)
-            return flask.Response(
+            return Response(
                 csvdata,
                 mimetype="text/csv",
                 headers={"Content-disposition":
@@ -72,12 +75,12 @@ def download_file(fileid, format):
             writer = pd.ExcelWriter(output, engine='xlsxwriter')
             csvdata = df.to_excel(writer, sheet_name='grants', index=False)
             writer.save()
-            return flask.Response(
+            return Response(
                 output.getvalue(),
                 mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 headers={"Content-disposition":
                          "attachment; filename={}.xlsx".format(fileid)})
         elif format == "json":
             pass
-        flask.abort(400)
-    flask.abort(404)
+        abort(400)
+    abort(404)

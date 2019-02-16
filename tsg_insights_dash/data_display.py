@@ -4,6 +4,7 @@ import re
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
+from flask import url_for
 
 from app import app
 from tsg_insights.data.cache import get_from_cache, get_cache
@@ -149,6 +150,14 @@ def dashboard_output(fileid, *args):
     # charts.append(imd_chart(df))
 
     outputs.extend(charts)
+
+    outputs.append(html.Div(children=[
+        html.H2(className='results-page__body__section-title', children="Download the results"),
+        html.Ul(children=[
+            html.Li(html.A(href=url_for('data.download_file', fileid=fileid, format='csv'), target="_blank", children='CSV Download')),
+            html.Li(html.A(href=url_for('data.download_file', fileid=fileid, format='xlsx'), target="_blank", children='Excel Download')),
+        ])
+    ]))
 
     return outputs
 
