@@ -24,8 +24,8 @@ POSTCODE_FIELDS = ['ctry', 'cty', 'laua', 'pcon', 'rgn', 'imd', 'ru11ind',
                    'oac11', 'lat', 'long']  # fields to care about from the postcodes)
 
 
-def get_dataframe_from_file(filename, contents=None):
-    fileid = get_fileid(contents, filename)
+def get_dataframe_from_file(filename, contents, date=None):
+    fileid = get_fileid(contents, filename, date)
 
     # 2. Check cache for file
     df = get_from_cache(fileid)
@@ -37,7 +37,8 @@ def get_dataframe_from_file(filename, contents=None):
     cache = prepare_lookup_cache()
     job = get_current_job()
 
-    data_preparation = DataPreparation(df, cache, job, url=url)
+    data_preparation = DataPreparation(
+        df, cache, job, filename=filename, contents=contents)
     data_preparation.stages = [LoadDatasetFromFile] + data_preparation.stages
     df = data_preparation.run()
 

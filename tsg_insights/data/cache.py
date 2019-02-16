@@ -4,6 +4,7 @@ import logging
 import json
 
 from redis import StrictRedis, from_url
+from .utils import CustomJSONEncoder
 
 REDIS_DEFAULT_URL = 'redis://localhost:6379/0'
 REDIS_ENV_VAR = 'REDIS_URL'
@@ -32,7 +33,7 @@ def save_to_cache(fileid, df, prefix=CACHE_DEFAULT_PREFIX, headers=None, url=Non
         "headers": headers,
         "url": url,
     }
-    r.hset("files", fileid, json.dumps(metadata))
+    r.hset("files", fileid, json.dumps(metadata, default=CustomJSONEncoder().default))
     logging.info("Dataframe [{}] metadata saved to redis".format(fileid))
 
 
