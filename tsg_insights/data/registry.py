@@ -10,10 +10,8 @@ THREESIXTY_STATUS_JSON = 'https://storage.googleapis.com/datagetter-360giving-ou
 DEFAULT_CACHE = 60*60*24
 REG_KEY = "threesixty_status"
 
-# fetch the 360Giving registry
-
-
 def get_registry(reg_url=THREESIXTY_STATUS_JSON, cache_expire=DEFAULT_CACHE, skip_cache=False):
+    # fetch the 360Giving registry
     r = get_cache()
     if not skip_cache:
         reg = r.get(REG_KEY)

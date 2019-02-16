@@ -20,8 +20,8 @@ def list_to_string(l, oxford_comma='auto', separator=", ", as_list=False):
     if as_list:
         return_list = [l[0]]
         for i in l[1:-1]:
-            return_list.append(i)
             return_list.append(separator)
+            return_list.append(i)
         if oxford_comma:
             return_list.append(separator)
         return_list.append(" and ")
@@ -30,7 +30,7 @@ def list_to_string(l, oxford_comma='auto', separator=", ", as_list=False):
 
     return "{}{} and {}".format(
         separator.join(l[0:-1]),
-        separator if oxford_comma else "",
+        separator.strip() if oxford_comma else "",
         l[-1]
     )
 
