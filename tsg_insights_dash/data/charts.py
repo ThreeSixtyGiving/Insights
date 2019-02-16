@@ -260,9 +260,9 @@ def awards_over_time_chart(df):
 def region_and_country_chart(df):
     data = CHARTS['ctry_rgn']['get_results'](df)
 
-    if not data or (df["__geo_ctry"].count() + df["__geo_rgn"].count()) == 0:
+    if not isinstance(data, (pd.DataFrame, pd.Series)) or (df["__geo_ctry"].count() + df["__geo_rgn"].count()) == 0:
         return message_box(
-            'Region and Country',
+            'UK Region and Country',
             '''This chart can\'t be shown as there are no recipients in the data with 
 income data. If your data contains grants to charities, you can add charity
 numbers to your data to show a chart of their latest income.
@@ -285,7 +285,7 @@ numbers to your data to show a chart of their latest income.
                 'displayModeBar': False
             }
         ),
-        'Region and Country',
+        'UK Region and Country',
         '(number of grants)',
         description='''Based on the registered address of a charity or company
 (or a postcode if included with the grant data). Only available for registered
@@ -450,7 +450,7 @@ def location_map(df, mapbox_access_token=None, mapbox_style=None):
         geo = geo.groupby(["__geo_lat", "__geo_long", popup_col]).size().rename("grants").reset_index()
     except KeyError as e:
         return message_box(
-            'Location of grant recipients',
+            'Location of UK grant recipients',
             [
                 '''An error occured when attempting to show the map. Error: ''',
                 html.Pre(str(e))
@@ -460,7 +460,7 @@ def location_map(df, mapbox_access_token=None, mapbox_style=None):
 
     if len(geo) == 0:
         return message_box(
-            'Location of grant recipients',
+            'Location of UK grant recipients',
             '''Map cannot be shown. No location data is available.''',
             error=True
         )
@@ -513,7 +513,7 @@ def location_map(df, mapbox_access_token=None, mapbox_style=None):
                 'displayModeBar': False
             }
         ),
-        'Location of grant recipients',
+        'Location of UK grant recipients',
         description='''Showing the location of **{:,.0f}** grants out of {:,.0f}
         
 Based on the registered address of a charity or company
