@@ -10,7 +10,7 @@ from flask.cli import AppGroup
 from rq import Worker, Queue, Connection
 from rq_win import WindowsWorker
 
-from tsg_insights.data.cache import redis_cache
+from ..data.cache import redis_cache
 
 cli = AppGroup('worker')
 
