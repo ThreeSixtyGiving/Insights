@@ -76,7 +76,7 @@ const track_job = function(jobid){
                          */
                         uploadProgress.innerHTML = `
                                     <p>Stage ${jobStatus.progress['stage'] + 1} of ${jobStatus.stages.length}</p>
-                                    <p>${jobStatus.stages[jobStatus.progress['stage']]}</p>
+                                    <p>${jobStatus.stages[jobStatus.progress['stage']+1]}</p>
                                     <p>${jobStatus.progress['progress'][0]} of ${jobStatus.progress['progress'][1]}</p>
                                     `;
                         break;
