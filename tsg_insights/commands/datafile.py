@@ -82,13 +82,26 @@ def cli_remove_file(fileid):
     delete_from_cache(fileid)
 
 
+@cli.command('removeall')
+def cli_remove_all_files():
+    click.confirm('This will delete all cached data. Are you sure you want to continue?', abort=True)
+    cache = get_cache()
+    for k, c in cache.hscan_iter("files"):
+        click.echo("Deleting file: {}".format(k.encode("utf8")))
+        delete_from_cache(k.encode("utf8"))
+
+
 @cli.command('preview')
 @click.argument('fileid')
-def cli_preview_file(fileid):
+@click.option('--field')
+def cli_preview_file(fileid, field=None):
     df = get_from_cache(fileid)
 
     cli_header("Columns")
     click.echo(df.columns.tolist())
 
     cli_header("Preview")
-    click.echo(df)
+    if field:
+        click.echo(df[field].to_frame())
+    else:
+        click.echo(df)
