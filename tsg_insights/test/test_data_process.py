@@ -58,10 +58,10 @@ class DummyCache(dict):
     def hset(self, key, field, value):
         if not key in self:
             self[key] = {}
-        self[key][field] = value
+        self[key][field] = value.encode() if isinstance(value, str) else value
 
     def hget(self, key, field):
-        return self.get(key, {}).get(field, {})
+        return self.get(key, {}).get(field)
 
     def hscan_iter(self, key):
         for v in self.get(key, {}).items():
@@ -258,7 +258,7 @@ def test_geo_merge():
             cache["postcode"][pc.encode()] = data.read()
 
     # get sample geodata
-    cache["geocodes"] = fetch_geocodes()
+    cache = prepare_lookup_cache(cache)
 
     df = pd.DataFrame({
         "Recipient Org:0:Postal Code": ["SE1 1AA", "L4 0TH", "M1A 1AM", "L4 0TH", None],
@@ -273,6 +273,7 @@ def test_geo_merge():
     assert len(result_df) == 5  # no rows should have been deleted
     # these rows have been matched with the cache
     assert len(result_df["__geo_ctry"].dropna()) == 3
+    assert result_df.iloc[1]["__geo_laua"] == "Liverpool"
 
 
 def test_add_extra_fields():

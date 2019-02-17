@@ -2,6 +2,7 @@ import base64
 import json
 import io
 import os
+import logging
 
 import pandas as pd
 import requests
@@ -76,13 +77,14 @@ def get_dataframe_from_url(url):
     return (fileid, url, headers)
 
 
-def prepare_lookup_cache():
-    r = get_cache()
+def prepare_lookup_cache(cache=None):
+    if cache is None:
+        cache = get_cache()
 
-    if not r.exists("geocodes"):
+    if not cache.exists("geocodes"):
         for g, name in fetch_geocodes().items():
-            r.hset("geocodes", g, name)
-    return r
+            cache.hset("geocodes", g, name)
+    return cache
 
 
 def fetch_geocodes():
@@ -135,6 +137,7 @@ class DataPreparation(object):
         self._setup_job_meta()
         for k, Stage in enumerate(self.stages):
             stage = Stage(df, self.cache, self.job, **self.attributes)
+            logging.info(stage.name)
             df = stage.run()
             self._progress_job(k)
         return df
@@ -474,6 +477,15 @@ class MergeGeoData(DataPreparationStage):
     name = 'Add geo data'
     POSTCODE_FIELDS = POSTCODE_FIELDS
 
+    def _convert_geocode(self, areatype, geocode_code):
+        geocode_name = self.cache.hget(
+            "geocodes", "-".join([areatype, str(geocode_code)]))
+        if not geocode_name:
+            return geocode_code
+        if isinstance(geocode_name, bytes):
+            return geocode_name.decode("utf8")
+        return geocode_name
+
     def _create_postcode_df(self):
         postcode_rows = []
         for k, c in self.cache.hscan_iter("postcode"):
@@ -488,12 +500,18 @@ class MergeGeoData(DataPreparationStage):
         # swap out names for codes
         for c in postcode_df.columns:
             postcode_df.loc[:, c] = postcode_df[c].apply(
-                lambda x: self.cache.hget("geocodes", "-".join([c, str(x)])))
+                lambda x: self._convert_geocode(c, str(x))
+            ).fillna(postcode_df[c])
             if postcode_df[c].dtype == 'object':
-                postcode_df.loc[:, c] = postcode_df[c].str.replace(
-                    r"\(pseudo\)", "")
-                postcode_df.loc[postcode_df[c].fillna(
-                    "").str.endswith("99999999"), c] = None
+                postcode_df.loc[:, c] = postcode_df[c].str.replace(r"\(pseudo\)", "")
+                postcode_df.loc[
+                    postcode_df[c].fillna("")=="N99999999",
+                    c
+                ] = "Northern Ireland"
+                postcode_df.loc[
+                    postcode_df[c].fillna("").str.endswith("99999999"),
+                    c
+                ] = None
 
         return postcode_df
 

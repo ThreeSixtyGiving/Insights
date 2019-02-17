@@ -21,24 +21,10 @@ def check_redis_cache():
     }
     return json.dumps(cache_contents)
 
-
-@bp.route('/refresh_lookup_cache')
-def refresh_lookup_cache():
-    # prepare the cache
-    r = get_cache()
-    cache = r.get("lookup_cache")
-
-    if cache is None:
-        cache = {
-            "charity": {},
-            "company": {},
-            "postcode": {},
-            "geocodes": {}
-        }
-    else:
-        cache = json.loads(cache.decode("utf8"))
-
-    cache["geocodes"] = fetch_geocodes()
-
-    r.set("lookup_cache", json.dumps(cache))
-    return json.dumps(cache["geocodes"])
+@bp.route('/geocodes')
+def view_geocodes():
+    cache = get_cache()
+    return jsonify({
+        k.decode("utf8"): c.decode("utf8")
+        for k, c in cache.hscan_iter("geocodes")
+    })
