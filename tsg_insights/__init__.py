@@ -66,15 +66,18 @@ def create_app(test_config=None):
     app.cli.add_command(worker.cli)
     app.cli.add_command(datafile.cli)
 
+    # where to serve images from
     @app.route('/images/<path:path>')
     def send_images(path):
         return send_from_directory('static/images', path)
 
+    # add caching
     one_week_in_seconds = 60*60*24*7
     requests_cache.install_cache(
         backend='redis',
         connection=get_cache(),
-        expire_after=one_week_in_seconds
+        expire_after=one_week_in_seconds,
+        allowable_methods=('GET', 'HEAD',),
     )
 
     return app
