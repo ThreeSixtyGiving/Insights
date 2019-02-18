@@ -7,7 +7,6 @@ for (const modal of modals) {
         trigger.addEventListener('click', (event) => {
             event.preventDefault();
             modal.classList.remove("hidden");
-            
         });
     }
 
@@ -17,7 +16,6 @@ for (const modal of modals) {
             modal.classList.add("hidden");
         });
     }
-    console.log(modal.id);
 
     if(urlParams.has(modal.id)){
         trigger.click();
@@ -62,10 +60,29 @@ const track_job = function(jobid){
                         break;
 
                     case "processing-error":
-                        uploadProgress.innerHTML = `
-                            <p>Error processing the file</p>
-                            <pre>${jobStatus.exc_info}</pre>
-                            `;
+                        var p = document.createElement('p');
+                        p.innerText = 'Error processing the file ';
+                        var e_details = document.createElement('div');
+                        e_details.innerHTML = `<pre>${jobStatus.exc_info}</pre>`;
+                        e_details.style['display'] = 'none';
+                        e_details.classList.add("hidden");
+                        var e_toggle = document.createElement('a');
+                        e_toggle.innerText = 'Show error';
+                        e_toggle.setAttribute('href', '#');
+                        e_toggle.addEventListener('click', (event) => {
+                            event.preventDefault();
+                            e_details.classList.toggle('hidden');
+                            if(e_details.classList.contains('hidden')){
+                                e_toggle.innerText = 'Show error';
+                                e_details.style['display'] = 'none';
+                            } else {
+                                e_toggle.innerText = 'Hide error';
+                                e_details.style['display'] = 'inherit';
+                            }
+                        })
+                        p.append(e_toggle);
+                        uploadProgress.innerHTML = '';
+                        uploadProgress.append(p, e_details);
                         clearInterval(intervalID);
                         break;
 
@@ -168,7 +185,6 @@ dropzone.ondrop = function (event) {
 
     const filesArray = event.dataTransfer.files;
     for (let i = 0; i < filesArray.length; i++) {
-        console.log(filesArray[i]);
         sendFile(filesArray[i]);
     }
 }
@@ -179,7 +195,6 @@ fileInput.onchange = function (event) {
 
     const filesArray = event.target.files;
     for (let i = 0; i < filesArray.length; i++) {
-        console.log(filesArray[i]);
         sendFile(filesArray[i]);
     }
 }
