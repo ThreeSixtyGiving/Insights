@@ -11,12 +11,7 @@ bp = Blueprint('home', __name__)
 @bp.route('/')
 def index():
     registry = process_registry(None, app.config.get("THREESIXTY_STATUS_JSON"))
-    newsletter = dict(
-        form_action=app.config.get("NEWSLETTER_FORM_ACTION"),
-        form_u=app.config.get("NEWSLETTER_FORM_U"),
-        form_id=app.config.get("NEWSLETTER_FORM_ID"),
-    )
-    return render_template('index.html.j2', registry=registry, newsletter=newsletter)
+    return render_template('index.html.j2', registry=registry)
 
 @bp.route('/about')
 def about():
