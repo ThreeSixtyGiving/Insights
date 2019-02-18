@@ -49,15 +49,24 @@ DEFAULT_LAYOUT = {
 def chart_title(title, subtitle=None, description=None):
     return html.Figcaption(className='', children=[
         html.H2(className='results-page__body__section-title', children=title),
-        (html.P(className='', children=subtitle) if subtitle else None),
-        (dcc.Markdown(className='', children=description) if description else None),
+        (html.P(className='results-page__body__section-subtitle', children=subtitle) if subtitle else None),
+        (dcc.Markdown(className='results-page__body__section-description', children=description) if description else None),
     ])
 
-def chart_wrapper(chart, title, subtitle=None, description=None):
+def chart_wrapper(chart, title, subtitle=None, description=None, children=[]):
     return html.Figure(className='', children=[
         chart_title(title, subtitle, description),
         chart
-    ])
+    ] + children)
+
+def chart_n(count, label='grant'):
+    return html.Div(
+        className='results-page__body__section-note',
+        children='Based on {:,.0f} {}.'.format(
+            count,
+            pluralize(label, count)
+        )
+    )
 
 def message_box(title, contents, error=False):
     if isinstance(contents, str):
@@ -127,7 +136,7 @@ def funder_chart(df):
 
 def grant_programme_chart(df):
 
-    if "Grant Programmes:Title" not in df.columns or len(df["Grant Programmes:Title"].unique()) <= 1:
+    if "Grant Programme:0:Title" not in df.columns or len(df["Grant Programme:0:Title"].unique()) <= 1:
         return
 
     data = CHARTS['grant_programmes']['get_results'](df)
@@ -144,7 +153,8 @@ def grant_programme_chart(df):
             }
         ),
         'Grant programmes',
-        '(number of grants)'
+        '(number of grants)',
+        children=[chart_n(data.sum(), 'grant')],
     )
 
 
@@ -163,6 +173,7 @@ def amount_awarded_chart(df):
         ),
         'Amount awarded',
         '(number of grants)',
+        children=[chart_n(data.sum(), 'grant')],
     )
 
 def org_identifier_chart(df):
@@ -180,6 +191,7 @@ def org_identifier_chart(df):
         ),
         'Identifier scheme',
         '(number of grants)',
+        children=[chart_n(data.sum(), 'grant')],
     )
 
 def awards_over_time_chart(df):
@@ -206,7 +218,7 @@ def awards_over_time_chart(df):
     elif (data['max'] - data['min']) >= 1:
         xbins_size = 'M3'
 
-    data = [dict(
+    chart_data = [dict(
         x = data['all'],
         autobinx = False,
         autobiny=True,
@@ -247,7 +259,7 @@ def awards_over_time_chart(df):
         dcc.Graph(
             id="awards_over_time_chart",
             figure={
-                'data': data,
+                'data': chart_data,
                 'layout': layout
             },
             config={
@@ -255,7 +267,8 @@ def awards_over_time_chart(df):
             }
         ),
         'Award Date',
-        '(number of grants)'
+        '(number of grants)',
+        children=[chart_n(len(data['all']), 'grant')],
     )
 
 
@@ -275,6 +288,10 @@ This can be added by using charity or company numbers, or by including a postcod
     layout['yaxis']['visible'] = True
     layout['xaxis']['visible'] = False
 
+    count_without_unknown = data["Grants"].sum()
+    if ("Unknown", "Unknown") in data.index:
+        count_without_unknown -= data.loc[("Unknown", "Unknown"), "Grants"]
+
     return chart_wrapper(
         dcc.Graph(
             id="region_and_country_chart",
@@ -290,7 +307,8 @@ This can be added by using charity or company numbers, or by including a postcod
         '(number of grants)',
         description='''Based on the registered address of a charity or company
 (or a postcode if included with the grant data). Only available for registered
-charities or companies, or those grants which contain a postcode.'''
+charities or companies, or those grants which contain a postcode.''',
+        children=[chart_n(count_without_unknown, 'grant')],
     )
 
 
@@ -316,7 +334,8 @@ def organisation_type_chart(df):
                     'displayModeBar': False
                 }
             ),
-            title, subtitle, description=description
+            title, subtitle, description=description,
+            children=[chart_n(data.sum(), 'grant')],
         )
 
 
@@ -341,7 +360,8 @@ def organisation_type_chart(df):
                 'displayModeBar': False
             }
         ),
-        title, subtitle, description=description
+        title, subtitle, description = description,
+        children = [chart_n(data.sum(), 'grant')],
     )
 
 
@@ -370,6 +390,7 @@ the income of organisations.
         ),
         'Latest income of charity recipients',
         '(number of grants)',
+        children=[chart_n(data.sum(), 'grant')],
     )
 
 def organisation_age_chart(df):
@@ -397,7 +418,8 @@ the age of organisations.
         ),
         'Age of recipient organisations',
         '(number of grants)',
-        description='Organisation age uses the registration date of that organisation. Based only on recipients with charity or company numbers.'
+        description='Organisation age uses the registration date of that organisation. Based only on recipients with charity or company numbers.',
+        children=[chart_n(data.sum(), 'grant')],
     )
 
 def imd_chart(df):
@@ -428,9 +450,10 @@ def imd_chart(df):
         ),
         'Index of multiple deprivation',
         '(number of grants)',
-            description='''Shows the number of grants made in each decile of deprivation in England, 
-            from 1 (most deprived) to 10 (most deprived). Based on the postcode included with the grant
-            or on an organisation's registered postcode, so may not reflect where grant activity took place.'''
+        description='''Shows the number of grants made in each decile of deprivation in England, 
+        from 1 (most deprived) to 10 (most deprived). Based on the postcode included with the grant
+        or on an organisation's registered postcode, so may not reflect where grant activity took place.''',
+        children=[chart_n(data.sum(), 'grant')],
     )
 
 def location_map(df, mapbox_access_token=None, mapbox_style=None):
@@ -521,7 +544,8 @@ Based on the registered address of a charity or company
 (or a postcode if included with the grant data). Only available for UK registered
 charities or companies, or those grants which contain a postcode.'''.format(
             grant_count, len(df)
-)
+        ),
+        children=[chart_n(geo["grants"].sum(), 'grant')],
     )
 
 def get_statistics(df):
