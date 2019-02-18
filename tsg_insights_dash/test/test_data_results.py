@@ -4,8 +4,8 @@ from tsg_insights_dash.data.results import *
 
 def test_get_ctry_rgn():
     df = pd.DataFrame({
-        "__geo_ctry": ["England", "England", "England", "Unknown", "Scotland", "Northern Ireland", None],
-        "__geo_rgn": ["South East", "South West", "South West", "Unknown", "Scotland", "Unknown", None],
+        "__geo_ctry": ["England", "England", "England", None, "Scotland", "Northern Ireland", None],
+        "__geo_rgn": ["South East", "South West", "South West", None, "Scotland", None, None],
         "Title": ["A", "B", "C", "D", "E", "F", "G"],
         "Amount Awarded": [300, 150, 200, 400, 500, 600, 0]
     })
@@ -33,5 +33,5 @@ def test_get_ctry_rgn():
     assert ctry_rgn.iloc[-1]["Grants"] == 2
 
     # check sort order
-    assert ctry_rgn.iloc[0]["Grants"] == 2
-    assert ctry_rgn.iloc[-2]["Grants"] == 1
+    assert ctry_rgn.iloc[0].name == ("Scotland", "Scotland")
+    assert ctry_rgn.iloc[-2].name == ("England", "South East")

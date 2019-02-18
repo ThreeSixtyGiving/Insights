@@ -81,31 +81,37 @@ def get_ctry_rgn(df):
     if "__geo_ctry" not in df.columns or "__geo_rgn" not in df.columns:
         return None
 
-    # ensure Northern Ireland is correctly labelled
-    rgn_field = df.loc[:, "__geo_rgn"]
-    rgn_field.loc[
-        df["__geo_ctry"].fillna("").eq("Northern Ireland") & df["__geo_rgn"].fillna("").eq("Unknown")
-    ] = "Northern Ireland"
+    REGION_ORDER = [
+        ("Scotland", "Scotland"),
+        ("Northern Ireland", "Northern Ireland"),
+        ("Wales", "Wales"),
+        ("England", "North East"),
+        ("England", "North West"),
+        ("England", "Yorkshire and The Humber"),
+        ("England", "West Midlands"),
+        ("England", "East Midlands"),
+        ("England", "East of England"),
+        ("England", "London"),
+        ("England", "South West"),
+        ("England", "South East"),
+        ("Isle of Man", "Isle of Man"),
+        ("Unknown", "Unknown"),
+    ]
 
+    # generate region groupby
     ctry_rgn = df.groupby([
-        df["__geo_ctry"].fillna("Unknown"),
-        rgn_field.fillna("Unknown"),
+        df["__geo_ctry"].fillna("Unknown").str.strip(),
+        # ensure countries where region is null are correctly labelled
+        df.loc[:, "__geo_rgn"].fillna(df["__geo_ctry"]).fillna("Unknown").str.strip(),
     ]).agg({
         "Amount Awarded": "sum",
         "Title": "size"
     }).rename(columns={"Title": "Grants"})
-    # ctry_rgn.index = ctry_rgn.index.map(
-    #     lambda x: " - ".join(x) if x[0].strip() != x[1].strip() else x[0].strip())
 
-    # sort by values
-    ctry_rgn = ctry_rgn.sort_values("Grants", ascending=False)
-
-    # Move unknown region to the end
-    unknown = ("Unknown", "Unknown")
+    # Sort from North -> South
     idx = ctry_rgn.index.tolist()
-    if unknown in idx:
-        idx = [i for i in idx if i != unknown] + [unknown]
-    ctry_rgn = ctry_rgn.reindex(idx)
+    new_idx = [i for i in REGION_ORDER if i in idx] + [i for i in idx if i not in REGION_ORDER]
+    ctry_rgn = ctry_rgn.reindex(new_idx)
 
     return ctry_rgn
 
