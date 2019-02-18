@@ -101,6 +101,13 @@ layout = html.Div(id="dashboard-container", className='results-page', children=[
                         html.Div(className="results-page__menu__subsection", children=[
                             html.A(id='df-reset-filters', href='#',
                                    className='results-page__menu__back', children='Reset all filters')
+                        ]),
+                        html.Div(className="results-page__menu__subsection", children=[
+                            html.H4(className='results-page__menu__back', children='Feedback'),
+                            html.P(className='results-page__menu__back', children='Tell us what you think'),
+                            html.A(className='results-page__menu__back',
+                                   href='mailto:labs@threesixtygiving.org',
+                                   children='labs@threesixtygiving.org'),
                         ])
                     ]),
                 ]),
