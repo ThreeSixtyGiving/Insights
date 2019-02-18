@@ -31,6 +31,9 @@ def create_app(test_config=None):
         MAPBOX_ACCESS_TOKEN=os.environ.get("MAPBOX_ACCESS_TOKEN"),
         MAPBOX_STYLE=os.environ.get("MAPBOX_STYLE"),
 
+        # limit of file size for the tool
+        FILE_SIZE_LIMIT=os.environ.get("FILE_SIZE_LIMIT", 50000000),
+
         # Redis variables - not set here
         # REDIS_DEFAULT_URL='redis://localhost:6379/0' # default URL for redis instance
         # REDIS_ENV_VAR='REDIS_URL'                    # name of the environmental variable that will be looked up for the redis url

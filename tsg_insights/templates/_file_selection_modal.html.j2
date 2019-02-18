@@ -13,7 +13,7 @@
             <li class="homepage__data-selection__set">
                 <h4 class="homepage__data-selection__set-name">{{ publisher }}</h4>
                 <ul class="homepage__data-selection__data-list">
-                    {% for file in files %}
+                        {% if file["file_size"] < config['FILE_SIZE_LIMIT'] %}
                     <li class="homepage__data-selection__data-list__item">
                         <a href="/fetch/registry/{{ file.identifier }}" class="fetch-from-registry" data-identifier="{{ file.identifier }}">
                             <ul>
@@ -24,6 +24,16 @@
                             </ul>
                         </a>
                     </li>
+                        {% else %}
+                        <li class="homepage__data-selection__data-list__item">
+                            <ul>
+                                <li class="homepage__data-selection__data-list__item__data-fixed"><strong>[Not available due to large file size]</strong> {{ file.title }}</li>
+                                <li class="homepage__data-selection__data-list__item__data-notfixed">{{ "{:,.0f} records".format(file.grant_count) }}</li>
+                                <li class="homepage__data-selection__data-list__item__data-notfixed">{{ file.award_date }}</li>
+                                <li class="homepage__data-selection__data-list__item__data-notfixed">{{ file.grant_amount }}</li>
+                            </ul>
+                        </li>
+                        {% endif %}
                     {% endfor %}
                 </ul>
             </li>

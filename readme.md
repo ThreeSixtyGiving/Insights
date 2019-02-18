@@ -36,6 +36,9 @@ THREESIXTY_STATUS_JSON=https://storage.googleapis.com/datagetter-360giving-outpu
 # configuration for the mapbox map - an access token is needed for the map to work
 MAPBOX_ACCESS_TOKEN=token_goes_here
 MAPBOX_STYLE=mapbox://styles/davidkane/cjmtr1n101qlz2ruqszjcmhls
+
+# files larger than this limit are not allowed on the site
+FILE_SIZE_LIMIT=50000000
 ```
 
 ### Find your mapbox access token

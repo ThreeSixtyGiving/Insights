@@ -2,7 +2,7 @@ import logging
 import sys
 
 import click
-from flask import Flask, url_for
+from flask import Flask, url_for, current_app
 from flask.cli import AppGroup
 from tqdm import tqdm
 import requests
@@ -38,7 +38,14 @@ def cli_fetch_file(url):
 
 @cli.command('fetchall')
 @click.argument('output', type=click.Path())
-def cli_fetch_all_files(output):
+@click.option('--file-limit', default=None, type=int, help='maximum file size to import')
+def cli_fetch_all_files(output, file_limit):
+
+    if not file_limit:
+        file_limit = current_app.config.get("FILE_SIZE_LIMIT")
+    if file_limit:
+        click.echo("Skipping files larger than {:,.0f} bytes".format(file_limit))
+
     reg = process_registry()
     results = {}
     for publisher, files in list(reg.items()):
@@ -49,7 +56,7 @@ def cli_fetch_all_files(output):
             error = None
             fileid = None
             headers = None
-            if file_['file_size'] < 50000000:
+            if file_['file_size'] < file_limit:
                 try:
                     fileid, filename, headers = get_dataframe_from_url(file_["download_url"])
                 except Exception as e:
