@@ -44,6 +44,7 @@ datasetFilter.addEventListener('keyup', (event) => {
 // function to track a job and update the status
 const track_job = function(jobid){
     const uploadProgress = document.getElementById('upload-progress');
+    uploadProgress.innerHTML = `<p>Processing file</p>`;
 
     // refresh the job ID every X seconds to get the current status
     const intervalID = setInterval(() => {
