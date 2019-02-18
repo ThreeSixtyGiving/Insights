@@ -3,8 +3,8 @@ import pandas as pd
 from tsg_insights.data.utils import format_currency
 
 IDENTIFIER_MAP = {
-    "360G": "Identifier not recognised",       # 360G          41190
-    "GB-CHC": "Registered Charity",             # GB-CHC        42190
+    "360G": "Identifier not recognised",        # 360G          41190
+    "GB-CHC": "Registered Charity (E&W)",       # GB-CHC        42190
     "GB-SC": "Registered Charity (Scotland)",   # GB-SC          7134
     "GB-NIC": "Registered Charity (NI)",        # GB-NIC          718
     "GB-COH": "Registered Company",             # GB-COH        11698

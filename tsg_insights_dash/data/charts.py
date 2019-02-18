@@ -344,7 +344,7 @@ def organisation_type_chart(df):
     data = CHARTS['org_type']['get_results'](df)
     title = 'Recipient type'
     subtitle = '(number of grants)'
-    description = '''Organisations marked "Identifier not recognised" don't have a organisation identifier
+        description = '''Organisations marked "Identifier not recognised" don't have a organisation identifier
 that uses a recognised register of organisations - like a charity register. These organisations can
 be in two categories:
 

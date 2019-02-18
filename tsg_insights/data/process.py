@@ -367,7 +367,7 @@ class MergeCompanyAndCharityDetails(DataPreparationStage):
             return "Registered Charity (Scotland)"
         elif id.startswith("N") or id.startswith("GB-NIC-"):
             return "Registered Charity (NI)"
-        return "Registered Charity"
+        return "Registered Charity (E&W)"
 
     def _create_orgid_df(self):
         charity_rows = []
