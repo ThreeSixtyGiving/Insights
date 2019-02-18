@@ -150,7 +150,7 @@ CHARTS = dict(
     amount_awarded={
         'title': 'Amount awarded',
         'units': '(number of grants)',
-        'get_results': (lambda df: df["Amount Awarded:Bands"].value_counts().sort_index()),
+        'get_results': (lambda df: pd.crosstab(df["Amount Awarded:Bands"], df["Currency"]).sort_index()),
     },
     identifier_scheme={
         'title': 'Identifier scheme',

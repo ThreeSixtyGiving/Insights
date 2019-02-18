@@ -99,7 +99,7 @@ def get_bar_data(values, name="Grants", chart_type='bar', colour=0):
         'type': chart_type, 
         'name': name,
         'marker': {
-            'color': THREESIXTY_COLOURS[colour]
+            'color': THREESIXTY_COLOURS[colour % len(THREESIXTY_COLOURS)]
         },
         'fill': 'tozeroy',
     }
@@ -160,11 +160,37 @@ def grant_programme_chart(df):
 
 def amount_awarded_chart(df):
     data = CHARTS['amount_awarded']['get_results'](df)
+
+    # if("USD" in data.columns):
+    #     data.loc[:, "GBP"] = data["USD"]
+    units = '(number of grants)'
+    
+    # replace £ signs if there's more than one currency
+    if (len(data.columns) > 1) or (data.columns[0] not in ["GBP", "EUR", "USD"]):
+        data.index = data.index.astype(str).str.replace("£", "")
+        units += ' Currencies: {}'.format(list_to_string(data.columns.tolist()))
+    elif "USD" in data.columns:
+        data.index = data.index.astype(str).str.replace("£", "$")
+        units += ' Currency: {}'.format(list_to_string(data.columns.tolist()))
+    elif "EUR" in data.columns:
+        data.index = data.index.astype(str).str.replace("£", "€")
+        units += ' Currency: {}'.format(list_to_string(data.columns.tolist()))
+    
+    colours = {
+        "GBP": 0,
+        "USD": 1,
+        "EUR": 2,
+    }
+
     return chart_wrapper(
         dcc.Graph(
             id="amount_awarded_chart",
             figure={
-                'data': [get_bar_data(data)],
+                'data': [get_bar_data(
+                    series[1],
+                    name=series[0],
+                    colour=colours.get(series[0], k+3),
+                ) for k, series in enumerate(data.iteritems())],
                 'layout': DEFAULT_LAYOUT
             },
             config={
@@ -172,8 +198,8 @@ def amount_awarded_chart(df):
             }
         ),
         'Amount awarded',
-        '(number of grants)',
-        children=[chart_n(data.sum(), 'grant')],
+        units,
+        children=[chart_n(data.sum().sum(), 'grant')],
     )
 
 def org_identifier_chart(df):
