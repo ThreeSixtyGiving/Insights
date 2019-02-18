@@ -3,7 +3,7 @@ import pandas as pd
 from tsg_insights.data.utils import format_currency
 
 IDENTIFIER_MAP = {
-    "360G": "No organisation identifier",       # 360G          41190
+    "360G": "Identifier not recognised",       # 360G          41190
     "GB-CHC": "Registered Charity",             # GB-CHC        42190
     "GB-SC": "Registered Charity (Scotland)",   # GB-SC          7134
     "GB-NIC": "Registered Charity (NI)",        # GB-NIC          718
@@ -130,7 +130,7 @@ def get_identifier_schemes(df):
         )
 
     return identifier_schemes.fillna(
-        "No organisation identifier"
+        "Identifier not recognised"
     ).apply(
         lambda x: IDENTIFIER_MAP.get(x, x)
     )

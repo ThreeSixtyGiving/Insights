@@ -344,8 +344,17 @@ def organisation_type_chart(df):
     data = CHARTS['org_type']['get_results'](df)
     title = 'Recipient type'
     subtitle = '(number of grants)'
-    description = '''Organisation type is only available for recipients with a valid
-                           organisation identifier.'''
+    description = '''Organisations marked "Identifier not recognised" don't have a organisation identifier
+that uses a recognised register of organisations - like a charity register. These organisations can
+be in two categories:
+
+1. They are an organisation without an external identifier, like an unregistered community group that
+doesn't appear on the charity register or the Companies House register.
+2. The publisher of the data has used their own identifier rather than an external identifier, or
+doesn't know the identifier for this organisation.
+
+Using external identifiers enriches 360Giving data by making it possible to match with other datasets.
+'''
 
     if len(data) > 4:
         layout = copy.deepcopy(DEFAULT_LAYOUT)
