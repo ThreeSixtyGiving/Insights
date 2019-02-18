@@ -362,6 +362,13 @@ class MergeCompanyAndCharityDetails(DataPreparationStage):
         "PRIV LTD SECT. 30 (Private limited company, section 30 of the Companies Act)": "Private Limited Company",
     }  # replacement values for companycategory
 
+    def _get_org_type(self, id):
+        if id.startswith("S") or id.startswith("GB-SC-"):
+            return "Registered Charity (Scotland)"
+        elif id.startswith("N") or id.startswith("GB-NIC-"):
+            return "Registered Charity (NI)"
+        return "Registered Charity"
+
     def _create_orgid_df(self):
         charity_rows = []
         for k, c in self.cache.hscan_iter("charity"):
@@ -374,7 +381,7 @@ class MergeCompanyAndCharityDetails(DataPreparationStage):
                 "date_removed": c.get("date_removed"),
                 "postcode": c.get("geo", {}).get("postcode"),
                 "latest_income": c.get("latest_income"),
-                "org_type": "Registered Charity"
+                "org_type": self._get_org_type(c.get("id")),
             })
 
         orgid_df = pd.DataFrame(charity_rows).set_index("orgid")

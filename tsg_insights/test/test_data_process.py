@@ -223,6 +223,9 @@ def test_org_merge():
     orgid_df = stage._create_orgid_df()
     assert len(orgid_df) == 4
     assert orgid_df.loc["GB-COH-04325234", "company_number"] == "04325234"
+    assert orgid_df.loc["GB-NIC-100012", "org_type"] == "Registered Charity (NI)"
+    assert orgid_df.loc["GB-SC-SC003558", "org_type"] == "Registered Charity (Scotland)"
+    assert orgid_df.loc["GB-CHC-225922", "org_type"] == "Registered Charity"
 
     company_df = stage._create_company_df()
     assert len(company_df) == 2
