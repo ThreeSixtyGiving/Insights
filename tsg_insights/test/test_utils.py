@@ -42,8 +42,7 @@ def test_unique_list():
 def test_format_currency():
     currencies = [
         (10, ("£10", ""), {}),
-        # (10000, ("£10", "k"), {}), # @TODO: change for this behaviour
-        (10000, ("£10,000", ""), {}),
+        (10000, ("£10.0", "thousand"), {}),
         (10000000, ("£10.0", "million"), {}),
         (10000000000, ("£10.0", "billion"), {}),
 
@@ -54,12 +53,14 @@ def test_format_currency():
         (10000000000, ("£10,000,000,000", ""), {"humanize_": False}),
 
         # with abbreviations
+        (10, ("£10", ""), {"abbreviate": True}),
+        (10000, ("£10.0", "k"), {"abbreviate": True}),
         (10000000, ("£10.0", "M"), {"abbreviate": True}),
         (10000000000, ("£10.0", "bn"), {"abbreviate": True}),
 
         # other currencies
         (10, ("US$10", ""), {"currency": "USD"}),
-        (10000, ("€10,000", ""), {"currency": "EUR"}),
+        (10000, ("€10.0", "thousand"), {"currency": "EUR"}),
         (10000000, ("AUS10.0", "million"), {"currency": "AUS"}),
         (10000000000, ("CND10.0", "billion"), {"currency": "CND"}),
     ]

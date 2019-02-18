@@ -49,11 +49,16 @@ def get_unique_list(l):
 def format_currency(amount, currency='GBP', humanize_=True, int_format="{:,.0f}", abbreviate=False):
     abbreviations = {
         'million': 'M',
-        'billion': 'bn'
+        'billion': 'bn',
+        'thousand': 'k',
     }
 
     if humanize_:
         amount_str = humanize.intword(amount).split(" ")
+        if amount < 1000000 and amount > 1000:
+            chopped = amount / float(1000)
+            amount_str = ['{:,.1f}'.format(chopped), 'thousand']
+
         if len(amount_str) == 2:
             return (
                 babel.numbers.format_currency(
