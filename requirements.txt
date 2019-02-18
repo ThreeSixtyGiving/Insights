@@ -33,7 +33,7 @@ MarkupSafe==1.0
 more-itertools==6.0.0
 nbformat==4.4.0
 numpy==1.14.5
-openpyxl==2.6.0
+openpyxl==2.5.8
 pandas==0.23.3
 plotly==3.6.0
 pluggy==0.8.1
