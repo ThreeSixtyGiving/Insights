@@ -222,14 +222,16 @@ def awards_over_time_chart(df):
         x = data['all'],
         autobinx = False,
         autobiny=True,
-        marker = dict(color = THREESIXTY_COLOURS[1]),
+        marker = dict(
+            color = THREESIXTY_COLOURS[1],
+        ),
         name = 'date',
         type = 'histogram',
         xbins = dict(
             start='{}-01-01'.format(data['min']),
             end='{}-12-31'.format(data['max']),
             size=xbins_size,
-        )
+        ),
     )]
 
     updatemenus = [dict(
