@@ -19,7 +19,7 @@ IDENTIFIER_MAP = {
     "GB-REV": "Registered Charity (HMRC)",      # GB-REV           92
     "US-EIN": "US - registered with IRS",       # US-EIN           38
     "ZA-NPO": "South Africa - registered with Nonprofit Organisation Directorate", # ZA-NPO           12
-    # IM-GR             8
+    "IM-GR": "Registered Charity (Isle of Man)",# IM-GR             8
     # NL-KVK            3
     # GG-RCE            3
     # XM-DAC            2
@@ -122,7 +122,7 @@ def get_org_type(df):
 
 def get_identifier_schemes(df):
     identifier_schemes = df["Recipient Org:0:Identifier"].apply(
-        lambda x: "360G" if x.startswith("360G-") else "-".join(x.split("-")[:2]))
+        lambda x: "360G" if len(x.split("-"))<3 else "-".join(x.split("-")[:2]))
     
     if "__org_org_type" in df:
         identifier_schemes = df["__org_org_type"].fillna(
