@@ -81,12 +81,32 @@ def get_ctry_rgn(df):
     if "__geo_ctry" not in df.columns or "__geo_rgn" not in df.columns:
         return None
 
-    ctry_rgn = df.fillna({"__geo_ctry": "Unknown", "__geo_rgn": "Unknown"}).groupby(["__geo_ctry", "__geo_rgn"]).agg({
+    # ensure Northern Ireland is correctly labelled
+    rgn_field = df.loc[:, "__geo_rgn"]
+    rgn_field.loc[
+        df["__geo_ctry"].eq("Northern Ireland") & df["__geo_rgn"].eq("Unknown")
+    ] = "Northern Ireland"
+
+    ctry_rgn = df.fillna({"__geo_ctry": "Unknown", "__geo_rgn": "Unknown"}).groupby([
+        df["__geo_ctry"].fillna("Unknown"),
+        rgn_field.fillna("Unknown"),
+    ]).agg({
         "Amount Awarded": "sum",
         "Title": "size"
     }).rename(columns={"Title": "Grants"})
     # ctry_rgn.index = ctry_rgn.index.map(
     #     lambda x: " - ".join(x) if x[0].strip() != x[1].strip() else x[0].strip())
+
+    # sort by values
+    ctry_rgn = ctry_rgn.sort_values("Grants", ascending=False)
+
+    # Move unknown region to the end
+    unknown = ("Unknown", "Unknown")
+    idx = ctry_rgn.index.tolist()
+    if unknown in idx:
+        idx = [i for i in idx if i != unknown] + [unknown]
+    ctry_rgn = ctry_rgn.reindex(idx)
+
     return ctry_rgn
 
 

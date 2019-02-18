@@ -265,9 +265,8 @@ def region_and_country_chart(df):
     if not isinstance(data, (pd.DataFrame, pd.Series)) or (df["__geo_ctry"].count() + df["__geo_rgn"].count()) == 0:
         return message_box(
             'UK Region and Country',
-            '''This chart can\'t be shown as there are no recipients in the data with 
-income data. If your data contains grants to charities, you can add charity
-numbers to your data to show a chart of their latest income.
+            '''This chart can\'t be shown as there is no information on the country and region of recipients or grants. 
+This can be added by using charity or company numbers, or by including a postcode.
             ''',
             error=True
         )
@@ -280,7 +279,7 @@ numbers to your data to show a chart of their latest income.
         dcc.Graph(
             id="region_and_country_chart",
             figure={
-                'data': [get_bar_data(data["Grants"], chart_type='column', colour=2)],
+                'data': [get_bar_data(data["Grants"].iloc[::-1], chart_type='column', colour=2)],
                 'layout': layout
             },
             config={
