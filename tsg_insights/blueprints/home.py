@@ -17,3 +17,7 @@ def index():
         form_id=app.config.get("NEWSLETTER_FORM_ID"),
     )
     return render_template('index.html.j2', registry=registry, newsletter=newsletter)
+
+@bp.route('/about')
+def about():
+    return render_template('about.html.j2')
