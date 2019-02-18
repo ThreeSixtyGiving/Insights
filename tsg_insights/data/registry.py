@@ -28,7 +28,10 @@ def process_registry(reg=None, reg_url=THREESIXTY_STATUS_JSON, cache_expire=DEFA
         reg = get_registry(reg_url, cache_expire)
     publishers = {}
     for v in reg:
-        publisher = v.get("publisher", {}).get("name", "")
+        publisher = publisher_sort = v.get("publisher", {}).get("name", "")
+        if publisher.lower().startswith('the '):
+            publisher_sort = publisher[4:]
+
         grant_count = v.get("datagetter_aggregates", {}).get("count", 0)
         grant_amount = v.get("datagetter_aggregates", {}).get(
             "currencies", {}).get("GBP", {}).get("total_amount", None)
@@ -47,9 +50,10 @@ def process_registry(reg=None, reg_url=THREESIXTY_STATUS_JSON, cache_expire=DEFA
         else:
             award_date_str = "{} - {}".format(min_award_date, max_award_date)
 
-        if publisher not in publishers:
-            publishers[publisher] = []
-        publishers[publisher].append({
+        if publisher_sort not in publishers:
+            publishers[publisher_sort] = []
+        publishers[publisher_sort].append({
+            'publisher': publisher,
             'identifier': v.get('identifier'),
             'title': v.get("title", ""),
             'grant_count': grant_count,
