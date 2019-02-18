@@ -39,6 +39,9 @@ MAPBOX_STYLE=mapbox://styles/davidkane/cjmtr1n101qlz2ruqszjcmhls
 
 # files larger than this limit are not allowed on the site
 FILE_SIZE_LIMIT=50000000
+
+# add google analytics tracking ID to use GA
+GOOGLE_ANALYTICS_TRACKING_ID=UA-118275561-3
 ```
 
 ### Find your mapbox access token

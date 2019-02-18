@@ -13,6 +13,19 @@
     <link rel="stylesheet" href="https://unpkg.com/dash-table-experiments@0.6.0/dash_table_experiments/dash_table_experiments.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/sanitize.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+        {% block analytics %}
+            {% if config.get("GOOGLE_ANALYTICS_TRACKING_ID") %}
+            <!-- Global site tag (gtag.js) - Google Analytics -->
+            <script async src="https://www.googletagmanager.com/gtag/js?id={{config.get("GOOGLE_ANALYTICS_TRACKING_ID")}}"></script>
+            <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', {{config.get("GOOGLE_ANALYTICS_TRACKING_ID")}});
+            </script>
+            {% endif %}
+        {% endblock %}
     {% endblock %}
 </head>
 

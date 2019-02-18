@@ -34,6 +34,9 @@ def create_app(test_config=None):
         # limit of file size for the tool
         FILE_SIZE_LIMIT=os.environ.get("FILE_SIZE_LIMIT", 50000000),
 
+        # google analytics property ID
+        GOOGLE_ANALYTICS_TRACKING_ID=os.environ.get("GOOGLE_ANALYTICS_TRACKING_ID")
+
         # Redis variables - not set here
         # REDIS_DEFAULT_URL='redis://localhost:6379/0' # default URL for redis instance
         # REDIS_ENV_VAR='REDIS_URL'                    # name of the environmental variable that will be looked up for the redis url
