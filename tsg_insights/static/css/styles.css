@@ -220,6 +220,17 @@ dd {
 .js-plotly-plot .plotly .main-svg {
   font-family: neusa-next-std-compact, sans-serif; }
 
+/* form input for homepage */
+.dataset-filter-wrapper.form input[type="text"] {
+  width: 100%;
+  font-family: neusa-next-std-compact, sans-serif;
+  margin: 0;
+  padding: 18px 64px 12px;
+  text-indent: 0px; }
+
+.homepage__data-selection__set.hidden {
+  display: none; }
+
 html {
   box-sizing: border-box;
   font-size: 16px; }
@@ -1026,11 +1037,11 @@ footer {
     font-family: neusa-next-std-compact, sans-serif;
     padding: 16px 10px;
     overflow: auto;
-    max-height: calc(100vh - 3.25em - 10px); }
+    max-height: calc(100vh - 3.25em - 68px); }
     @media (min-width: 64.063em) {
       .homepage__data-selection__sets {
         padding: 28px 64px;
-        max-height: calc(80vh - 3.25em - 10px); } }
+        max-height: calc(80vh - 3.25em - 68px); } }
   .homepage__data-selection__set:not(:last-child) {
     border-bottom: 1px solid #9c1f61;
     margin-bottom: 12px; }
@@ -1451,24 +1462,3 @@ footer {
     pointer-events: none;
     max-height: 0 !important;
     overflow: hidden; }
-/* 
-.js-foldable-element {
-  transition: max-height 0.23s ease-in-out, opacity 0.23s ease-in-out; }
-  .js-foldable-element.js-foldable-hide {
-    opacity: 0;
-    pointer-events: none;
-    max-height: 0 !important;
-    overflow: hidden; } */
-
-.homepage__data-selection__set.hidden {
-  display: none;
-}
-
-
-.dataset-filter-wrapper.form input {
-  width: 100%;
-  font-family: neusa-next-std-compact, sans-serif;
-  margin: 0;
-  padding: 18px 64px 12px;
-  text-indent: 0px;
-}
