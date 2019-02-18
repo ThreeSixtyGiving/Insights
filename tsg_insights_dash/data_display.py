@@ -97,6 +97,11 @@ layout = html.Div(id="dashboard-container", className='results-page', children=[
                                 filter_html('df-change-{}'.format(filter_id), filter_def),
                             ]
                         ) for filter_id, filter_def in FILTERS.items()
+                    ] + [
+                        html.Div(className="results-page__menu__subsection", children=[
+                            html.A(id='df-reset-filters', href='#',
+                                   className='results-page__menu__back', children='Reset all filters')
+                        ])
                     ]),
                 ]),
                 dcc.Store(id='award-dates', data={f: FILTERS[f]["defaults"] for f in FILTERS}),
@@ -186,6 +191,13 @@ def dropdown_filter(filter_id, filter_def):
         return value[filter_id]
     return dropdown_filter_func
 
+def dropdown_filter_value(filter_id, filter_def):
+    def dropdown_filter_set_default_value(value, n_clicks, existing_value):
+        logging.info("dropdown", n_clicks)
+        if n_clicks:
+            return ['__all']
+        return existing_value
+    return dropdown_filter_set_default_value
 
 def filter_dropdown_hide(filter_id, filter_def):
     def filter_dropdown_hide_func(value, container):
@@ -224,7 +236,7 @@ def slider_select_marks(filter_id, filter_def):
     return slider_select_marks_func
         
 def slider_select_value(filter_id, filter_def):
-    def slider_select_value_func(value):
+    def slider_select_value_func(value, n_clicks, existing_value):
         logging.debug("year_select_value", value)
         value = value if value else {filter_id: filter_def["defaults"]}
         return [value[filter_id]["min"], value[filter_id]["max"]]
@@ -286,6 +298,15 @@ for filter_id, filter_def in FILTERS.items():
                 dropdown_filter(filter_id, filter_def)
             )
 
+        # callback setting the default value of the filter (nothing selected)
+        app.callback(
+            Output('df-change-{}'.format(filter_id), 'value'),
+            [Input('award-dates', 'data'),
+             Input('df-reset-filters', 'n_clicks')],
+            [State('df-change-{}'.format(filter_id), 'value')])(
+                dropdown_filter_value(filter_id, filter_def)
+            )
+
         # callback which hides the filter if there's only 1 or 0 options available
         app.callback(Output('df-change-{}-wrapper'.format(filter_id), 'container'),
                     [Input('award-dates', 'data')],
@@ -315,7 +336,9 @@ for filter_id, filter_def in FILTERS.items():
 
         # callback for setting the initial value of a slider
         app.callback(Output('df-change-{}'.format(filter_id), 'value'),
-                    [Input('award-dates', 'data')])(
+                     [Input('award-dates', 'data'),
+                      Input('df-reset-filters', 'n_clicks')],
+                     [State('df-change-{}'.format(filter_id), 'value')])(
                         slider_select_value(filter_id, filter_def)
                     )
 
