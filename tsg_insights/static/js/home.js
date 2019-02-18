@@ -92,11 +92,18 @@ const track_job = function(jobid){
                          * jobStatus.progress['stage'] gives the index of the current stage
                          * jobStatus.progress['progress'] holds an array [currentindex, totalsize] of progress through the current stage
                          */
-                        uploadProgress.innerHTML = `
+                        if (jobStatus.progress['progress']) {
+                            uploadProgress.innerHTML = `
                                     <p>Stage ${jobStatus.progress['stage'] + 1} of ${jobStatus.stages.length}</p>
-                                    <p>${jobStatus.stages[jobStatus.progress['stage']+1]}</p>
+                                    <p>${jobStatus.stages[jobStatus.progress['stage'] + 1]}</p>
                                     <p>${jobStatus.progress['progress'][0]} of ${jobStatus.progress['progress'][1]}</p>
                                     `;
+                        } else {
+                            uploadProgress.innerHTML = `
+                                    <p>Stage ${jobStatus.progress['stage'] + 1} of ${jobStatus.stages.length}</p>
+                                    <p>${jobStatus.stages[jobStatus.progress['stage'] + 1]}</p>
+                                    `;
+                        }
                         break;
 
                     case "completed":
