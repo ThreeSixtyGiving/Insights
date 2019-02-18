@@ -4,10 +4,10 @@ from tsg_insights_dash.data.results import *
 
 def test_get_ctry_rgn():
     df = pd.DataFrame({
-        "__geo_ctry": ["England", "England", "England", "Unknown", "Scotland", "Northern Ireland"],
-        "__geo_rgn": ["South East", "South West", "South West", "Unknown", "Scotland", "Unknown"],
-        "Title": ["A", "B", "C", "D", "E", "F"],
-        "Amount Awarded": [300, 150, 200, 400, 500, 600]
+        "__geo_ctry": ["England", "England", "England", "Unknown", "Scotland", "Northern Ireland", None],
+        "__geo_rgn": ["South East", "South West", "South West", "Unknown", "Scotland", "Unknown", None],
+        "Title": ["A", "B", "C", "D", "E", "F", "G"],
+        "Amount Awarded": [300, 150, 200, 400, 500, 600, 0]
     })
 
     # check no results returned if columns not present
@@ -30,6 +30,7 @@ def test_get_ctry_rgn():
 
     # check Unknown moved to the end
     assert ctry_rgn.iloc[-1].name == ("Unknown", "Unknown")
+    assert ctry_rgn.iloc[-1]["Grants"] == 2
 
     # check sort order
     assert ctry_rgn.iloc[0]["Grants"] == 2

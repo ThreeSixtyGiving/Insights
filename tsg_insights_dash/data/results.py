@@ -84,10 +84,10 @@ def get_ctry_rgn(df):
     # ensure Northern Ireland is correctly labelled
     rgn_field = df.loc[:, "__geo_rgn"]
     rgn_field.loc[
-        df["__geo_ctry"].eq("Northern Ireland") & df["__geo_rgn"].eq("Unknown")
+        df["__geo_ctry"].fillna("").eq("Northern Ireland") & df["__geo_rgn"].fillna("").eq("Unknown")
     ] = "Northern Ireland"
 
-    ctry_rgn = df.fillna({"__geo_ctry": "Unknown", "__geo_rgn": "Unknown"}).groupby([
+    ctry_rgn = df.groupby([
         df["__geo_ctry"].fillna("Unknown"),
         rgn_field.fillna("Unknown"),
     ]).agg({
