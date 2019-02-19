@@ -218,10 +218,16 @@ dd {
 
 /* Font style for charts */
 .js-plotly-plot .plotly .main-svg {
-  font-family: neusa-next-std-compact, sans-serif; }
+  font-family: neusa-next-std-compact, sans-serif;
+  font-weight: 300; }
+
+/* Tweaking the SVG here */
+.ytick text,
+.point > text {
+  font-weight: 300; }
 
 /* form input for homepage */
-.dataset-filter-wrapper.form input[type="text"] {
+.dataset-filter-wrapper.form input {
   width: 100%;
   font-family: neusa-next-std-compact, sans-serif;
   margin: 0;
@@ -1037,11 +1043,11 @@ footer {
     font-family: neusa-next-std-compact, sans-serif;
     padding: 16px 10px;
     overflow: auto;
-    max-height: calc(100vh - 3.25em - 68px); }
+    max-height: calc(100vh - 3.25em - 78px); }
     @media (min-width: 64.063em) {
       .homepage__data-selection__sets {
         padding: 28px 64px;
-        max-height: calc(80vh - 3.25em - 68px); } }
+        max-height: calc(80vh - 3.25em - 78px); } }
   .homepage__data-selection__set:not(:last-child) {
     border-bottom: 1px solid #9c1f61;
     margin-bottom: 12px; }
@@ -1173,7 +1179,8 @@ footer {
       font-family: neusa-next-std-compact, sans-serif;
       font-weight: 300;
       letter-spacing: 0.5px;
-      line-height: 16px; }
+      line-height: 16px;
+      margin-bottom: 6px; }
       .results-page__menu__back i {
         font-size: 0.75rem; }
     .results-page__menu__section-title {
@@ -1354,11 +1361,15 @@ footer {
     .results-page__body__section-title {
       color: #0b2833;
       font-family: neusa-next-std-compact, sans-serif;
-      font-size: 1.5em;
-      font-weight: 400;
+      font-size: 2rem;
+      font-weight: 300;
       letter-spacing: 0.75px;
       line-height: 32px;
       margin: 32px 0 8px 0; }
+    .results-page__body__section-subtitle, .results-page__body__section-note, .results-page__body__section-description, .results-page__body__download li a {
+      font-size: 1.2rem;
+      font-family: neusa-next-std-compact, sans-serif;
+      font-weight: 300; }
     .results-page__body__header {
       position: fixed;
       width: 100%; }

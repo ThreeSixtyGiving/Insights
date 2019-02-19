@@ -103,11 +103,12 @@ layout = html.Div(id="dashboard-container", className='results-page', children=[
                                    className='results-page__menu__back', children='Reset all filters')
                         ]),
                         html.Div(className="results-page__menu__subsection", children=[
-                            html.H4(className='results-page__menu__back', children='Feedback'),
-                            html.P(className='results-page__menu__back', children='Tell us what you think'),
-                            html.A(className='results-page__menu__back',
-                                   href='mailto:labs@threesixtygiving.org',
-                                   children='labs@threesixtygiving.org'),
+                            html.P(className='results-page__menu__back', children=[
+                                'Tell us what you think',
+                                html.Br(),
+                                html.A(href='mailto:labs@threesixtygiving.org',
+                                       children='labs@threesixtygiving.org'),
+                            ]),
                         ])
                     ]),
                 ]),
@@ -165,7 +166,7 @@ def dashboard_output(fileid, *args):
 
     outputs.append(html.Div(children=[
         html.H2(className='results-page__body__section-title', children="Download the results"),
-        html.Ul(children=[
+        html.Ul(className='results-page__body__download', children=[
             html.Li(html.A(href=url_for('data.download_file', fileid=fileid, format='csv'), target="_blank", children='CSV Download')),
             html.Li(html.A(href=url_for('data.download_file', fileid=fileid, format='xlsx'), target="_blank", children='Excel Download')),
         ])

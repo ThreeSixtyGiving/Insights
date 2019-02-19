@@ -345,7 +345,7 @@ def organisation_type_chart(df):
     title = 'Recipient type'
     subtitle = '(number of grants)',
     description = html.P('''Organisation type is based on official organisation identifiers,
-                            such as registered charity or company numbers, found in the data.''')
+                            such as registered charity or company numbers, found in the data.''', className='results-page__body__section-note')
     children = [chart_n(data.sum(), 'grant'), description]
     if "Identifier not recognised" in data.index:
         children.append(html.P('''
