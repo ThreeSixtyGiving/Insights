@@ -344,17 +344,15 @@ def organisation_type_chart(df):
     data = CHARTS['org_type']['get_results'](df)
     title = 'Recipient type'
     subtitle = '(number of grants)',
-    description = '''Organisations marked "Identifier not recognised" don't have a organisation identifier
-that uses a recognised register of organisations - like a charity register. These organisations can
-be in two categories:
-
-1. They are an organisation without an external identifier, like an unregistered community group that
-doesn't appear on the charity register or the Companies House register.
-2. The publisher of the data has used their own identifier rather than an external identifier, or
-doesn't know the identifier for this organisation.
-
-Using external identifiers enriches 360Giving data by making it possible to match with other datasets.
-'''
+    description = html.P('''Organisation type is based on official organisation identifiers,
+                            such as registered charity or company numbers, found in the data.''')
+    children = [chart_n(data.sum(), 'grant'), description]
+    if "Identifier not recognised" in data.index:
+        children.append(html.P('''
+            "Identifier not recognised" means either that the organisation does not have an official
+            identifier, for example because it is an unregistered community group, or the publisher
+            has not included official identifiers in the data.
+            '''))
 
     if len(data) > 4:
         layout = copy.deepcopy(DEFAULT_LAYOUT)
@@ -371,8 +369,9 @@ Using external identifiers enriches 360Giving data by making it possible to matc
                     'displayModeBar': False
                 }
             ),
-            title, subtitle, description=description,
-            children=[chart_n(data.sum(), 'grant')],
+            title,
+            subtitle,
+            children=children,
         )
 
 
@@ -397,8 +396,9 @@ Using external identifiers enriches 360Giving data by making it possible to matc
                 'displayModeBar': False
             }
         ),
-        title, subtitle, description = description,
-        children = [chart_n(data.sum(), 'grant')],
+        title,
+        subtitle,
+        children=children,
     )
 
 
