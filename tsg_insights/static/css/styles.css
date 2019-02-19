@@ -784,13 +784,15 @@ footer {
   padding-bottom: 558px;
   background-image: url("/images/homepage-header-background.svg");
   background-repeat: no-repeat;
-  background-size: 100%;
+  background-size: 50%;
   background-position: 40% 75%;
+  text-align: center;
   font-family: neusa-next-std-compact, sans-serif;
   font-weight: 300; }
   @media (min-width: 64.063em) {
     .homepage__header {
       background-size: 45%;
+      text-align: inherit;
       background-position: right 55%;
       padding-right: 499.2px;
       padding-bottom: 186px; } }

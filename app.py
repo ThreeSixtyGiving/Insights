@@ -41,7 +41,6 @@ app.config.suppress_callback_exceptions = True
 
 with server.app_context():
     footer = render_template('footer.html.j2')
-    print(footer)
 
 app.index_string = '''
 <!DOCTYPE html>
