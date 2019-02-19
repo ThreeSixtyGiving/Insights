@@ -100,10 +100,10 @@ layout = html.Div(id="dashboard-container", className='results-page', children=[
                     ] + [
                         html.Div(className="results-page__menu__subsection", children=[
                             html.A(id='df-reset-filters', href='#',
-                                   className='results-page__menu__back', children='Reset all filters')
+                                   className='results-page__menu__reset', children='Reset all filters')
                         ]),
                         html.Div(className="results-page__menu__subsection", children=[
-                            html.P(className='results-page__menu__back', children=[
+                            html.P(className='results-page__menu__feedback', children=[
                                 'Tell us what you think',
                                 html.Br(),
                                 html.A(href='mailto:labs@threesixtygiving.org',
