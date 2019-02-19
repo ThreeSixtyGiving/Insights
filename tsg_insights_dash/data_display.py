@@ -201,7 +201,7 @@ def dropdown_filter(filter_id, filter_def):
 
 def dropdown_filter_value(filter_id, filter_def):
     def dropdown_filter_set_default_value(value, n_clicks, existing_value):
-        logging.info("dropdown", n_clicks)
+        logging.debug("dropdown", n_clicks)
         if n_clicks:
             return ['__all']
         return existing_value

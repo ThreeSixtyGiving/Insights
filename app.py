@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import dash
+from flask import render_template
 
 from tsg_insights import create_app
 
@@ -38,6 +39,10 @@ app = dash.Dash(
 )
 app.config.suppress_callback_exceptions = True
 
+with server.app_context():
+    footer = render_template('footer.html.j2')
+    print(footer)
+
 app.index_string = '''
 <!DOCTYPE html>
 <html>
@@ -52,6 +57,7 @@ app.index_string = '''
         {%config%}
         {%scripts%}
         ''' + analytics_script + '''
+        ''' + footer + '''
     </body>
 </html>
 '''
