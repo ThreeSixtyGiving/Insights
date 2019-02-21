@@ -22,8 +22,8 @@ command.
 
 ```
 # flask app
-FLASK_APP=tsg_insights
-FLASK_END=development # if you're developing
+FLASK_APP=index:server
+FLASK_ENV=development # if you're developing
 
 # configuration for the newsletter signup box
 NEWSLETTER_FORM_ACTION=https://threesixtygiving.us10.list-manage.com/subscribe
