@@ -4,13 +4,18 @@ import re
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
-from flask import url_for
+from dash_dangerously_set_inner_html import DangerouslySetInnerHTML as InnerHTML
+from flask import url_for, render_template
 
 from app import app
 from tsg_insights.data.cache import get_from_cache, get_cache
 from .data.charts import *
 from .data.filters import FILTERS, get_filtered_df
 from tsg_insights_components import InsightChecklist, InsightDropdown, InsightFoldable
+
+def footer(server):
+    with server.app_context():
+        return InnerHTML(render_template('footer.html.j2'))
 
 def filter_html(filter_id, filter_def):
     if filter_def.get("type") == 'rangeslider':
@@ -121,6 +126,7 @@ layout = html.Div(id="dashboard-container", className='results-page', children=[
                          id="dashboard-output")
         ]),
     ]),
+    footer(app.server),
 ])
 
 @app.callback(Output('dashboard-output', 'children'),
