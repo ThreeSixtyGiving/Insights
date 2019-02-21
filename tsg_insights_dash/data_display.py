@@ -126,7 +126,7 @@ layout = html.Div(id="dashboard-container", className='results-page', children=[
                          id="dashboard-output")
         ]),
     ]),
-    footer(app.server),
+    # footer(app.server),
 ])
 
 @app.callback(Output('dashboard-output', 'children'),
