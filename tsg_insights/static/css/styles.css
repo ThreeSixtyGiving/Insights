@@ -1168,7 +1168,11 @@ footer {
     padding-top: 5px; }
   .results-page__app {
     flex-grow: 1;
-    display: flex; }
+    display: flex;
+    flex-direction: column; }
+    @media (min-width: 64.063em) {
+      .results-page__app {
+        flex-direction: row; } }
   .results-page__menu {
     flex: 27%;
     background-color: #0b2833;
