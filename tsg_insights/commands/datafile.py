@@ -94,8 +94,8 @@ def cli_remove_all_files():
     click.confirm('This will delete all cached data. Are you sure you want to continue?', abort=True)
     cache = get_cache()
     for k, c in cache.hscan_iter("files"):
-        click.echo("Deleting file: {}".format(k.encode("utf8")))
-        delete_from_cache(k.encode("utf8"))
+        click.echo("Deleting file: {}".format(k))
+        delete_from_cache(k)
 
 
 @cli.command('preview')
