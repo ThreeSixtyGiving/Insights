@@ -9,6 +9,7 @@ click==6.7
 colorama==0.4.1
 dash==0.36.0
 dash-core-components==0.43.0
+dash-dangerously-set-inner-html==0.0.2
 dash-html-components==0.13.5
 dash-renderer==0.17.0
 dash-resumable-upload==0.0.3
