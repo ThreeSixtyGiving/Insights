@@ -3,192 +3,32 @@
 
 {% block content %}
 <div class="about__header">
-  <a href="/"><img src="images/360-insights-color.png" width="256" /></a><br />
-  <h1>About this tool</h1>
-  <div class="about__columns">
-    <div class="about__column">
-      <p>
-        360Insights aims to help you explore grantmaking data published to the 360Giving data Standard.
-        It takes a 360Giving format file, combines it with other data sources and turns it into an
-        interactive visual dashboard. 
-      </p>
-      <p>
-        With 360Insights you can quickly see information on seven key areas for each funder sharing their grants data openly with 360Giving.
-      </p>
-      <p>
-        360Giving commissioned <a href="https://dkane.net/" rel="noopener" target="_blank">David Kane</a> to build 360Insights
-        and <a href="https://www.ccmdesign.ca/" rel="noopener" target="_blank">ccm.design</a> to design it.
-      </p>
-    </div>
-    <div class="about__column">
-      <p>
-        You can <a href="https://github.com/ThreeSixtyGiving/Insights" rel="noopener" target="_blank">view the site code on Github</a>. 
-        The tool makes use of Open Source tools, such as: 
-        <a href="https://dash.plot.ly/">Dash by Plotly</a>, 
-        <a href="http://flask.pocoo.org/">Flask</a> and 
-        <a href="https://pandas.pydata.org/">Pandas</a>.
-      </p>
-      {# <p>
-        For more information about 360Giving including terms of use and privacy policy, please see the
-        <a href="http://www.threesixtygiving.org/" rel="noopener" target="_blank">main 360Giving website</a>.
-      </p> #}
-    </div>
-  </div>
+{% include '_about_header.html.j2' %}
 </div>
 
-<section class="about__section about__section--gray">
-  <div class="wrapper">
-    <div class="about__columns">
-      <div class="about__column">
-        <h2>Data sources</h2>
-      </div>
-    </div>
-    <div class="about__columns">
-      <div class="about__column">
-        <p class="strong">
-          Grantmakers
-        </p>
-        <p>
-          360Insights uses the <a href="http://data.threesixtygiving.org/">360Giving data registry</a> to retrieve grants data
-          published by grantmakers to the 360Giving data Standard.
-        </p>
-        <p>
-          Each of the files has been published by a grantmaker, usually on their own website,
-          under a licence that allows the data to be reused and shared. 
-          They have used a common format - the 
-          <a href="http://www.threesixtygiving.org/support/standard/" rel="noopener" target="_blank">360Giving data standard</a>
-           - to make files in a consistent way.
-        </p>
-        <p>
-          When you select a dataset through 360Insights, the software will fetch the data from the publisher’s website, checks
-          that it fits the data Standard, adds some external data if possible and then displays the results in the form of
-          charts and a map.
-        </p>
-      </div>
-      <div class="about__column">
-        <p class="strong">
-          Other data
-        </p>
-        <p>
-          360Insights combines 360Giving data with other data sources to expand what is possible.
-        </p>
-        <p>
-          <a href="https://findthatcharity.uk/">Findthatcharity</a> is used to bring in data about charities 
-          from the following sources, used under the 
-          <a href="http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/">Open Government Licence</a>:
-        </p>
-        <p>
-          <a href="http://data.charitycommission.gov.uk/">Charity Commission for England and Wales</a>
-        </p>
-        <p>
-          <a href="https://www.oscr.org.uk/about-charities/search-the-register/charity-register-download">Scottish Charity Regulator</a>
-           - <span style="font-style: italic;">© Crown Copyright and database right 2019. Contains
-          information from the Scottish Charity Register supplied by the Office of the
-          Scottish Charity Regulator and licensed under the 
-          <a href="http://www.nationalarchives.gov.uk/doc/open-government-licence/version/2/">Open Government Licence v.2.0</a></span>.
-        </p>
-        <p>
-          <a href="http://www.charitycommissionni.org.uk/charity-search/">Charity Commission for Northern Ireland</a>
-        </p>
-        <p>
-          Data on postcodes comes from <a href="https://postcodes.findthatcharity.uk/">postcodes.findthatcharity.uk</a>. Postcode data from
-          ONS used under <a href="http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/">Open Government Licence</a>.
-        </p>
-        <p>
-          Contains OS data © Crown copyright and database right 2019 
-        </p>
-        <p>
-          Contains Royal Mail data © Royal Mail copyright and database right 2019 
-        </p>
-        <p>
-          Contains National Statistics data © Crown copyright and database right 2019
-        </p>
-        <p>
-          Data on companies comes from the <a href="https://www.gov.uk/government/organisations/companies-house/about-our-services#uri-info">Companies House URI service</a>.
-        </p>
-      </div>
-    </div>
-  </div>
+<section class="about__section about__section--gray" id="data-sources">
+{% include '_about_data-sources.html.j2' %}
 </section>
 
-<section class="about__section">
-  <div class="wrapper">
-    <div class="about__columns">
-      <div class="about__column about__column--large">
-        <h2>What happens to data I upload?</h2>
-      </div>
-      <div class="about__column about__take-down">
-        <a class="about__take-down__button" href="#" target="_blank" rel="noopener">Take down policy</a>
-      </div>
-    </div>
-    <div class="about__columns">
-      <div class="about__column">
-        <p class="strong">
-          360Giving publishers
-        </p>
-        <p>
-            360Insights is designed to enable you to submit files for the application to process and
-            then display information from them. It also generates files in CSV and Microsoft Excel
-            formats that combine the original data with the charity or company data. You can then
-            download these files.
-        </p>
-        <p class="warning">
-            Please ensure that you have the appropriate permissions to upload data to 360Insights. 
-        </p>
-        <p class="warning">
-            Do not submit confidential or non-public personal data to this tool.
-        </p>
-      </div>
-      <div class="about__column">
-        <p class="headless">
-          Any data you upload will be available at the URL created and can be accessed by anyone 
-          with that link. If your data is not suitable for sharing publicly then you should treat 
-          this URL with care, and only share it with people who have permission to access to the data. 
-        </p>
-        <p>
-          We do not make use of any of the data for purposes other than to create visualisations
-          for the data you have submitted and to review the operation and output of the application.
-        </p>
-        <p>
-          We do create and store metadata about your use of the application, and about the files/data
-          that you have uploaded in order to monitor how the application is being used.
-        </p>
-        <p>
-          <a href="#">Read the 360 Insights privacy notice for further information</a>
-        </p>
-      </div>
-    </div>
-  </div>
+<section class="about__section" id="data-upload">
+{% include '_about_data-upload.html.j2' %}
 </section>
 
-{# <section class="about__section">
-  <div class="wrapper">
-    <div class="about__columns">
-      <div class="about__column">
-        <h2>How do we use cookies?</h2>
-      </div>
-    </div>
-    <div class="about__columns">
-      <div class="about__column">
-        <p>
-          This site uses cookies – small text files that are placed on your machine to help
-          the site provide a better user experience. In general, cookies are used to retain
-          user preferences, store information for things like shopping carts, and provide
-          anonymised tracking data to third party applications like Google Analytics.
-        </p>
-      </div>
-      <div class="about__column">
-        <p>
-          As a rule, cookies will make your browsing experience better. However, you may
-          prefer to disable cookies on this site and on others. The most effective way to
-          do this is to disable cookies in your browser. We suggest consulting the Help
-          section of your browser or taking a look at the About Cookies website which offers
-          guidance for all modern browsers.
-        </p>
-      </div>
-    </div>
-  </div>
-</section> #}
+<section class="about__section about__section--gray" id="cookies">
+{% include '_about_cookies.html.j2' %}
+</section>
+
+<section class="about__section" id="privacy">
+{% include '_about_privacy.html.j2' %}
+</section>
+
+<section class="about__section about__section--gray" id="terms">
+{% include '_about_terms.html.j2' %}
+</section>
+
+<section class="about__section" id="disclaimer">
+{% include '_about_disclaimer.html.j2' %}
+</section>
 
 {% include '_homepage_newsletter.html.j2' %}
 {% endblock %}
