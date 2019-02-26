@@ -3,7 +3,7 @@ import json
 import requests
 import pandas as pd
 
-from .cache import get_cache, save_to_cache, get_from_cache
+from .cache import get_cache
 from .utils import format_currency, get_fileid
 
 THREESIXTY_STATUS_JSON = 'https://storage.googleapis.com/datagetter-360giving-output/branch/master/status.json'

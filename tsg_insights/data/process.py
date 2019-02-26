@@ -71,8 +71,18 @@ def get_dataframe_from_url(url):
     data_preparation.stages = [LoadDatasetFromURL] + data_preparation.stages
     df = data_preparation.run()
 
+    # 4. Get metadata about the file
+    metadata = {
+        "headers": headers,
+        "url": url,
+    }
+    registry = get_registry()
+    file_ = [f for f in registry if f['identifier'] == identifier]
+    if len(file_) == 1:
+        metadata["registry_entry"] = file_
+
     # 5. save to cache
-    save_to_cache(fileid, df, headers=headers, url=url) # dataframe
+    save_to_cache(fileid, df, metadata=metadata)  # dataframe
 
     return (fileid, url, headers)
 

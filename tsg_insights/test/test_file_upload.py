@@ -7,7 +7,7 @@ import pytest
 import requests_mock
 
 from tsg_insights.data.process import *
-from tsg_insights.data.cache import get_from_cache
+from tsg_insights.data.cache import get_from_cache, get_metadata_from_cache
 
 
 @pytest.fixture
@@ -76,3 +76,7 @@ def test_file_fetch_from_url(get_file, m):
         df = get_from_cache(fileid)
         assert isinstance(df, pd.DataFrame)
         assert len(df) > 0
+
+        metadata = get_metadata_from_cache(fileid)
+        assert len(metadata.keys())==6
+        assert metadata["url"] == url

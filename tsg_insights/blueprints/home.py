@@ -4,7 +4,6 @@ from flask import Blueprint, render_template, jsonify
 from flask import current_app as app
 
 from ..data.registry import process_registry
-from ..data.cache import get_from_cache
 
 bp = Blueprint('home', __name__)
 

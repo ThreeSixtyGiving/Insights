@@ -20,18 +20,20 @@ def get_cache():
     return redis_cache()
 
 
-def save_to_cache(fileid, df, prefix=CACHE_DEFAULT_PREFIX, headers=None, url=None):
+def save_to_cache(fileid, df, prefix=CACHE_DEFAULT_PREFIX, metadata=None):
     r = get_cache()
     r.set("{}{}".format(prefix, fileid), pickle.dumps(df))
     logging.info("Dataframe [{}] saved to redis".format(fileid))
+
+    if not metadata:
+        metadata = {}
 
     metadata = {
         "fileid": fileid,
         "funders": df["Funding Org:0:Name"].unique().tolist(),
         "max_date": df["Award Date"].max().isoformat(),
         "min_date": df["Award Date"].min().isoformat(),
-        "headers": headers,
-        "url": url,
+        **metadata
     }
     r.hset("files", fileid, json.dumps(metadata, default=CustomJSONEncoder().default))
     logging.info("Dataframe [{}] metadata saved to redis".format(fileid))
@@ -58,3 +60,11 @@ def get_from_cache(fileid, prefix=CACHE_DEFAULT_PREFIX):
             return pickle.loads(df)
         except ImportError as error:
             return None
+
+def get_metadata_from_cache(fileid):
+    r = get_cache()
+
+    if not r.hexists("files", fileid):
+        return None
+
+    return json.loads(r.hget("files", fileid).decode("utf8"))
