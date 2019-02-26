@@ -171,6 +171,9 @@ layout = html.Div(id="dashboard-container", className='results-page', children=[
                         html.Li(html.A(href='#', target="_blank",
                                        children='Excel Download', id='file-download-excel')),
                     ]),
+                    html.P([
+                        '''Fields added by this tool start with "Insights:"''',
+                    ]),
                 ]
             ),
             footer(app.server),

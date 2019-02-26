@@ -62,7 +62,50 @@ def fetch_file(fileid):
 @bp.route('/download/<fileid>.<format>')
 def download_file(fileid, format):
     df = get_filtered_df(fileid)
+
+    fields_to_exclude = [
+        'Recipient Org:0:Identifier:Scheme',
+        'Recipient Org:0:Identifier:Clean',
+        '__org_orgid',
+        '__org_charity_number',
+        '__org_company_number',
+        # '__geo_ctry',
+        # '__geo_cty',
+        # '__geo_laua',
+        # '__geo_pcon',
+        # '__geo_rgn',
+        '__geo_imd',
+        '__geo_ru11ind',
+        '__geo_oac11',
+        # '__geo_lat',
+        # '__geo_long',
+    ]
+
+    column_renames = {
+        "__org_date_registered": "Insights:Recipient Org:Date Registered",
+        "__org_date_removed": "Insights:Recipient Org:Date Removed",
+        "__org_latest_income": "Insights:Recipient Org:Latest Income",
+        "__org_latest_income_bands": "Insights:Recipient Org:Latest Income:Bands",
+        "__org_org_type": "Insights:Recipient Org:Organisation Type",
+        "__org_postcode": "Insights:Recipient Org:Postcode",
+        "__org_age": "Insights:Recipient Org:Age",
+        "__org_age_bands": "Insights:Recipient Org:Age:Bands",
+        "__geo_ctry": "Insights:Geo:Country",
+        "__geo_cty": "Insights:Geo:County",
+        "__geo_laua": "Insights:Geo:Local Authority",
+        "__geo_pcon": "Insights:Geo:Parliamentary Constituency",
+        "__geo_rgn": "Insights:Geo:Region",
+        "__geo_lat": "Insights:Geo:Latitude",
+        "__geo_long": "Insights:Geo:Longitude",
+        "Award Date:Year": "Insights:Award Date:Year",
+        "Amount Awarded:Bands": "Insights:Amount Awarded:Bands",
+    }
+
     if df is not None:
+
+        columns = [c for c in df.columns if c not in fields_to_exclude]
+        df = df[columns].rename(columns=column_renames)
+
         if format == "csv":
             csvdata = df.to_csv(index=False)
             return Response(
@@ -73,7 +116,8 @@ def download_file(fileid, format):
         elif format == 'xlsx':
             output = io.BytesIO()
             writer = pd.ExcelWriter(output, engine='xlsxwriter')
-            csvdata = df.to_excel(writer, sheet_name='grants', index=False)
+            csvdata = df.to_excel(
+                writer, sheet_name='grants', index=False)
             writer.save()
             return Response(
                 output.getvalue(),
