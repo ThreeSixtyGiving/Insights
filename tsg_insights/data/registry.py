@@ -78,6 +78,13 @@ def get_reg_file(identifier):
         file_[0].get("datagetter_metadata", {}).get("file_type")
     )
 
+def get_reg_file_from_url(url):
+    registry = get_registry()
+    for f in registry:
+        if f.get("distribution", [{}])[0].get("downloadURL")==url:
+            return f
+    return None
+
 
 def fetch_reg_file(url, method='GET'):
     user_agents = {

@@ -1,5 +1,6 @@
 import logging
 import re
+import json
 
 import dash_core_components as dcc
 import dash_html_components as html
@@ -8,7 +9,7 @@ from dash_dangerously_set_inner_html import DangerouslySetInnerHTML as InnerHTML
 from flask import url_for, render_template
 
 from app import app
-from tsg_insights.data.cache import get_from_cache, get_cache
+from tsg_insights.data.cache import get_from_cache, get_cache, get_metadata_from_cache
 from .data.charts import *
 from .data.filters import FILTERS, get_filtered_df
 from tsg_insights_components import InsightChecklist, InsightDropdown, InsightFoldable
@@ -198,6 +199,9 @@ def dashboard_output(fileid, *args):
     filter_args = dict(zip(FILTERS.keys(), args))
     df = get_filtered_df(fileid, **filter_args)
     logging.debug("dashboard_output", fileid, df is None)
+
+    metadata = get_metadata_from_cache(fileid)
+
     if df is None:
         return []
 
@@ -206,9 +210,9 @@ def dashboard_output(fileid, *args):
 
     outputs = []
     
-
     outputs.extend(get_funder_output(df, filter_args.get("grant_programmes")))
     outputs.append(get_statistics(df))
+    outputs.extend(get_file_output(metadata))
 
     charts = []
     

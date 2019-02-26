@@ -679,3 +679,51 @@ def get_funder_output(df, grant_programme=[]):
     # @todo: STYLING FOR subbtitle listing funders
     # return return_str + subtitle
     return return_str
+
+def get_file_output(metadata):
+    if not metadata:
+        return []
+
+    output = []
+
+    if metadata.get("registry_entry"):
+        output.append(html.P(
+            html.Strong('From the 360Giving data registry')
+        ))
+        output.append(html.P([
+            "Published by ",
+            html.A(
+                metadata.get("registry_entry", {}).get("publisher", {}).get("name"),
+                href=metadata.get("registry_entry", {}).get("publisher", {}).get("website"),
+                target="_blank",
+            ),
+            " with a ",
+            html.A(
+                metadata.get("registry_entry", {}).get(
+                    "license_name", "Unknown"),
+                href=metadata.get("registry_entry", {}).get(
+                    "license"),
+                target="_blank",
+            ),
+            " licence."
+        ]))
+    if metadata.get("url"):
+        output.append(html.P([
+            "Original URL ",
+            html.A(
+                metadata.get("url"),
+                href=metadata.get("url"),
+                target="_blank",
+            ),
+        ]))
+    
+    if not output:
+        return []
+
+    return [
+        # html.H2(className="results-page__body__section-title",
+        #         children="About this data"),
+        html.P(className="results-page__body__section-attribution", children=output)
+    ]
+
+    

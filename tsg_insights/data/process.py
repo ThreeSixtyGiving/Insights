@@ -12,7 +12,7 @@ from threesixty import ThreeSixtyGiving
 
 from .cache import get_cache, get_from_cache, save_to_cache
 from .utils import get_fileid, charity_number_to_org_id
-from .registry import fetch_reg_file
+from .registry import fetch_reg_file, get_reg_file_from_url
 
 FTC_URL = 'https://findthatcharity.uk/orgid/{}.json'
 CH_URL = 'http://data.companieshouse.gov.uk/doc/company/{}.json'
@@ -76,10 +76,9 @@ def get_dataframe_from_url(url):
         "headers": headers,
         "url": url,
     }
-    registry = get_registry()
-    file_ = [f for f in registry if f['identifier'] == identifier]
-    if len(file_) == 1:
-        metadata["registry_entry"] = file_
+    registry = get_reg_file_from_url(url)
+    if registry:
+        metadata["registry_entry"] = registry
 
     # 5. save to cache
     save_to_cache(fileid, df, metadata=metadata)  # dataframe
