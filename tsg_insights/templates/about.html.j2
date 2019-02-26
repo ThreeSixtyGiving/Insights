@@ -1,0 +1,34 @@
+
+{% extends 'base.html.j2' %}
+
+{% block content %}
+<div class="about__header">
+{% include '_about_header.html.j2' %}
+</div>
+
+<section class="about__section about__section--gray" id="data-sources">
+{% include '_about_data-sources.html.j2' %}
+</section>
+
+<section class="about__section" id="data-upload">
+{% include '_about_data-upload.html.j2' %}
+</section>
+
+<section class="about__section about__section--gray" id="cookies">
+{% include '_about_cookies.html.j2' %}
+</section>
+
+<section class="about__section" id="privacy">
+{% include '_about_privacy.html.j2' %}
+</section>
+
+<section class="about__section about__section--gray" id="terms">
+{% include '_about_terms.html.j2' %}
+</section>
+
+<section class="about__section" id="disclaimer">
+{% include '_about_disclaimer.html.j2' %}
+</section>
+
+{% include '_homepage_newsletter.html.j2' %}
+{% endblock %}

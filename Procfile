@@ -1,2 +1,2 @@
 web: gunicorn index:server
-worker: python worker.py
+worker: flask worker start

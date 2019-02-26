@@ -1,0 +1,44 @@
+<div id="file-selection-modal" class="homepage__data-selection hidden js-homepage-dataset-selection-window js-modal" data-trigger='file-selection-open'>
+    <div class="homepage__data-selection__window">
+        <div class="homepage__data-selection__highlight">
+            Datasets
+            <div id="file-selection-close" class="close-button js-homepage-dataset-selection-window-close">
+            </div>
+        </div>
+        <div class="dataset-filter-wrapper form">
+            <input type='text' id='dataset-filter' placeholder='Type a publisher name' value='' />
+        </div>
+        <ul id="registry-list" class="homepage__data-selection__sets">
+            {% for publisher in registry.keys()|sort %}
+            <li class="homepage__data-selection__set">
+                <h4 class="homepage__data-selection__set-name">{{ registry[publisher][0]['publisher'] }}</h4>
+                <ul class="homepage__data-selection__data-list">
+                    {% for file in registry[publisher] %}
+                        {% if file["file_size"] < config['FILE_SIZE_LIMIT'] %}
+                        <li class="homepage__data-selection__data-list__item">
+                            <a href="/fetch/registry/{{ file.identifier }}" class="fetch-from-registry" data-identifier="{{ file.identifier }}">
+                                <ul>
+                                    <li class="homepage__data-selection__data-list__item__data-fixed">{{ file.title }}</li>
+                                    <li class="homepage__data-selection__data-list__item__data-notfixed">{{ "{:,.0f} records".format(file.grant_count) }}</li>
+                                    <li class="homepage__data-selection__data-list__item__data-notfixed">{{ file.award_date }}</li>
+                                    <li class="homepage__data-selection__data-list__item__data-notfixed">{{ file.grant_amount }}</li>
+                                </ul>
+                            </a>
+                        </li>
+                        {% else %}
+                        <li class="homepage__data-selection__data-list__item">
+                            <ul>
+                                <li class="homepage__data-selection__data-list__item__data-fixed"><strong>[Not available due to large file size]</strong> {{ file.title }}</li>
+                                <li class="homepage__data-selection__data-list__item__data-notfixed">{{ "{:,.0f} records".format(file.grant_count) }}</li>
+                                <li class="homepage__data-selection__data-list__item__data-notfixed">{{ file.award_date }}</li>
+                                <li class="homepage__data-selection__data-list__item__data-notfixed">{{ file.grant_amount }}</li>
+                            </ul>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
