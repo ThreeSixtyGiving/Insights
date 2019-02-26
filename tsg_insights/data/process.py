@@ -534,7 +534,7 @@ class AddExtraFieldsExternal(DataPreparationStage):
 
     # Bins used for numeric fields
     AMOUNT_BINS = [-1, 500, 1000, 2000, 5000, 10000, 100000, 1000000, float("inf")]
-    AMOUNT_BIN_LABELS = ["Under £500", "£500 - £1,000", "£1,000 - £2,000", "£2k - £5k", "£5k - £10k",
+    AMOUNT_BIN_LABELS = ["Under £500", "£500 - £1k", "£1k - £2k", "£2k - £5k", "£5k - £10k",
                         "£10k - £100k", "£100k - £1m", "Over £1m"]
     INCOME_BINS = [-1, 10000, 100000, 1000000, 10000000, float("inf")]
     INCOME_BIN_LABELS = ["Under £10k", "£10k - £100k",
