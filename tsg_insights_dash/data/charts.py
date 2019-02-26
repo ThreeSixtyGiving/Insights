@@ -709,13 +709,18 @@ def get_file_output(metadata):
         ]))
     if metadata.get("url"):
         output.append(html.P([
-            "Original URL ",
             html.A(
-                metadata.get("url"),
+                "Download original file",
                 href=metadata.get("url"),
                 target="_blank",
             ),
-        ]))
+        ] + [
+            " (",
+            metadata.get("registry_entry", {}).get(
+                "datagetter_metadata", {}).get("file_type"),
+            ")",
+        ] if metadata.get("registry_entry", {}).get(
+            "datagetter_metadata") else []))
     
     if not output:
         return []
