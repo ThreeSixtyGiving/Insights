@@ -107,11 +107,21 @@ def test_check_columns_exist():
 def test_check_column_types():
     df = pd.DataFrame([{
         "Award Date": "2019-01-01",
+        "Amount Awarded": "1234",
+        "Funding Org:0:Name": "abcd ",
+        "Funding Org:0:Identifier": "abcd ",
+        "Recipient Org:0:Name": "abcd ",
+        "Recipient Org:0:Identifier": "abcd ",
     }])
     cache = DummyCache()
     stage = CheckColumnTypes(df, cache, None)
     result_df = stage.run()
     assert result_df.dtypes["Award Date"] == "datetime64[ns]"
+    assert result_df.dtypes["Amount Awarded"] == "float64"
+    assert result_df["Funding Org:0:Name"][0] == "abcd"
+    assert result_df["Funding Org:0:Identifier"][0] == "abcd"
+    assert result_df["Recipient Org:0:Name"][0] == "abcd"
+    assert result_df["Recipient Org:0:Identifier"][0] == "abcd"
 
     df = pd.DataFrame([{
         "Award Date": "Text here",

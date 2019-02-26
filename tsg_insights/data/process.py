@@ -241,9 +241,19 @@ class CheckColumnsExist(CheckColumnNames):
 class CheckColumnTypes(DataPreparationStage):
 
     name = 'Check column types'
+    columns_to_check = {
+        "Amount Awarded": lambda x: x.astype(float),
+        "Funding Org:0:Identifier": lambda x: x.str.strip(),
+        "Funding Org:0:Name": lambda x: x.str.strip(),
+        "Recipient Org:0:Name": lambda x: x.str.strip(),
+        "Recipient Org:0:Identifier": lambda x: x.str.strip(),
+        "Award Date": lambda x: pd.to_datetime(x),
+    }
 
     def run(self):
-        self.df.loc[:, "Award Date"] = pd.to_datetime(self.df["Award Date"])
+        for c, func in self.columns_to_check.items():
+            if c in self.df.columns:
+                self.df.loc[:, c] = func(self.df[c])
         return self.df
 
 class AddExtraColumns(DataPreparationStage):
