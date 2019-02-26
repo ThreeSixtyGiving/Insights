@@ -22,7 +22,7 @@
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
 
-            gtag('config', {{config.get("GOOGLE_ANALYTICS_TRACKING_ID")}});
+            gtag('config', '{{config.get("GOOGLE_ANALYTICS_TRACKING_ID")}}');
             </script>
             {% endif %}
         {% endblock %}

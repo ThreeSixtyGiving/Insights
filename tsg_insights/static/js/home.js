@@ -42,7 +42,30 @@ datasetFilter.addEventListener('keyup', (event) => {
 // function to track a job and update the status
 const track_job = function(jobid){
     const uploadProgress = document.getElementById('upload-progress');
-    uploadProgress.innerHTML = `<p>Processing file</p>`;
+
+    // set loading state
+    var progressLoader = document.getElementById("upload-progress-loader");
+    progressLoader.style.display = 'flex';
+    var resultsButton = document.getElementById("upload-progress-results");
+    resultsButton.innerText = 'View results';
+    resultsButton.href = '#';
+    resultsButton.classList.add("invalid");
+
+    // set progress bar states
+    var mainProgress = document.getElementById("upload-progress-main");
+    var mainProgressBar = mainProgress.getElementsByTagName("progress")[0];
+    mainProgress.getElementsByClassName("homepage__data-fetching__process-name")[0].innerText = 'Fetching data';
+    mainProgress.getElementsByClassName("homepage__data-fetching__steps")[0].innerText = '';
+    mainProgressBar.value = 0;
+    mainProgressBar.max = 10;
+
+    var subProgress = document.getElementById("upload-progress-sub");
+    var subProgressBar = subProgress.getElementsByTagName("progress")[0];
+    subProgress.getElementsByClassName("homepage__data-fetching__process-name")[0].innerText = '';
+    subProgress.getElementsByClassName("homepage__data-fetching__steps")[0].innerText = '';
+    subProgress.style.display = "none";
+    subProgressBar.value = 0;
+    subProgressBar.max = 10;
 
     // refresh the job ID every X seconds to get the current status
     const intervalID = setInterval(() => {
@@ -52,6 +75,7 @@ const track_job = function(jobid){
             })
             .then(function (jobStatus) {
                 // update the current status in the dialogue
+                progressLoader.style.display = 'none';
 
                 switch (jobStatus.status) {
                     case "not-found":
@@ -87,36 +111,55 @@ const track_job = function(jobid){
                         break;
 
                     case "in-progress":
+                        if(!jobStatus.progress){
+                            progressLoader.style.display = 'flex';
+                            break;
+                        }
+
                         /**
                          * jobStatus.stages has a description of the different stages
                          * jobStatus.progress['stage'] gives the index of the current stage
                          * jobStatus.progress['progress'] holds an array [currentindex, totalsize] of progress through the current stage
                          */
+                        mainProgress.getElementsByClassName("homepage__data-fetching__process-name")[0].innerText = jobStatus.stages[jobStatus.progress['stage'] + 1];
+                        mainProgress.getElementsByClassName("homepage__data-fetching__steps")[0].innerText = `Stage ${jobStatus.progress['stage'] + 1} of ${jobStatus.stages.length}`;
+                        mainProgressBar.value = jobStatus.progress['stage'] + 1;
+                        mainProgressBar.max = jobStatus.stages.length;
+
                         if (jobStatus.progress['progress']) {
-                            uploadProgress.innerHTML = `
-                                    <p>Stage ${jobStatus.progress['stage'] + 1} of ${jobStatus.stages.length}</p>
-                                    <p>${jobStatus.stages[jobStatus.progress['stage'] + 1]}</p>
-                                    <p>${jobStatus.progress['progress'][0]} of ${jobStatus.progress['progress'][1]}</p>
-                                    `;
+                            subProgress.style.display = "inherit";
+                            subProgress.getElementsByClassName("homepage__data-fetching__process-name")[0].innerText = `${jobStatus.progress['progress'][0]} of ${jobStatus.progress['progress'][1]}`;
+                            // subProgress.getElementsByClassName("homepage__data-fetching__steps")[0].innerText = `${jobStatus.progress['progress'][0]} of ${jobStatus.progress['progress'][1]}`;
+                            subProgressBar.value = jobStatus.progress['progress'][0];
+                            subProgressBar.max = jobStatus.progress['progress'][1];
                         } else {
-                            uploadProgress.innerHTML = `
-                                    <p>Stage ${jobStatus.progress['stage'] + 1} of ${jobStatus.stages.length}</p>
-                                    <p>${jobStatus.stages[jobStatus.progress['stage'] + 1]}</p>
-                                    `;
+                            subProgress.style.display = "none";
                         }
                         break;
 
                     case "completed":
                         // redirect to the file when the fetch has finished
                         clearInterval(intervalID);
-                        document.getElementById('upload-progress-modal').classList.add("hidden");
-                        window.location.href = `/file/${jobStatus.result[0]}`;
+
+                        var resultUrl = `/file/${jobStatus.result[0]}`;
+
+                        // set up progress bars
+                        subProgress.style.display = "none";
+                        mainProgress.getElementsByClassName("homepage__data-fetching__process-name")[0].innerText = 'Completed';
+                        mainProgress.getElementsByClassName("homepage__data-fetching__steps")[0].innerText = '';
+                        mainProgressBar.value = mainProgressBar.max;
+                        
+                        // add href to results button
+                        resultsButton.innerText = 'View results';
+                        resultsButton.href = resultUrl;
+                        resultsButton.classList.remove("invalid");
+
+                        // document.getElementById('upload-progress-modal').classList.add("hidden");
+                        // window.location.href = resultUrl;
                         break;
 
                     default:
-                        uploadProgress.innerHTML = `
-                                    <p>Processing file</p>
-                                    `;
+                        progressLoader.style.display = 'flex';
 
                 }
             });

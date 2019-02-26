@@ -2,111 +2,183 @@
 {% extends 'base.html.j2' %}
 
 {% block content %}
-<div id="page-content" class="cf">
-    <div class="homepage__data-sources">
-        <a href="{{ url_for('index') }}">
-            <img src="{{ url_for('static', filename='images/360-insights-color.png') }}" width="256">
-        </a>
-        <br>
-        <h1>About this tool</h1>
-        <p>
-            This tool is designed to help explore grantmaking data published to the 360Giving data standard.
-            It takes a 360Giving format file and turns it into an interactive dashboard 
-        </p>
-        <p>
-            360Giving commissioned <a href="https://dkane.net/">David Kane</a> to build the tool. 
-            The site design is by <a href="https://www.ccmdesign.ca/">CCM Design</a>.
-        </p>
-        <p>
-            You can view the <a href="https://github.com/ThreeSixtyGiving/Insights">site code on Github</a>.
-            The tool makes use of Open Source tools, such as:
-        </p>
-        <ul>
-            <li><a href="https://dash.plot.ly/">Dash by Plotly</a></li>
-            <li><a href="http://flask.pocoo.org/">Flask</a></li>
-            <li><a href="https://pandas.pydata.org/">Pandas</a></li>
-        </ul>
-        <p>For more information about 360Giving including terms of use and privacy policy, please see the 
-            <a href="https://www.threesixtygiving.org/">main 360Giving website</a>.</p>
-        <h2>Data sources</h2>
-        <p></p>
-        <h3>360Giving publishers</h3>
-        <p>
-            This tool uses the <a href="http://data.threesixtygiving.org/">360Giving data registry</a> to get a list of
-            grants data published to the 360Giving data standard that can be explored with the tool.
-        </p>
-        <p>
-            Each of the files has been published by a grantmaker, usually on their own website, under a licence
-            that allows the data to be reused and shared. They have used a common format - the 
-            <a href="http://standard.threesixtygiving.org/en/latest/#">360Giving data standard</a> to make files in
-            a consistent way.
-        </p>
-        <p>
-            When you use one of the files through this website, the tool will fetch the data from the publishers
-            website, make sure it fits the data standard, add some external data if it can and then display the
-            results.
-        </p>
-        <h3>Other data</h3>
-        <p>
-            This tool combines 360Giving data with other data to expand what is possible to do with the data.
-            The other data sources used are:
-        </p> 
-        <ul>
-            <li>
-                <a href="https://findthatcharity.uk/about#data-sources">Findthatcharity</a> is used to bring in data about charities. Findthatcharity sources data on
-                charities from the following places, used under the <a href="">Open Government Licence</a>:
-                <ul>
-                    <li><a href="http://data.charitycommission.gov.uk/">Charity Commission for England and Wales</a></li>
-                    <li><a href="https://www.oscr.org.uk/about-charities/search-the-register/charity-register-download">Scottish Charity Regulator</a> - 
-© Crown Copyright and database right 2019. Contains information from the Scottish Charity Register supplied by the Office of the Scottish Charity Regulator and licensed under the Open Government Licence v.2.0. </li>
-                    <li><a href="http://www.charitycommissionni.org.uk/charity-search/">Charity Commission for Northern Ireland</a></li>
-                </ul>
-            </li>
-            <li>
-                Data on postcodes comes from <a href="https://postcodes.findthatcharity.uk/">postcodes.findthatcharity.uk</a>. 
-                <a href="https://www.ons.gov.uk/methodology/geography/licences">Postcode data from ONS used under Open Government License</a><br> 
-                Contains OS data © Crown copyright and database right 2019 <br>
-                Contains Royal Mail data © Royal Mail copyright and database right 2019 <br> 
-                Contains National Statistics data © Crown copyright and database right 2019
-            </li>
-            <li>
-                Data on companies comes from the 
-                <a href="https://www.gov.uk/government/organisations/companies-house/about-our-services#uri-info">Companies House URI service</a>.
-            </li>
-        </ul>
-        <h2>What happens to data I upload?</h2>
-        <p>
-            This application is designed so that people can submit files to the application, allow the application 
-            to process them and to then display information about them, generate alternative file formats of the 
-            original data, and provide those files for download.
-        </p>
-        <p>
-            <strong>Please do not submit any non-public personal data to this application.</strong>
-        </p>
-        <p>
-            We do not make use of any of the data within the files for purposes other than to create reports 
-            for you about the data you have submitted and to review the operation and output of the website.
-        </p>
-        <p>
-            We do create and store metadata about your use of the application, and about the files/data that you have uploaded in order to monitor how the application is being used.
-        </p>
-        <p><a href="http://www.threesixtygiving.org/take-down-policy/">Take down policy</a></p>
-        <h2>How we use cookies</h2>
-        <p>
-            This site uses cookies – small text files that are placed on your machine to help the site provide a 
-            better user experience. In general, cookies are used to retain user preferences, store information 
-            for things like shopping carts, and provide anonymised tracking data to third party applications 
-            like Google Analytics. As a rule, cookies will make your browsing experience better. However, you 
-            may prefer to disable cookies on this site and on others. The most effective way to do this is to 
-            disable cookies in your browser. We suggest consulting the Help section of your browser or taking 
-            a look at the <a href="http://www.aboutcookies.org/">About Cookies</a> website which offers guidance 
-            for all modern browsers.
-        </p>
+<div class="about__header">
+  <a href="/"><img src="images/360-insights-color.png" width="256" /></a><br />
+  <h1>About this tool</h1>
+  <div class="about__columns">
+    <div class="about__column">
+      <p>
+        This tool is designed to help explore grantmaking data published to the 360Giving data standard.
+        It takes a 360Giving format file and turns it into an interactive dashboard.
+      </p>
+      <p>
+        360Giving commissioned <a href="https://dkane.net/" rel="noopener" target="_blank">David Kane</a> to build the tool.
+        The site design is by <a href="https://www.ccmdesign.ca/" rel="noopener" target="_blank">ccm.design</a>.
+      </p>
     </div>
+    <div class="about__column">
+      <p>
+        You can <a href="https://github.com/ThreeSixtyGiving/Insights" rel="noopener" target="_blank">view the site code on Github</a>. 
+        The tool makes use of Open Source tools, such as: 
+        <a href="https://dash.plot.ly/">Dash by Plotly</a>, 
+        <a href="http://flask.pocoo.org/">Flask</a> and 
+        <a href="https://pandas.pydata.org/">Pandas</a>.
+      </p>
+      <p>
+        For more information about 360Giving including terms of use and privacy policy, please see the
+        <a href="http://www.threesixtygiving.org/" rel="noopener" target="_blank">main 360Giving website</a>.
+      </p>
+    </div>
+  </div>
 </div>
-{% endblock %}
 
-{% block scripts %}
-    {{ super() }}
-    <script src="{{ url_for('static', filename='js/home.js') }}"></script>
+<section class="about__section about__section--gray">
+  <div class="wrapper">
+    <div class="about__columns">
+      <div class="about__column">
+        <h2>How we use cookies?</h2>
+      </div>
+    </div>
+    <div class="about__columns">
+      <div class="about__column">
+        <p class="strong">
+          360Giving publishers
+        </p>
+        <p>
+          This tool uses the <a href="http://data.threesixtygiving.org/">360Giving data registry</a> to get a list of grants data
+          published to the 360Giving data standard that can be explored with the tool.
+        </p>
+        <p>
+          Each of the files has been published by a grantmaker, usually on their own
+          website, under a licence that allows the data to be reused and shared.
+        </p>
+        <p>
+          They have used a common format - the 
+          <a href="http://www.threesixtygiving.org/support/standard/" rel="noopener" target="_blank">360Giving data standard</a>
+           - to make files in a consistent way.
+        </p>
+        <p>
+          When you use one of the files through this website, the tool will fetch the
+          data from the publishers website, make sure it fits the data standard, add
+          some external data if it can and then display the results.
+        </p>
+      </div>
+      <div class="about__column">
+        <p class="strong">
+          Other data
+        </p>
+        <p>
+          This tool combines 360Giving data with other data to expand what is possible
+          to do with the data. The other data sources used are:
+        </p>
+        <p>
+          <a href="https://findthatcharity.uk/">Findthatcharity</a> is used to bring in data about charities. Findthatcharity sources
+          data on charities from the following places, used under the 
+          <a href="http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/">Open Government Licence</a>:
+        </p>
+        <p>
+          <a href="http://data.charitycommission.gov.uk/">Charity Commission for England and Wales</a>
+        </p>
+        <p>
+          <a href="https://www.oscr.org.uk/about-charities/search-the-register/charity-register-download">Scottish Charity Regulator</a>
+           - © Crown Copyright and database right 2019. Contains
+          information from the Scottish Charity Register supplied by the Office of the
+          Scottish Charity Regulator and licensed under the 
+          <a href="http://www.nationalarchives.gov.uk/doc/open-government-licence/version/2/">Open Government Licence v.2.0</a>.
+        </p>
+        <p>
+          <a href="http://www.charitycommissionni.org.uk/charity-search/">Charity Commission for Northern Ireland</a>
+        </p>
+        <p>
+          Data on postcodes comes from <a href="https://postcodes.findthatcharity.uk/">postcodes.findthatcharity.uk</a>. Postcode data from
+          ONS used under <a href="http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/">Open Government Licence</a>.
+        </p>
+        <p>
+          Contains OS data © Crown copyright and database right 2019 
+        </p>
+        <p>
+          Contains Royal Mail data © Royal Mail copyright and database right 2019 
+        </p>
+        <p>
+          Contains National Statistics data © Crown copyright and database right 2019
+        </p>
+        <p>
+          Data on companies comes from the <a href="https://www.gov.uk/government/organisations/companies-house/about-our-services#uri-info">Companies House URI service</a>.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="about__section">
+  <div class="wrapper">
+    <div class="about__columns">
+      <div class="about__column about__column--large">
+        <h2>What happens to data I upload?</h2>
+      </div>
+      <div class="about__column about__take-down">
+        <a class="about__take-down__button" href="#" target="_blank" rel="noopener">Take down policy</a>
+      </div>
+    </div>
+    <div class="about__columns">
+      <div class="about__column">
+        <p class="strong">
+          360Giving publishers
+        </p>
+        <p>
+            This application is designed so that people can submit files to the application,
+            allow the application to process them and to then display information about them,
+            generate alternative file formats of the original data, and provide those files
+            for download.
+        </p>
+        <p class="warning">
+            Please do not submit any non-public personal data to this application.
+        </p>
+      </div>
+      <div class="about__column">
+        <p class="headless">
+          We do not make use of any of the data within the files for purposes other than to
+          create reports for you about the data you have submitted and to review the operation
+          and output of the website.
+        </p>
+        <p>
+          We do create and store metadata about your use of the application, and about the
+          files/data that you have uploaded in order to monitor how the application is being
+          used.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="about__section">
+  <div class="wrapper">
+    <div class="about__columns">
+      <div class="about__column">
+        <h2>How do we use cookies?</h2>
+      </div>
+    </div>
+    <div class="about__columns">
+      <div class="about__column">
+        <p>
+          This site uses cookies – small text files that are placed on your machine to help
+          the site provide a better user experience. In general, cookies are used to retain
+          user preferences, store information for things like shopping carts, and provide
+          anonymised tracking data to third party applications like Google Analytics.
+        </p>
+      </div>
+      <div class="about__column">
+        <p>
+          As a rule, cookies will make your browsing experience better. However, you may
+          prefer to disable cookies on this site and on others. The most effective way to
+          do this is to disable cookies in your browser. We suggest consulting the Help
+          section of your browser or taking a look at the About Cookies website which offers
+          guidance for all modern browsers.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% include '_homepage_newsletter.html.j2' %}
 {% endblock %}

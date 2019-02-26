@@ -15,7 +15,7 @@ from tsg_insights_components import InsightChecklist, InsightDropdown, InsightFo
 
 def footer(server):
     with server.app_context():
-        return InnerHTML(render_template('footer.html.j2'))
+        return InnerHTML(render_template('footer.html.j2', footer_class="light"))
 
 def filter_html(filter_id, filter_def):
     if filter_def.get("type") == 'rangeslider':
@@ -123,10 +123,58 @@ layout = html.Div(id="dashboard-container", className='results-page', children=[
 
         html.Div(className="results-page__body", children=[
             html.Section(className='results-page__body__content',
-                         id="dashboard-output")
+                         id="dashboard-output"),
+            html.Section(
+                className='results-page__body__whats-next',
+                id="whats-next",
+                children=[
+                    html.H3(className="results-page__body__whats-next__title", children='What next?'),
+                    html.P([
+                        html.Strong('1. Make the most of your data'),
+                        html.Br(),
+                        '''Grants data is at its most powerful when you can link it to other datasets.
+There were some pieces missing from the data which meant we couldn't make the most of it.
+For linkable data, we suggest adding:''',
+                    ]),
+                    html.Ul([
+                        html.Li([html.A(
+                            'external organisation identifiers, like ', href='http://standard.threesixtygiving.org/en/latest/identifiers/#id2')]),
+                        html.Li(
+                            [html.A('postcodes or other geo data', href='https://postcodes.findthatcharity.uk/')]),
+                    ]),
+                    html.P([
+                        html.Strong('2. Try other services and get inspiration'),
+                        html.Br(),
+                        '''There are lots of other services you can use to explore and visualise this kind of data. Here are some of our favourites:''',
+                    ]),
+                    html.Ul([
+                        html.Li(
+                            [html.A('Flourish', href='https://flourish.studio/')]),
+                        html.Li(
+                            [html.A('Databasic', href='https://databasic.io/')]),
+                        html.Li([html.A('Carto', href='https://carto.com/')]),
+                        html.Li(
+                            [html.A('360Giving Visualisation challenge', href='https://challenge.threesixtygiving.org/')]),
+                    ]),
+                    html.P([
+                        html.Strong('3. Do you own analysis'),
+                        html.Br(),
+                        '''
+You can also download the original files to analyse yourself, for example in Excel or another package.
+The download includes all the additional information we've added to our data, like charity data or geo
+data from the postcodes.''',
+                    ]),
+                    html.Ul([
+                        html.Li(html.A(href='#', target="_blank",
+                                       children='CSV Download', id='file-download-csv')),
+                        html.Li(html.A(href='#', target="_blank",
+                                       children='Excel Download', id='file-download-excel')),
+                    ]),
+                ]
+            ),
+            footer(app.server),
         ]),
     ]),
-    # footer(app.server),
 ])
 
 @app.callback(Output('dashboard-output', 'children'),
@@ -170,15 +218,17 @@ def dashboard_output(fileid, *args):
 
     outputs.extend(charts)
 
-    outputs.append(html.Div(children=[
-        html.H2(className='results-page__body__section-title', children="Download the results"),
-        html.Ul(className='results-page__body__download', children=[
-            html.Li(html.A(href=url_for('data.download_file', fileid=fileid, format='csv'), target="_blank", children='CSV Download')),
-            html.Li(html.A(href=url_for('data.download_file', fileid=fileid, format='xlsx'), target="_blank", children='Excel Download')),
-        ])
-    ]))
-
     return outputs
+
+@app.callback(Output('file-download-csv', 'href'),
+              [Input('output-data-id', 'data')])
+def file_download_csv_href(fileid):
+    return url_for('data.download_file', fileid=fileid, format='csv')
+
+@app.callback(Output('file-download-excel', 'href'),
+              [Input('output-data-id', 'data')])
+def file_download_excel_href(fileid):
+    return url_for('data.download_file', fileid=fileid, format='xlsx')
 
 @app.callback(Output('award-dates', 'data'),
               [Input('output-data-id', 'data')])

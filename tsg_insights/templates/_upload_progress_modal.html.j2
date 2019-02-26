@@ -1,19 +1,94 @@
 <div id="upload-progress-modal" class="homepage__data-selection hidden js-homepage-upload-progress-window js-modal">
     <div class="homepage__data-selection__window">
-        <div class="homepage__data-selection__highlight">
-            Upload progress
-            <div id="file-selection-close" class="close-button js-homepage-upload-progress-window-close">
+        <div class="page-loader" style="position: absolute; display: none;" id="upload-progress-loader">
+            <div class="la-ball-atom la-2x">
+                <div style="background-color:#0b2833"></div>
+                <div style="color:#cddc2b;"></div>
+                <div style="color:#f4831f;"></div>
+                <div style="color:#9c1f61;"></div>
             </div>
         </div>
-        <div id="upload-progress">
-            <div class="page-loader" style="position: absolute;">
-                <div class="la-ball-atom la-2x">
-                    <div style="background-color:#0b2833"></div>
-                    <div style="color:#cddc2b;"></div>
-                    <div style="color:#f4831f;"></div>
-                    <div style="color:#9c1f61;"></div>
-                </div>
+        <div class="homepage__data-selection__highlight">
+            Fetching data
+            <div id="file-selection-close" class="close-button js-homepage-dataset-fetching-window-close">
             </div>
+        </div>
+        <div id="upload-progress" class="homepage__data-fetching__content">
+            <div class="homepage__data-fetching__display" id="upload-progress-main">
+                <div class="homepage__data-fetching__display-header">
+                    <div class="homepage__data-fetching__process-name"></div>
+                    <div class="homepage__data-fetching__steps"></div>
+                </div>
+                <progress value="0" max="11">
+                    <div class="progress-bar">
+                        <div class="progress-bar__bar" style="width: 0%"></div>
+                    </div>
+                </progress>
+            </div>
+            <div class="homepage__data-fetching__display" id="upload-progress-sub">
+                <div class="homepage__data-fetching__display-header">
+                    <div class="homepage__data-fetching__process-name">
+                        &nbsp;
+                    </div>
+                    <div class="homepage__data-fetching__steps"></div>
+                </div>
+                <progress value="0" max="11">
+                    <div class="progress-bar">
+                        <div class="progress-bar__bar" style="width: 0%"></div>
+                    </div>
+                </progress>
+            </div>
+        </div>
+        <div class="homepage__data-selection__upload-wrapper">
+            <a href="#" class="homepage__data-selection__upload-button invalid" id="upload-progress-results">View results</a> <!-- "invalid" class disables button -->
         </div>
     </div>
 </div>
+{#
+<div class="homepage__data-selection hidden js-homepage-dataset-fetching-window">
+  <div class="homepage__data-selection__window">
+    <div class="homepage__data-selection__highlight">
+      Fetching data
+      <div class="close-button js-homepage-dataset-fetching-window-close"></div>
+    </div>
+    <div class="homepage__data-fetching__content">
+      <div class="homepage__data-fetching__display">
+        <div class="homepage__data-fetching__display-header">
+          <div class="homepage__data-fetching__process-name">
+            Lookup charity data
+          </div>
+          <div class="homepage__data-fetching__steps">
+            Step 5 of 11
+          </div>
+        </div>
+        <progress value="5" max="11">
+          <div class="progress-bar">
+            <div class="progress-bar__bar" style="width: 45.45%"></div>
+          </div>
+        </progress>
+      </div>
+      <div class="homepage__data-fetching__display">
+        <div class="homepage__data-fetching__display-header">
+          <div class="homepage__data-fetching__process-name">
+            Lookup charity data
+          </div>
+          <div class="homepage__data-fetching__steps">
+            Step 5 of 11
+          </div>
+        </div>
+        <progress value="44" max="93">
+          <div class="progress-bar">
+            <div class="progress-bar__bar" style="width: 47.31%"></div>
+          </div>
+        </progress>
+        <div class="homepage__data-fetching__display-footer">
+          Processed 44 of 93
+        </div>
+      </div>
+    </div>
+    <div class="homepage__data-selection__upload-wrapper">
+      <button class="homepage__data-selection__upload-button invalid">View results</button> <!-- "invalid" class disables button -->
+    </div>
+  </div>
+</div>
+#}
