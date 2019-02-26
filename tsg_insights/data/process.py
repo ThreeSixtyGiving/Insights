@@ -51,11 +51,17 @@ def get_dataframe_from_file(filename, contents, date=None):
 def get_dataframe_from_url(url):
     # 1. Work out the file id
     headers = fetch_reg_file(url, 'HEAD')
-    # work out the version of the file
-    # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Last-Modified
-    last_modified = headers.get("ETag", headers.get("Last-Modified"))
 
-    fileid = get_fileid(None, url, last_modified)
+    # 2. Get the registry entry for the file (if available)
+    registry = get_reg_file_from_url(url)
+    if registry.get("identifier"):
+        fileid = registry.get("identifier")
+    else:
+        # work out the version of the file
+        # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Last-Modified
+        last_modified = headers.get("ETag", headers.get("Last-Modified"))
+
+        fileid = get_fileid(None, url, last_modified)
 
     # 2. Check cache for file
     df = get_from_cache(fileid)
@@ -76,7 +82,6 @@ def get_dataframe_from_url(url):
         "headers": headers,
         "url": url,
     }
-    registry = get_reg_file_from_url(url)
     if registry:
         metadata["registry_entry"] = registry
 

@@ -67,6 +67,10 @@ const track_job = function(jobid){
     subProgressBar.value = 0;
     subProgressBar.max = 10;
 
+    // set error display loading state
+    var uploadError = document.getElementById("upload-progress-error");
+    uploadError.style.display = "none";
+
     // refresh the job ID every X seconds to get the current status
     const intervalID = setInterval(() => {
         fetch(`/job/${jobid}`)
@@ -79,17 +83,23 @@ const track_job = function(jobid){
 
                 switch (jobStatus.status) {
                     case "not-found":
-                        uploadProgress.innerHTML = `<p>File could not be found</p>`;
+                        uploadError.style.display = "inherit";
+                        uploadError.getElementsByClassName("homepage__data-fetching__process-name")[0].innerText = 'File could not be found';
                         clearInterval(intervalID);
                         break;
 
                     case "processing-error":
+                        uploadError.style.display = "inherit";
+                        mainProgress.style.display = "none";
                         var p = document.createElement('p');
                         p.innerText = 'Error processing the file ';
                         var e_details = document.createElement('div');
                         e_details.innerHTML = `<pre>${jobStatus.exc_info}</pre>`;
-                        e_details.style['display'] = 'none';
+                        e_details.style['display'] = 'none'; 
+                        e_details.style['overflow'] = 'scroll';
+                        e_details.style['maxHeight'] = '250px';
                         e_details.classList.add("hidden");
+
                         var e_toggle = document.createElement('a');
                         e_toggle.innerText = 'Show error';
                         e_toggle.setAttribute('href', '#');
@@ -104,9 +114,13 @@ const track_job = function(jobid){
                                 e_details.style['display'] = 'inherit';
                             }
                         })
-                        p.append(e_toggle);
-                        uploadProgress.innerHTML = '';
-                        uploadProgress.append(p, e_details);
+                        
+                        uploadError.getElementsByClassName("homepage__data-fetching__process-name")[0].innerHTML = '';
+                        uploadError.getElementsByClassName("homepage__data-fetching__process-name")[0].append(p);
+                        uploadError.getElementsByClassName("homepage__data-fetching__steps")[0].innerHTML = '';
+                        uploadError.getElementsByClassName("homepage__data-fetching__steps")[0].append(e_toggle);
+                        uploadError.getElementsByClassName("homepage__data-fetching__display-error")[0].innerHTML = '';
+                        uploadError.getElementsByClassName("homepage__data-fetching__display-error")[0].append(e_details);
                         clearInterval(intervalID);
                         break;
 
@@ -211,6 +225,11 @@ for (const registryLink of document.getElementsByClassName("fetch-from-registry"
                 track_job(jobid);
             });
     })
+
+    // if we've been given a "fetch" parameter then start the fetch
+    if (urlParams.get('fetch') == registryLink.dataset.identifier) {
+        registryLink.click();
+    }
 }
 
 // trigger upload when a file is dropped onto the dropzone

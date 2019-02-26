@@ -47,6 +47,7 @@ def delete_from_cache(fileid, prefix=CACHE_DEFAULT_PREFIX):
     r.hdel("files", fileid)
     logging.info("Dataframe [{}] metadata removed from redis".format(fileid))
 
+
 def get_from_cache(fileid, prefix=CACHE_DEFAULT_PREFIX):
     r = get_cache()
 
