@@ -225,8 +225,13 @@ dropzone.onclick = function (event) {
 dropzone.ondragover = dropzone.ondragenter = function (event) {
     event.stopPropagation();
     event.preventDefault();
-    // @TODO:  add styles here to signal that they're in the right place
-    // eg: border: 8px dashed lightgray;
+    dropzone.classList.add("highlight");
+}
+
+dropzone.ondragleave = dropzone.ondragend = dropzone.ondragexit = function (event) {
+    event.stopPropagation();
+    event.preventDefault();
+    dropzone.classList.remove("highlight");
 }
 
 dropzone.ondrop = function (event) {
