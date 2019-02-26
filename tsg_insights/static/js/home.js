@@ -84,6 +84,7 @@ const track_job = function(jobid){
                 switch (jobStatus.status) {
                     case "not-found":
                         uploadError.style.display = "inherit";
+                        mainProgress.style.display = "none";
                         uploadError.getElementsByClassName("homepage__data-fetching__process-name")[0].innerText = 'File could not be found';
                         clearInterval(intervalID);
                         break;
@@ -135,6 +136,7 @@ const track_job = function(jobid){
                          * jobStatus.progress['stage'] gives the index of the current stage
                          * jobStatus.progress['progress'] holds an array [currentindex, totalsize] of progress through the current stage
                          */
+                        mainProgress.style.display = "inherit";
                         mainProgress.getElementsByClassName("homepage__data-fetching__process-name")[0].innerText = jobStatus.stages[jobStatus.progress['stage'] + 1];
                         mainProgress.getElementsByClassName("homepage__data-fetching__steps")[0].innerText = `Stage ${jobStatus.progress['stage'] + 1} of ${jobStatus.stages.length}`;
                         mainProgressBar.value = jobStatus.progress['stage'] + 1;
@@ -169,7 +171,7 @@ const track_job = function(jobid){
                         resultsButton.classList.remove("invalid");
 
                         // document.getElementById('upload-progress-modal').classList.add("hidden");
-                        // window.location.href = resultUrl;
+                        window.location.href = resultUrl;
                         break;
 
                     default:
