@@ -8,12 +8,16 @@
   <div class="about__columns">
     <div class="about__column">
       <p>
-        This tool is designed to help explore grantmaking data published to the 360Giving data standard.
-        It takes a 360Giving format file and turns it into an interactive dashboard.
+        360Insights aims to help you explore grantmaking data published to the 360Giving data Standard.
+        It takes a 360Giving format file, combines it with other data sources and turns it into an
+        interactive visual dashboard. 
       </p>
       <p>
-        360Giving commissioned <a href="https://dkane.net/" rel="noopener" target="_blank">David Kane</a> to build the tool.
-        The site design is by <a href="https://www.ccmdesign.ca/" rel="noopener" target="_blank">ccm.design</a>.
+        With 360Insights you can quickly see information on seven key areas for each funder sharing their grants data openly with 360Giving.
+      </p>
+      <p>
+        360Giving commissioned <a href="https://dkane.net/" rel="noopener" target="_blank">David Kane</a> to build 360Insights
+        and <a href="https://www.ccmdesign.ca/" rel="noopener" target="_blank">ccm.design</a> to design it.
       </p>
     </div>
     <div class="about__column">
@@ -24,10 +28,10 @@
         <a href="http://flask.pocoo.org/">Flask</a> and 
         <a href="https://pandas.pydata.org/">Pandas</a>.
       </p>
-      <p>
+      {# <p>
         For more information about 360Giving including terms of use and privacy policy, please see the
         <a href="http://www.threesixtygiving.org/" rel="noopener" target="_blank">main 360Giving website</a>.
-      </p>
+      </p> #}
     </div>
   </div>
 </div>
@@ -36,31 +40,29 @@
   <div class="wrapper">
     <div class="about__columns">
       <div class="about__column">
-        <h2>How we use cookies?</h2>
+        <h2>Data sources</h2>
       </div>
     </div>
     <div class="about__columns">
       <div class="about__column">
         <p class="strong">
-          360Giving publishers
+          Grantmakers
         </p>
         <p>
-          This tool uses the <a href="http://data.threesixtygiving.org/">360Giving data registry</a> to get a list of grants data
-          published to the 360Giving data standard that can be explored with the tool.
+          360Insights uses the <a href="http://data.threesixtygiving.org/">360Giving data registry</a> to retrieve grants data
+          published by grantmakers to the 360Giving data Standard.
         </p>
         <p>
-          Each of the files has been published by a grantmaker, usually on their own
-          website, under a licence that allows the data to be reused and shared.
-        </p>
-        <p>
+          Each of the files has been published by a grantmaker, usually on their own website,
+          under a licence that allows the data to be reused and shared. 
           They have used a common format - the 
           <a href="http://www.threesixtygiving.org/support/standard/" rel="noopener" target="_blank">360Giving data standard</a>
            - to make files in a consistent way.
         </p>
         <p>
-          When you use one of the files through this website, the tool will fetch the
-          data from the publishers website, make sure it fits the data standard, add
-          some external data if it can and then display the results.
+          When you select a dataset through 360Insights, the software will fetch the data from the publisher’s website, checks
+          that it fits the data Standard, adds some external data if possible and then displays the results in the form of
+          charts and a map.
         </p>
       </div>
       <div class="about__column">
@@ -68,12 +70,11 @@
           Other data
         </p>
         <p>
-          This tool combines 360Giving data with other data to expand what is possible
-          to do with the data. The other data sources used are:
+          360Insights combines 360Giving data with other data sources to expand what is possible.
         </p>
         <p>
-          <a href="https://findthatcharity.uk/">Findthatcharity</a> is used to bring in data about charities. Findthatcharity sources
-          data on charities from the following places, used under the 
+          <a href="https://findthatcharity.uk/">Findthatcharity</a> is used to bring in data about charities 
+          from the following sources, used under the 
           <a href="http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/">Open Government Licence</a>:
         </p>
         <p>
@@ -81,10 +82,10 @@
         </p>
         <p>
           <a href="https://www.oscr.org.uk/about-charities/search-the-register/charity-register-download">Scottish Charity Regulator</a>
-           - © Crown Copyright and database right 2019. Contains
+           - <span style="font-style: italic;">© Crown Copyright and database right 2019. Contains
           information from the Scottish Charity Register supplied by the Office of the
           Scottish Charity Regulator and licensed under the 
-          <a href="http://www.nationalarchives.gov.uk/doc/open-government-licence/version/2/">Open Government Licence v.2.0</a>.
+          <a href="http://www.nationalarchives.gov.uk/doc/open-government-licence/version/2/">Open Government Licence v.2.0</a></span>.
         </p>
         <p>
           <a href="http://www.charitycommissionni.org.uk/charity-search/">Charity Commission for Northern Ireland</a>
@@ -126,32 +127,41 @@
           360Giving publishers
         </p>
         <p>
-            This application is designed so that people can submit files to the application,
-            allow the application to process them and to then display information about them,
-            generate alternative file formats of the original data, and provide those files
-            for download.
+            360Insights is designed to enable you to submit files for the application to process and
+            then display information from them. It also generates files in CSV and Microsoft Excel
+            formats that combine the original data with the charity or company data. You can then
+            download these files.
         </p>
         <p class="warning">
-            Please do not submit any non-public personal data to this application.
+            Please ensure that you have the appropriate permissions to upload data to 360Insights. 
+        </p>
+        <p class="warning">
+            Do not submit confidential or non-public personal data to this tool.
         </p>
       </div>
       <div class="about__column">
         <p class="headless">
-          We do not make use of any of the data within the files for purposes other than to
-          create reports for you about the data you have submitted and to review the operation
-          and output of the website.
+          Any data you upload will be available at the URL created and can be accessed by anyone 
+          with that link. If your data is not suitable for sharing publicly then you should treat 
+          this URL with care, and only share it with people who have permission to access to the data. 
         </p>
         <p>
-          We do create and store metadata about your use of the application, and about the
-          files/data that you have uploaded in order to monitor how the application is being
-          used.
+          We do not make use of any of the data for purposes other than to create visualisations
+          for the data you have submitted and to review the operation and output of the application.
+        </p>
+        <p>
+          We do create and store metadata about your use of the application, and about the files/data
+          that you have uploaded in order to monitor how the application is being used.
+        </p>
+        <p>
+          <a href="#">Read the 360 Insights privacy notice for further information</a>
         </p>
       </div>
     </div>
   </div>
 </section>
 
-<section class="about__section">
+{# <section class="about__section">
   <div class="wrapper">
     <div class="about__columns">
       <div class="about__column">
@@ -178,7 +188,7 @@
       </div>
     </div>
   </div>
-</section>
+</section> #}
 
 {% include '_homepage_newsletter.html.j2' %}
 {% endblock %}
