@@ -333,9 +333,8 @@ This can be added by using charity or company numbers, or by including a postcod
         ),
         'UK Region and Country',
         '(number of grants)',
-        description='''Based on the registered address of a charity or company
-(or a postcode if included with the grant data). Only available for registered
-charities or companies, or those grants which contain a postcode.''',
+        description='''Chart based on postcodes found in the grant data, or the UK
+        registered charity or company address, if postcodes are not available.''',
         children=[chart_n(count_without_unknown, 'grant')],
     )
 
@@ -577,9 +576,8 @@ def location_map(df, mapbox_access_token=None, mapbox_style=None):
         'Location of UK grant recipients',
         description='''Showing the location of **{:,.0f}** grants out of {:,.0f}
         
-Based on the registered address of a charity or company
-(or a postcode if included with the grant data). Only available for UK registered
-charities or companies, or those grants which contain a postcode.'''.format(
+Map locations are based on postcodes found in the grant data, or the UK registered
+charity or company address, if postcodes are not available. Mapping is UK only.'''.format(
             grant_count, len(df)
         ),
         children=[chart_n(geo["grants"].sum(), 'grant')],
