@@ -153,9 +153,13 @@ def dashboard_output(fileid, *args):
                 html.Span("Dataset not found",
                           className="results-page__body__content__date"),
                     className="results-page__body__content__header"),
-            html.P([
-                html.A("Try to fetch this file", href="/?fetch={}".format(fileid))
-            ], className="results-page__body__section-description") if fileid else None,
+            html.P(([
+                html.A("Try to fetch this file", href="/?fetch={}".format(fileid)),
+                " or "
+            ] if fileid else []) + [
+                html.A("Go to homepage",
+                       href="/"),
+            ], className="results-page__body__section-description"),
         ]
 
     if len(df) == 0:
