@@ -68,26 +68,26 @@ From the URL above you find the following variables:
 
 ```bash
 # create app
-dokku apps:create explorer
+dokku apps:create insights
 
 # add redis cache
 sudo dokku plugin:install https://github.com/dokku/dokku-redis.git redis
-dokku redis:create explorercache
-dokku redis:link explorercache explorer
+dokku redis:create insightscache
+dokku redis:link insightscache insights
 
 # enable domains
-dokku domains:enable explorer
-dokku domains:add explorer example.com
+dokku domains:enable insights
+dokku domains:add insights example.com
 
 # letsencrypt
-dokku config:set --no-restart explorer DOKKU_LETSENCRYPT_EMAIL=your@email.tld
-dokku letsencrypt explorer
+dokku config:set --no-restart insights DOKKU_LETSENCRYPT_EMAIL=your@email.tld
+dokku letsencrypt insights
 
 # create app storage
-mkdir -p /var/lib/dokku/data/storage/explorer-uploads
-chown -R dokku:dokku /var/lib/dokku/data/storage/explorer-uploads
-chown -R 32767:32767 /var/lib/dokku/data/storage/explorer-uploads
-dokku storage:mount explorer /var/lib/dokku/data/storage/explorer-uploads:/app/uploads
+mkdir -p /var/lib/dokku/data/storage/insights-uploads
+chown -R dokku:dokku /var/lib/dokku/data/storage/insights-uploads
+chown -R 32767:32767 /var/lib/dokku/data/storage/insights-uploads
+dokku storage:mount insights /var/lib/dokku/data/storage/insights-uploads:/app/uploads
 ```
 
 ## Get newsletter section to appear
