@@ -242,11 +242,10 @@ def what_next_missing_fields(fileid):
         missing.append(["postcodes or other geo data",
                         "https://postcodes.findthatcharity.uk/"])
 
-    if "Identifier not recognised" in CHARTS['org_type']['get_results'](df).index:
+    org_type = CHARTS['org_type']['get_results'](df)
+    if "Identifier not recognised" in org_type.index and len(org_type.index)==1:
         missing.append(["external organisation identifiers, like charity numbers",
                         'http://standard.threesixtygiving.org/en/latest/identifiers/#id2'])
-
-    print(missing)
 
 
     if not missing:

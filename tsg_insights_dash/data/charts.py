@@ -351,7 +351,7 @@ def organisation_type_chart(df):
             "Identifier not recognised" means either that the organisation does not have an official
             identifier, for example because it is an unregistered community group, or the publisher
             has not included official identifiers in the data.
-            '''))
+            ''', className='results-page__body__section-note'))
 
     if len(data) > 4:
         layout = copy.deepcopy(DEFAULT_LAYOUT)
