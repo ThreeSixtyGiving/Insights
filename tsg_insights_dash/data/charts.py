@@ -47,6 +47,10 @@ DEFAULT_LAYOUT = {
         pad=4
     ),
 }
+DEFAULT_CONFIG = {
+    'displayModeBar': False,
+    'scrollZoom': 'gl3d',
+}
 
 def chart_title(title, subtitle=None, description=None):
     return html.Figcaption(className='', children=[
@@ -110,8 +114,6 @@ def get_bar_data(values, name="Grants", chart_type='bar', colour=0):
         bar_data['type'] = 'bar'
         bar_data['orientation'] = 'h'
         bar_data['hoverinfo'] = 'text',
-        # bar_data['textposition'] = 'outside',
-        # bar_data['constraintext'] = 'both',
         x = bar_data['x']
         bar_data['x'] = bar_data['y']
         bar_data['y'] = x
@@ -155,9 +157,7 @@ def grant_programme_chart(df):
                 'data': [get_bar_data(data)],
                 'layout': DEFAULT_LAYOUT
             },
-            config={
-                'displayModeBar': False
-            }
+            config=DEFAULT_CONFIG
         ),
         chart['title'], 
         subtitle=chart.get("units"),
@@ -202,9 +202,7 @@ def amount_awarded_chart(df):
                 ) for k, series in enumerate(data.iteritems())],
                 'layout': DEFAULT_LAYOUT
             },
-            config={
-                'displayModeBar': False
-            }
+            config=DEFAULT_CONFIG
         ),
         chart['title'], 
         subtitle=units,
@@ -222,9 +220,7 @@ def org_identifier_chart(df):
                 'data': [get_bar_data(data)],
                 'layout': DEFAULT_LAYOUT
             },
-            config={
-                'displayModeBar': False
-            }
+            config=DEFAULT_CONFIG
         ),
         chart['title'],
         subtitle=chart.get("units"),
@@ -303,9 +299,7 @@ def awards_over_time_chart(df):
                 'data': chart_data,
                 'layout': layout
             },
-            config={
-                'displayModeBar': False
-            }
+            config=DEFAULT_CONFIG
         ),
         chart['title'], 
         subtitle=chart.get("units"),
@@ -340,9 +334,7 @@ def region_and_country_chart(df):
                 'data': [get_bar_data(data["Grants"].iloc[::-1], chart_type='column', colour=2)],
                 'layout': layout
             },
-            config={
-                'displayModeBar': False
-            }
+            config=DEFAULT_CONFIG
         ),
         chart['title'], 
         subtitle=chart.get("units"),
@@ -378,9 +370,7 @@ def organisation_type_chart(df):
                     'data': [get_bar_data(data.sort_values(), chart_type='column')],
                     'layout': layout
                 },
-                config={
-                    'displayModeBar': False
-                }
+                config=DEFAULT_CONFIG
             ),
             title,
             subtitle,
@@ -405,9 +395,7 @@ def organisation_type_chart(df):
                     )],
                 'layout': DEFAULT_LAYOUT
             },
-            config={
-                'displayModeBar': False
-            }
+            config=DEFAULT_CONFIG
         ),
         title,
         subtitle,
@@ -433,9 +421,7 @@ def organisation_income_chart(df):
                 'data': [get_bar_data(data, colour=3)],
                 'layout': DEFAULT_LAYOUT
             },
-            config={
-                'displayModeBar': False
-            }
+            config=DEFAULT_CONFIG
         ),
         chart['title'], 
         subtitle=chart.get("units"),
@@ -460,9 +446,7 @@ def organisation_age_chart(df):
                 'data': [get_bar_data(data)],
                 'layout': DEFAULT_LAYOUT
             },
-            config={
-                'displayModeBar': False
-            }
+            config=DEFAULT_CONFIG
         ),
         chart['title'], 
         subtitle=chart.get("units"),
@@ -491,9 +475,7 @@ def imd_chart(df):
                 'data': [get_bar_data(data)],
                 'layout': layout
             },
-            config={
-                'displayModeBar': False
-            }
+            config=DEFAULT_CONFIG
         ),
         chart['title'], 
         subtitle=chart.get("units"),
@@ -578,9 +560,7 @@ def location_map(df, mapbox_access_token=None, mapbox_style=None):
         dcc.Graph(
             id='grant_location_chart',
             figure={"data": data, "layout": layout},
-            config={
-                'displayModeBar': False
-            }
+            config=DEFAULT_CONFIG
         ),
         'Location of UK grant recipients',
         description='''Showing the location of **{:,.0f}** grants out of {:,.0f}
