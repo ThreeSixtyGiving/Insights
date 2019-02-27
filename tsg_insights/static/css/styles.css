@@ -1668,6 +1668,14 @@ footer {
     font-weight: 400;
     text-transform: uppercase;
     margin: 0 0 16px 0; }
+  .about__section li {
+    font-size: 1.25em;
+    font-weight: 300;
+    line-height: 28px; }
+  .about__section ul {
+    list-style: circle;
+    margin-left: 25px;
+    margin-bottom: 24px; }
   .about__section p {
     font-size: 1.25em;
     font-weight: 300;
@@ -1726,36 +1734,17 @@ footer {
   background: #ddd;
   font-size: 16px;
   font-family: neusa-next-std-compact, sans-serif;
-  font-weight: 300;
-}
-
-#cookie-consent-container a {
-  color: #b1236e;
-  text-decoration: underline;
-  margin-right: 12px;
-}
-
-#cookie-consent-container button {
-  border: 0;
-  background-color: #b1236e;
-  color: #fff;
-  padding: 4px 12px 2px;
-}
-
-#cookie-consent-container button#cookie-consent-no {
-  border: 1px solid #b1236e;
-  background-color: #fff;
-  color: #b1236e;
-}
-
-.about__section li {
-  font-size: 1.25em;
-  font-weight: 300;
-  line-height: 28px;
-}
-
-.about__section ul {
-  list-style: circle;
-  margin-left: 25px;
-  margin-bottom: 24px;
-}
+  font-weight: 300; }
+  #cookie-consent-container a {
+    color: #b1236e;
+    text-decoration: underline;
+    margin-right: 12px; }
+  #cookie-consent-container button {
+    border: 0;
+    background-color: #b1236e;
+    color: #fff;
+    padding: 4px 12px 2px; }
+  #cookie-consent-container button#cookie-consent-no {
+    border: 1px solid #b1236e;
+    background-color: #fff;
+    color: #b1236e; }
