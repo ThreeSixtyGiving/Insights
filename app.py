@@ -32,15 +32,14 @@ if server.config.get("GOOGLE_ANALYTICS_TRACKING_ID"):
             run_ga();
         }
         if (document.cookie.indexOf('cookie_consent=')==-1){
-            console.log("cookies not yet asked");
             var fn = function () {
-                document.cookie = "cookie_consent=true";
+                document.cookie = "cookie_consent=true;max-age=31536000";
                 document.getElementById('cookie-consent-container').hidden = true;
                 run_ga();
             };
             document.getElementById('cookie-consent').onclick = fn;
             var fn_no = function () {
-                document.cookie = "cookie_consent=false";
+                document.cookie = "cookie_consent=false;max-age=31536000";
                 document.getElementById('cookie-consent-container').hidden = true;
             };
             document.getElementById('cookie-consent-no').onclick = fn_no;

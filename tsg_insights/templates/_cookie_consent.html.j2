@@ -13,12 +13,12 @@
         </div>
         <script>
             var fn = function () {
-                document.cookie = "cookie_consent=true";
+                document.cookie = "cookie_consent=true;max-age=31536000";
                 document.getElementById('cookie-consent-container').hidden = true;
             };
             document.getElementById('cookie-consent').onclick = fn;
             var fn_no = function () {
-                document.cookie = "cookie_consent=false";
+                document.cookie = "cookie_consent=false;max-age=31536000";
                 document.getElementById('cookie-consent-container').hidden = true;
             };
             document.getElementById('cookie-consent-no').onclick = fn_no;
