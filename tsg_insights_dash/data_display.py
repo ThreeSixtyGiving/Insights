@@ -250,12 +250,10 @@ def what_next_missing_fields(fileid):
             html.P([
                 html.A(
                     '''360Giving can help you add these fields to your data.''',
-                    href="https://www.threesixtygiving.org/support/"
+                    href="https://www.threesixtygiving.org/contact/"
                 ),
             ]),
         ]
-
-    print(missing)
 
     return [
         html.H3(className="results-page__body__whats-next__title",

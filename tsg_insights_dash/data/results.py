@@ -183,7 +183,7 @@ CHARTS = dict(
             lambda x: "360G" if x.startswith("360G-") else "-".join(x.split("-")[:2])).value_counts().sort_index()),
     },
     award_date={
-        'title': 'Award Date',
+        'title': 'Award date',
         'units': '(number of grants)',
         'get_results': (lambda df: {
             "all": df['Award Date'].dt.strftime("%Y-%m-%d").tolist(),
@@ -192,14 +192,12 @@ CHARTS = dict(
         }),
     },
     ctry_rgn={
-        'title': 'Region and Country',
+        'title': 'UK region and country',
         'units': '(number of grants)',
-        'desc': '''Based on the registered address of a charity or company
-(or a postcode if included with the grant data). Only available for registered
-charities or companies, or those grants which contain a postcode.''',
-        'missing': '''This chart can\'t be shown as there are no recipients in the data with 
-income data. If your data contains grants to charities, you can add charity
-numbers to your data to show a chart of their latest income.''',
+        'desc': '''This chart is based on postcodes found in the grants data.
+If postcodes aren’t present, they are sourced from UK charity or company registers.''',
+        'missing': '''This chart can\'t be shown as there is no information on the country and region of recipients or grants. 
+This can be added by using charity or company numbers, or by including a postcode.''',
         'get_results': get_ctry_rgn,
     },
     org_type={
