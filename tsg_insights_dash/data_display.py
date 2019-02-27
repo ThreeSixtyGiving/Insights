@@ -205,8 +205,9 @@ def file_download_excel_href(fileid):
 
 
 @app.callback(Output('whats-next', 'children'),
-              [Input('output-data-id', 'data')])
-def what_next_missing_fields(fileid):
+              [Input('dashboard-output', 'children')],
+              [State('output-data-id', 'data')])
+def what_next_missing_fields(_, fileid):
     df = get_filtered_df(fileid)
 
     if df is None:

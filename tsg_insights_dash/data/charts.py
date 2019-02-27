@@ -19,7 +19,6 @@ DEFAULT_LAYOUT = {
         'size': 18
     },
     'yaxis': {
-        'automargin': True,
         'visible': False,
         'showgrid': False,
         'showline': False,
@@ -30,7 +29,6 @@ DEFAULT_LAYOUT = {
         },
     },
     'xaxis': {
-        'automargin': True,
         'showgrid': False,
         'showline': False,
         'layer': 'below traces',
@@ -321,6 +319,7 @@ def region_and_country_chart(df):
 
     layout = copy.deepcopy(DEFAULT_LAYOUT)
     layout['yaxis']['visible'] = True
+    layout['yaxis']['automargin'] = True
     layout['xaxis']['visible'] = False
 
     count_without_unknown = data["Grants"].sum()
@@ -362,6 +361,7 @@ def organisation_type_chart(df):
     if len(data) > 4:
         layout = copy.deepcopy(DEFAULT_LAYOUT)
         layout['yaxis']['visible'] = True
+        layout['yaxis']['automargin'] = True
         layout['xaxis']['visible'] = False
         return chart_wrapper(
             dcc.Graph(
