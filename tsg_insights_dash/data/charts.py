@@ -23,6 +23,7 @@ DEFAULT_LAYOUT = {
         'visible': False,
         'showgrid': False,
         'showline': False,
+        'layer': 'below traces',
         'linewidth': 0,
         'tickfont': {
             'size': 20
@@ -32,6 +33,7 @@ DEFAULT_LAYOUT = {
         'automargin': True,
         'showgrid': False,
         'showline': False,
+        'layer': 'below traces',
         'linewidth': 0,
         'tickfont': {
             'size': 20
@@ -44,6 +46,10 @@ DEFAULT_LAYOUT = {
         t=24,
         pad=4
     ),
+}
+DEFAULT_CONFIG = {
+    'displayModeBar': False,
+    'scrollZoom': 'gl3d',
 }
 
 def chart_title(title, subtitle=None, description=None):
@@ -89,8 +95,9 @@ def get_bar_data(values, name="Grants", chart_type='bar', colour=0):
         'x': titles, 
         'y': [i[1] for i in values.iteritems()], 
         'text': [i[1] for i in values.iteritems()],
-        'textposition': 'auto',
-        'constraintext': 'inside',
+        'textposition': 'outside',
+        'cliponaxis': False,
+        'constraintext': 'none',
         'textfont': {
             'size': 18,
             'family': 'neusa-next-std-compact, sans-serif;',
@@ -113,8 +120,8 @@ def get_bar_data(values, name="Grants", chart_type='bar', colour=0):
     return bar_data
 
 def funder_chart(df):
-
-    data = CHARTS['funders']['get_results'](df)
+    chart = CHARTS['funders']
+    data = chart['get_results'](df)
     if len(data) <= 1:
         return
 
@@ -129,8 +136,9 @@ def funder_chart(df):
                 'displayModeBar': False
             }
         ),
-        'Funders', 
-        '(number of grants)'
+        chart['title'], 
+        subtitle=chart.get("units"),
+        description=chart.get("desc"),
     )
 
 
@@ -139,7 +147,8 @@ def grant_programme_chart(df):
     if "Grant Programme:0:Title" not in df.columns or len(df["Grant Programme:0:Title"].unique()) <= 1:
         return
 
-    data = CHARTS['grant_programmes']['get_results'](df)
+    chart = CHARTS['grant_programmes']
+    data = chart['get_results'](df)
 
     return chart_wrapper(
         dcc.Graph(
@@ -148,22 +157,22 @@ def grant_programme_chart(df):
                 'data': [get_bar_data(data)],
                 'layout': DEFAULT_LAYOUT
             },
-            config={
-                'displayModeBar': False
-            }
+            config=DEFAULT_CONFIG
         ),
-        'Grant programmes',
-        '(number of grants)',
+        chart['title'], 
+        subtitle=chart.get("units"),
+        description=chart.get("desc"),
         children=[chart_n(data.sum(), 'grant')],
     )
 
 
 def amount_awarded_chart(df):
-    data = CHARTS['amount_awarded']['get_results'](df)
+    chart = CHARTS['amount_awarded']
+    data = chart['get_results'](df)
 
     # if("USD" in data.columns):
     #     data.loc[:, "GBP"] = data["USD"]
-    units = '(number of grants)'
+    units = chart.get("units", "")
     
     # replace £ signs if there's more than one currency
     if (len(data.columns) > 1) or (data.columns[0] not in ["GBP", "EUR", "USD"]):
@@ -193,17 +202,17 @@ def amount_awarded_chart(df):
                 ) for k, series in enumerate(data.iteritems())],
                 'layout': DEFAULT_LAYOUT
             },
-            config={
-                'displayModeBar': False
-            }
+            config=DEFAULT_CONFIG
         ),
-        'Amount awarded',
-        units,
+        chart['title'], 
+        subtitle=units,
+        description=chart.get("desc"),
         children=[chart_n(data.sum().sum(), 'grant')],
     )
 
 def org_identifier_chart(df):
-    data = CHARTS['identifier_scheme']['get_results'](df)
+    chart = CHARTS['identifier_scheme']
+    data = chart['get_results'](df)
     return chart_wrapper(
         dcc.Graph(
             id="identifier_scheme_chart",
@@ -211,12 +220,11 @@ def org_identifier_chart(df):
                 'data': [get_bar_data(data)],
                 'layout': DEFAULT_LAYOUT
             },
-            config={
-                'displayModeBar': False
-            }
+            config=DEFAULT_CONFIG
         ),
-        'Identifier scheme',
-        '(number of grants)',
+        chart['title'],
+        subtitle=chart.get("units"),
+        description=chart.get("desc"),
         children=[chart_n(data.sum(), 'grant')],
     )
 
@@ -230,7 +238,8 @@ def awards_over_time_chart(df):
             error=False
         )
 
-    data = CHARTS['award_date']['get_results'](df)
+    chart = CHARTS['award_date']
+    data = chart['get_results'](df)
 
     xbins_sizes = (
         ('M1', 'by month'),
@@ -290,25 +299,23 @@ def awards_over_time_chart(df):
                 'data': chart_data,
                 'layout': layout
             },
-            config={
-                'displayModeBar': False
-            }
+            config=DEFAULT_CONFIG
         ),
-        'Award Date',
-        '(number of grants)',
+        chart['title'], 
+        subtitle=chart.get("units"),
+        description=chart.get("desc"),
         children=[chart_n(len(data['all']), 'grant')],
     )
 
 
 def region_and_country_chart(df):
-    data = CHARTS['ctry_rgn']['get_results'](df)
+    chart = CHARTS['ctry_rgn']
+    data = chart['get_results'](df)
 
     if not isinstance(data, (pd.DataFrame, pd.Series)) or (df["__geo_ctry"].count() + df["__geo_rgn"].count()) == 0:
         return message_box(
-            'UK Region and Country',
-            '''This chart can\'t be shown as there is no information on the country and region of recipients or grants. 
-This can be added by using charity or company numbers, or by including a postcode.
-            ''',
+            chart["title"],
+            chart.get("missing"),
             error=True
         )
 
@@ -327,24 +334,23 @@ This can be added by using charity or company numbers, or by including a postcod
                 'data': [get_bar_data(data["Grants"].iloc[::-1], chart_type='column', colour=2)],
                 'layout': layout
             },
-            config={
-                'displayModeBar': False
-            }
+            config=DEFAULT_CONFIG
         ),
-        'UK Region and Country',
-        '(number of grants)',
-        description='''Chart based on postcodes found in the grant data, or the UK
-        registered charity or company address, if postcodes are not available.''',
+        chart['title'], 
+        subtitle=chart.get("units"),
+        description=chart.get("desc"),
         children=[chart_n(count_without_unknown, 'grant')],
     )
 
 
 def organisation_type_chart(df):
-    data = CHARTS['org_type']['get_results'](df)
-    title = 'Recipient type'
-    subtitle = '(number of grants)',
+    chart = CHARTS['org_type']
+    data = chart['get_results'](df)
+    title = chart["title"]
+    subtitle = chart.get("units")
     description = html.P('''Organisation type is based on official organisation identifiers,
-                            such as registered charity or company numbers, found in the data.''', className='results-page__body__section-note')
+                            such as registered charity or company numbers, found in the data.''',
+                            className='results-page__body__section-note')
     children = [chart_n(data.sum(), 'grant'), description]
     if "Identifier not recognised" in data.index:
         children.append(html.P('''
@@ -364,9 +370,7 @@ def organisation_type_chart(df):
                     'data': [get_bar_data(data.sort_values(), chart_type='column')],
                     'layout': layout
                 },
-                config={
-                    'displayModeBar': False
-                }
+                config=DEFAULT_CONFIG
             ),
             title,
             subtitle,
@@ -391,9 +395,7 @@ def organisation_type_chart(df):
                     )],
                 'layout': DEFAULT_LAYOUT
             },
-            config={
-                'displayModeBar': False
-            }
+            config=DEFAULT_CONFIG
         ),
         title,
         subtitle,
@@ -402,17 +404,16 @@ def organisation_type_chart(df):
 
 
 def organisation_income_chart(df):
+    chart = CHARTS["org_income"]
+
     if "__org_latest_income_bands" not in df.columns or df["__org_latest_income_bands"].count() == 0:
         return message_box(
-            'Latest income of charity recipients',
-            '''This chart can\'t be shown as there are no recipients in the data with 
-organisation income data. Add company or charity numbers to your data to show a chart of
-the income of organisations.
-            ''',
+            chart["title"],
+            chart.get("missing"),
             error=True
         )
 
-    data = CHARTS['org_income']['get_results'](df)
+    data = chart['get_results'](df)
     return chart_wrapper(
         dcc.Graph(
             id="organisation_income_chart",
@@ -420,27 +421,24 @@ the income of organisations.
                 'data': [get_bar_data(data, colour=3)],
                 'layout': DEFAULT_LAYOUT
             },
-            config={
-                'displayModeBar': False
-            }
+            config=DEFAULT_CONFIG
         ),
-        'Latest income of charity recipients',
-        '(number of grants)',
+        chart['title'], 
+        subtitle=chart.get("units"),
+        description=chart.get("desc"),
         children=[chart_n(data.sum(), 'grant')],
     )
 
 def organisation_age_chart(df):
+    chart = CHARTS["org_age"]
     if "__org_age_bands" not in df.columns or df["__org_age_bands"].count()==0:
         return message_box(
-            'Age of recipient organisations',
-            '''This chart can\'t be shown as there are no recipients in the data with 
-organisation age data. Add company or charity numbers to your data to show a chart of
-the age of organisations.
-            ''',
+            chart["title"],
+            chart.get("missing"),
             error=True
         )
 
-    data = CHARTS['org_age']['get_results'](df)
+    data = chart['get_results'](df)
     return chart_wrapper(
         dcc.Graph(
             id="organisation_age_chart",
@@ -448,25 +446,22 @@ the age of organisations.
                 'data': [get_bar_data(data)],
                 'layout': DEFAULT_LAYOUT
             },
-            config={
-                'displayModeBar': False
-            }
+            config=DEFAULT_CONFIG
         ),
-        'Age of recipient organisations',
-        '(number of grants)',
-        description='Organisation age uses the registration date of that organisation. Based only on recipients with charity or company numbers.',
+        chart['title'], 
+        subtitle=chart.get("units"),
+        description=chart.get("desc"),
         children=[chart_n(data.sum(), 'grant')],
     )
 
 def imd_chart(df):
     # @TODO: expand to include non-English IMD too
-    data = CHARTS['org_age']['get_results'](df)
+    chart = CHARTS["org_age"]
+    data = chart['get_results'](df)
     if not data:
         return message_box(
-            'Index of multiple deprivation',
-            '''We can't show this chart as we couldn't find any details of the index of multiple deprivation 
-            ranking for postcodes in your data. At the moment we can only use data for England.
-            ''',
+            chart["title"],
+            chart.get("missing"),
             error=True
         )
 
@@ -480,15 +475,11 @@ def imd_chart(df):
                 'data': [get_bar_data(data)],
                 'layout': layout
             },
-            config={
-                'displayModeBar': False
-            }
+            config=DEFAULT_CONFIG
         ),
-        'Index of multiple deprivation',
-        '(number of grants)',
-        description='''Shows the number of grants made in each decile of deprivation in England, 
-        from 1 (most deprived) to 10 (most deprived). Based on the postcode included with the grant
-        or on an organisation's registered postcode, so may not reflect where grant activity took place.''',
+        chart['title'], 
+        subtitle=chart.get("units"),
+        description=chart.get("desc"),
         children=[chart_n(data.sum(), 'grant')],
     )
 
@@ -569,15 +560,14 @@ def location_map(df, mapbox_access_token=None, mapbox_style=None):
         dcc.Graph(
             id='grant_location_chart',
             figure={"data": data, "layout": layout},
-            config={
-                'displayModeBar': False
-            }
+            config=DEFAULT_CONFIG
         ),
         'Location of UK grant recipients',
         description='''Showing the location of **{:,.0f}** grants out of {:,.0f}
         
-Map locations are based on postcodes found in the grant data, or the UK registered
-charity or company address, if postcodes are not available. Mapping is UK only.'''.format(
+This map is based on postcodes found in the grants data.
+If postcodes aren’t present, they are sourced from UK
+charity or company registers Mapping is UK only.'''.format(
             grant_count, len(df)
         ),
         children=[chart_n(geo["grants"].sum(), 'grant')],

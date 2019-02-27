@@ -1,7 +1,7 @@
 import requests_cache
 import os
 
-from flask import Flask, send_from_directory
+from flask import Flask, send_from_directory, request
 import pandas as pd
 
 from .data.registry import THREESIXTY_STATUS_JSON
@@ -85,5 +85,22 @@ def create_app(test_config=None):
         expire_after=one_week_in_seconds,
         allowable_methods=('GET', 'HEAD',),
     )
+
+    # add cookie check
+    @app.context_processor
+    def inject_template_scope():
+        injections = dict()
+
+        def cookies_consented():
+            value = request.cookies.get('cookie_consent')
+            return value == 'true'
+
+        def cookies_asked():
+            value = request.cookies.get('cookie_consent')
+            return value is not None
+        
+        injections.update(cookies_consented=cookies_consented, cookies_asked=cookies_asked)
+
+        return injections
 
     return app

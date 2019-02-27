@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/sanitize.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
         {% block analytics %}
-            {% if config.get("GOOGLE_ANALYTICS_TRACKING_ID") %}
+            {% if config.get("GOOGLE_ANALYTICS_TRACKING_ID") and cookies_consented() %}
             <!-- Global site tag (gtag.js) - Google Analytics -->
             <script async src="https://www.googletagmanager.com/gtag/js?id={{config.get("GOOGLE_ANALYTICS_TRACKING_ID")}}"></script>
             <script>
@@ -35,6 +35,7 @@
         {% include 'footer.html.j2' %}
     {% endblock %}
     {% block scripts %}{% endblock %}
+    {% include '_cookie_consent.html.j2' %}
 </body>
 
 </html>

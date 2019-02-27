@@ -11,12 +11,42 @@ if server.config.get("GOOGLE_ANALYTICS_TRACKING_ID"):
     scripts.append("https://www.googletagmanager.com/gtag/js?id={}".format(
         server.config.get("GOOGLE_ANALYTICS_TRACKING_ID")
     ))
-    analytics_script = """<script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
+    analytics_script = """
+        <div id="cookie-consent-container">
+            <span>
+                Allow cookies?
+            </span>
+            <a href="/about#cookies" target="_blank">More information</a>
+            <button id="cookie-consent">Yes</button>
+            <button id="cookie-consent-no">No</button>
+        </div>
+        <script>
+        var run_ga = function(){
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
 
-        gtag('config', '%s');
+            gtag('config', '%s');
+        }
+        if(document.cookie.indexOf('cookie_consent=true')!=-1){
+            run_ga();
+        }
+        if (document.cookie.indexOf('cookie_consent=')==-1){
+            var fn = function () {
+                document.cookie = "cookie_consent=true;max-age=31536000";
+                document.getElementById('cookie-consent-container').hidden = true;
+                run_ga();
+            };
+            document.getElementById('cookie-consent').onclick = fn;
+            var fn_no = function () {
+                document.cookie = "cookie_consent=false;max-age=31536000";
+                document.getElementById('cookie-consent-container').hidden = true;
+            };
+            document.getElementById('cookie-consent-no').onclick = fn_no;
+        } else {
+            console.log("cookies have been asked");
+            document.getElementById('cookie-consent-container').hidden = true;
+        }
         </script>""" % server.config.get("GOOGLE_ANALYTICS_TRACKING_ID")
 
 app = dash.Dash(

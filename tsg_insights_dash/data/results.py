@@ -32,6 +32,26 @@ IDENTIFIER_MAP = {
     # JE-FSC            1
 }
 
+AWARD_BAND_CHANGES = {
+    "Under £500": "Up to £500",
+    "£500 - £1k": "£501 - £1,000",
+    "£1k - £2k": "£1,001 - £2,000",
+    "£2k - £5k": "£3k - £5k",
+    "£5k - £10k": "£6k - £10k",
+    "£10k - £100k": "£11k - £100k",
+    "£100k - £1m": "£101k - £1m",
+    "Over £1m": "Over £1m"
+}
+
+AGE_BAND_CHANGES = {
+    "Under 1 year": "Up to 1 year",
+    "1-2 years": "2 years",
+    "2-5 years": "3-5 years",
+    "5-10 years": "6-10 years",
+    "10-25 years": "11-25 years",
+    "Over 25 years": "Over 25 years"
+}
+
 def get_imd_data(df):
 
     imd_order = [
@@ -150,7 +170,11 @@ CHARTS = dict(
     amount_awarded={
         'title': 'Amount awarded',
         'units': '(number of grants)',
-        'get_results': (lambda df: pd.crosstab(df["Amount Awarded:Bands"], df["Currency"]).sort_index()),
+        'get_results': (lambda df: pd.crosstab(
+            df["Amount Awarded:Bands"].cat.rename_categories(AWARD_BAND_CHANGES),
+            df["Currency"],
+            dropna=False
+        ).sort_index()),
     },
     identifier_scheme={
         'title': 'Identifier scheme',
@@ -159,7 +183,7 @@ CHARTS = dict(
             lambda x: "360G" if x.startswith("360G-") else "-".join(x.split("-")[:2])).value_counts().sort_index()),
     },
     award_date={
-        'title': 'Award Date',
+        'title': 'Award date',
         'units': '(number of grants)',
         'get_results': (lambda df: {
             "all": df['Award Date'].dt.strftime("%Y-%m-%d").tolist(),
@@ -168,14 +192,12 @@ CHARTS = dict(
         }),
     },
     ctry_rgn={
-        'title': 'Region and Country',
+        'title': 'UK region and country',
         'units': '(number of grants)',
-        'desc': '''Based on the registered address of a charity or company
-(or a postcode if included with the grant data). Only available for registered
-charities or companies, or those grants which contain a postcode.''',
-        'missing': '''This chart can\'t be shown as there are no recipients in the data with 
-income data. If your data contains grants to charities, you can add charity
-numbers to your data to show a chart of their latest income.''',
+        'desc': '''This chart is based on postcodes found in the grants data.
+If postcodes aren’t present, they are sourced from UK charity or company registers.''',
+        'missing': '''This chart can\'t be shown as there is no information on the country and region of recipients or grants. 
+This can be added by using charity or company numbers, or by including a postcode.''',
         'get_results': get_ctry_rgn,
     },
     org_type={
@@ -200,7 +222,7 @@ the income of organisations.''',
         'missing': '''This chart can\'t be shown as there are no recipients in the data with 
 organisation age data. Add company or charity numbers to your data to show a chart of
 the age of organisations.''',
-        'get_results': (lambda df: df["__org_age_bands"].value_counts().sort_index()),
+        'get_results': (lambda df: df["__org_age_bands"].cat.rename_categories(AGE_BAND_CHANGES).value_counts().sort_index()),
     },
     imd={
         'title': 'Index of multiple deprivation',
