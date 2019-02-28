@@ -88,7 +88,9 @@ def test_check_column_names():
 
 def test_check_columns_exist():
     mandatory_columns = ['Amount Awarded', 'Funding Org:0:Name', 'Award Date',
-                         'Recipient Org:0:Name', 'Recipient Org:0:Identifier']
+                         'Recipient Org:0:Name', 'Recipient Org:0:Identifier',
+                         'Currency', 'Funding Org:0:Identifier', 'Identifier',
+                         'Title']
     df = pd.DataFrame([{
         v: k for k, v in enumerate(mandatory_columns)
     }])
@@ -226,7 +228,7 @@ def test_org_merge():
     df = pd.DataFrame({
         "Recipient Org:0:Identifier:Clean": ["GB-CHC-225922", "GB-CHC-225922", "GB-COH-09668396",
                                              "GB-COH-00198344", "GB-NIC-100012", "GB-SC-SC003558",
-                                             "GB-CHC-DOESNOTEXIST"],
+                                             "GB-CHC-DOESNOTEXIST", "GB-COH-04325234"],
     })
     stage = MergeCompanyAndCharityDetails(df, cache, None)
 
@@ -242,8 +244,8 @@ def test_org_merge():
     assert company_df.loc["GB-COH-09668396", "company_number"] == "09668396"
 
     result_df = stage.run()
-    assert len(result_df) == 7 # no rows should have been deleted
-    assert len(result_df["__org_org_type"].dropna()) == 5 # these rows have been matched with the cache
+    assert len(result_df) == len(df) # no rows should have been deleted
+    assert len(result_df["__org_org_type"].dropna()) == 6 # these rows have been matched with the cache
 
 
 def test_postcode_lookup(m):

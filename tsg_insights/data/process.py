@@ -479,6 +479,9 @@ class MergeCompanyAndCharityDetails(DataPreparationStage):
         if not isinstance(orgid_df, pd.DataFrame):
             return self.df
 
+        # drop any duplicates
+        orgid_df = orgid_df[~orgid_df.index.duplicated(keep='first')]
+
         # create some extra fields
         orgid_df.loc[:, "age"] = pd.datetime.now() - orgid_df["date_registered"]
         orgid_df.loc[:, "latest_income"] = orgid_df["latest_income"].astype(float)
