@@ -57,7 +57,7 @@ layout = html.Div(id="dashboard-container", className='results-page', children=[
             html.A(
                 href='/',
                 children=[
-                    "360Giving ",
+                    "360",
                     html.Span(style={"color": "#9c1f61"}, children="Insights"),
                 ]
             )
