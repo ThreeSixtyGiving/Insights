@@ -9,7 +9,7 @@ import requests_mock
 
 from tsg_insights import create_app
 from tsg_insights.data.process import *
-from tsg_insights.data.cache import get_from_cache, get_metadata_from_cache
+from tsg_insights.data.cache import get_from_cache, get_metadata_from_cache, delete_from_cache
 
 
 @pytest.fixture
@@ -50,6 +50,7 @@ def test_app():
     return create_app({
         "UPLOAD_FOLDER": tempfile.mkdtemp(),
         "REQUESTS_CACHE_ON": False,
+        "CACHE_DEFAULT_PREFIX": "test_file_"
     })
 
 
@@ -72,6 +73,12 @@ def test_file_upload(get_file, m, test_app):
             assert isinstance(df, pd.DataFrame)
             assert len(df) > 0
 
+            metadata = get_metadata_from_cache(fileid)
+            assert len(metadata.keys()) == 5
+            assert isinstance(metadata["expires"], str)
+
+            delete_from_cache(fileid)
+
 
 def test_file_fetch_from_url(get_file, m, test_app):
     with test_app.app_context():
@@ -93,3 +100,5 @@ def test_file_fetch_from_url(get_file, m, test_app):
             metadata = get_metadata_from_cache(fileid)
             assert len(metadata.keys())==6
             assert metadata["url"] == url
+
+            delete_from_cache(fileid)

@@ -88,9 +88,7 @@ def test_check_column_names():
 
 def test_check_columns_exist():
     mandatory_columns = ['Amount Awarded', 'Funding Org:0:Name', 'Award Date',
-                         'Recipient Org:0:Name', 'Recipient Org:0:Identifier',
-                         'Currency', 'Funding Org:0:Identifier', 'Identifier',
-                         'Title']
+                         'Recipient Org:0:Name', 'Recipient Org:0:Identifier']
     df = pd.DataFrame([{
         v: k for k, v in enumerate(mandatory_columns)
     }])

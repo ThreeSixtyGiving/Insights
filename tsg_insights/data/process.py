@@ -72,6 +72,7 @@ def get_dataframe_from_url(url):
     # 2. Check cache for file
     df = get_from_cache(fileid)
     if df is not None:
+        print("using cache")
         return (fileid, url, headers)
 
     # 3. Fetch and prepare the data

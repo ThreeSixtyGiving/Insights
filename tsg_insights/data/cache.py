@@ -78,7 +78,7 @@ def get_from_cache(fileid, cache_type=None):
         logging.info("Dataframe [{}] not found".format(fileid))
         return None
     if "expires" in metadata:
-        if datetime.datetime.fromisoformat(metadata["expires"]) < datetime.datetime.now():
+        if datetime.datetime.strptime(metadata["expires"], "%Y-%m-%dT%H:%M:%S.%f") < datetime.datetime.now():
             logging.info("Dataframe [{}] expired on {}".format(
                 fileid, metadata["expires"]))
             return None
