@@ -21,7 +21,7 @@ def create_app(test_config=None):
         ),
         JSON_SORT_KEYS=False,
         REQUESTS_CACHE_ON=True,
-        FILE_CACHE=os.environ.get("FILE_CACHE", 'redis'), # use 'redis' or 'filesystem'
+        FILE_CACHE=os.environ.get("FILE_CACHE", 'filesystem'), # use 'redis' or 'filesystem'
 
         # Newsletter
         NEWSLETTER_FORM_ACTION=os.environ.get("NEWSLETTER_FORM_ACTION"),
