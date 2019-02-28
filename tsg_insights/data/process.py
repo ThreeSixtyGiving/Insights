@@ -3,6 +3,7 @@ import json
 import io
 import os
 import logging
+import datetime
 
 import pandas as pd
 import requests
@@ -25,7 +26,7 @@ POSTCODE_FIELDS = ['ctry', 'cty', 'laua', 'pcon', 'rgn', 'imd', 'ru11ind',
                    'oac11', 'lat', 'long']  # fields to care about from the postcodes)
 
 
-def get_dataframe_from_file(filename, contents, date=None):
+def get_dataframe_from_file(filename, contents, date=None, expire_days=(6 * (365/12))):
     fileid = get_fileid(contents, filename, date)
 
     # 2. Check cache for file
@@ -43,8 +44,13 @@ def get_dataframe_from_file(filename, contents, date=None):
     data_preparation.stages = [LoadDatasetFromFile] + data_preparation.stages
     df = data_preparation.run()
 
+    # 4. set expiry time
+    metadata = {
+        "expires": (datetime.datetime.now() + datetime.timedelta(expire_days)).isoformat()
+    }
+
     # 5. save to cache
-    save_to_cache(fileid, df)  # dataframe
+    save_to_cache(fileid, df, metadata=metadata)  # dataframe
 
     return (fileid, filename)
 

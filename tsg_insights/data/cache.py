@@ -2,6 +2,7 @@ import os
 import pickle
 import logging
 import json
+import datetime
 
 from flask import current_app
 from redis import StrictRedis, from_url
@@ -72,9 +73,15 @@ def get_from_cache(fileid, cache_type=None):
     prefix = current_app.config.get("CACHE_DEFAULT_PREFIX", "file_")
     cache_type = cache_type or current_app.config.get("FILE_CACHE")
 
-    if not r.hexists("files", fileid):
+    metadata = get_metadata_from_cache(fileid)
+    if not metadata:
         logging.info("Dataframe [{}] not found".format(fileid))
         return None
+    if "expires" in metadata:
+        if datetime.datetime.fromisoformat(metadata["expires"]) < datetime.datetime.now():
+            logging.info("Dataframe [{}] expired on {}".format(
+                fileid, metadata["expires"]))
+            return None
 
     if cache_type == "redis":
         df = r.get("{}{}".format(prefix, fileid))
