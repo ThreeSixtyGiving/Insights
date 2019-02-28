@@ -202,12 +202,11 @@ def grant_programme_chart(df):
         chart_type = 'column'
         data = data[::-1]
 
-
     return chart_wrapper(
         dcc.Graph(
             id="grant_programme_chart",
             figure={
-                'data': [get_bar_data(data)],
+                'data': [get_bar_data(data, chart_type=chart_type)],
                 'layout': layout
             },
             config=DEFAULT_CONFIG
