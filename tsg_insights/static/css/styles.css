@@ -227,6 +227,7 @@ dd {
   font-weight: 300; }
 
 /* form input for homepage */
+.dataset-filter-wrapper.form input[type="text"],
 .dataset-filter-wrapper.form input {
   width: 100%;
   font-family: neusa-next-std-compact, sans-serif;
