@@ -10,7 +10,7 @@ import pandas as pd
 
 from ..data.registry import process_registry, get_reg_file
 from ..data.process import get_dataframe_from_url
-from ..data.cache import delete_from_cache, get_from_cache, get_cache
+from ..data.cache import delete_from_cache, get_from_cache, get_cache, get_filename, save_to_cache
 
 cli = AppGroup('data')
 
@@ -106,6 +106,28 @@ def cli_remove_all_files():
     for k, c in cache.hscan_iter("files"):
         click.echo("Deleting file: {}".format(k))
         delete_from_cache(k)
+
+
+@cli.command('redistofile')
+@with_appcontext
+def cli_redistofile():
+    cache = get_cache()
+    for k, c in cache.hscan_iter("files"):
+        k = k.decode("utf8")
+        df = get_from_cache(k, cache_type='redis')
+        if df is not None:
+            save_to_cache(k, df, cache_type='filesystem')
+
+
+@cli.command('filetoredis')
+@with_appcontext
+def cli_redistofile():
+    cache = get_cache()
+    for k, c in cache.hscan_iter("files"):
+        k = k.decode("utf8")
+        df = get_from_cache(k, cache_type='filesystem')
+        if df is not None:
+            save_to_cache(k, df, cache_type='redis')
 
 
 @cli.command('preview')

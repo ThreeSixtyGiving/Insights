@@ -22,11 +22,12 @@ def get_filename(fileid):
     return os.path.join(uploads_folder, "{}.pkl".format(fileid))
 
 
-def save_to_cache(fileid, df, metadata=None):
+def save_to_cache(fileid, df, metadata=None, cache_type=None):
     r = get_cache()
     prefix = current_app.config.get("CACHE_DEFAULT_PREFIX", "file_")
+    cache_type = cache_type or current_app.config.get("FILE_CACHE")
 
-    if current_app.config.get("FILE_CACHE")=="redis":
+    if cache_type == "redis":
         r.set("{}{}".format(prefix, fileid), pickle.dumps(df))
         logging.info("Dataframe [{}] saved to redis".format(fileid))
     else:
@@ -48,11 +49,12 @@ def save_to_cache(fileid, df, metadata=None):
     logging.info("Dataframe [{}] metadata saved to redis".format(fileid))
 
 
-def delete_from_cache(fileid):
+def delete_from_cache(fileid, cache_type=None):
     r = get_cache()
     prefix = current_app.config.get("CACHE_DEFAULT_PREFIX", "file_")
+    cache_type = cache_type or current_app.config.get("FILE_CACHE")
 
-    if current_app.config.get("FILE_CACHE") == "redis":
+    if cache_type == "redis":
         r.delete("{}{}".format(prefix, fileid))
         logging.info("Dataframe [{}] removed from redis".format(fileid))
     else:
@@ -65,20 +67,24 @@ def delete_from_cache(fileid):
     logging.info("Dataframe [{}] metadata removed from redis".format(fileid))
 
 
-def get_from_cache(fileid):
+def get_from_cache(fileid, cache_type=None):
     r = get_cache()
     prefix = current_app.config.get("CACHE_DEFAULT_PREFIX", "file_")
+    cache_type = cache_type or current_app.config.get("FILE_CACHE")
 
     if not r.hexists("files", fileid):
+        logging.info("Dataframe [{}] not found".format(fileid))
         return None
 
-    if current_app.config.get("FILE_CACHE") == "redis":
+    if cache_type == "redis":
         df = r.get("{}{}".format(prefix, fileid))
         if df:
             try:
                 logging.info("Retrieved dataframe [{}] from redis".format(fileid))
                 return pickle.loads(df)
             except ImportError as error:
+                logging.info(
+                    "Dataframe [{}] could not be loaded".format(fileid))
                 return None
 
     else:
@@ -91,7 +97,9 @@ def get_from_cache(fileid):
                         "Retrieved dataframe [{}] from filesystem".format(fileid))
                     return df
                 except ImportError as error:
+                    logging.info("Dataframe [{}] could not be loaded".format(fileid))
                     return None
+        logging.info("File [{}] doesn't exist".format(filename))
 
     return None
 
