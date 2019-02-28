@@ -8,7 +8,7 @@ from tqdm import tqdm
 import requests
 import pandas as pd
 
-from ..data.registry import process_registry
+from ..data.registry import process_registry, get_reg_file
 from ..data.process import get_dataframe_from_url
 from ..data.cache import delete_from_cache, get_from_cache, get_cache
 
@@ -32,7 +32,13 @@ def cli_header(title:str):
 @click.argument('url')
 @with_appcontext
 def cli_fetch_file(url):
-    fileid, filename, headers = get_dataframe_from_url(url)
+    if url.startswith("http"):
+        fileid, filename, headers = get_dataframe_from_url(url)
+    # otherwise assume it's a registry ID
+    else:
+        file_url, file_type = get_reg_file(url)
+        fileid, filename, headers = get_dataframe_from_url(file_url)
+
     click.echo("File loaded")
     click.echo('/file/{}'.format(fileid))
 
