@@ -3,7 +3,6 @@ import json
 import io
 import os
 import logging
-import re
 
 import pandas as pd
 import requests
@@ -187,7 +186,7 @@ class LoadDatasetFromURL(DataPreparationStage):
             return self.df
 
         url = self.attributes.get("url")
-        self.df = ThreeSixtyGiving.from_url(url, validate=False).to_pandas()
+        self.df = ThreeSixtyGiving.from_url(url).to_pandas()
 
         return self.df
 
@@ -209,15 +208,15 @@ class LoadDatasetFromFile(DataPreparationStage):
 
         if filename.endswith("csv"):
             # Assume that the user uploaded a CSV file
-            self.df = ThreeSixtyGiving.from_csv(io.BytesIO(contents), validate=False).to_pandas()
+            self.df = ThreeSixtyGiving.from_csv(io.BytesIO(contents)).to_pandas()
         elif filename.endswith("xls") or filename.endswith("xlsx"):
             # Assume that the user uploaded an excel file
             self.df = ThreeSixtyGiving.from_excel(
-                io.BytesIO(contents), validate=False).to_pandas()
+                io.BytesIO(contents)).to_pandas()
         elif filename.endswith("json"):
             # Assume that the user uploaded a json file
             self.df = ThreeSixtyGiving.from_json(
-                io.BytesIO(contents), validate=False).to_pandas()
+                io.BytesIO(contents)).to_pandas()
 
         return self.df
 
@@ -228,25 +227,15 @@ class CheckColumnNames(DataPreparationStage):
     name = 'Check column names'
     columns_to_check = [
         'Amount Awarded', 'Funding Org:0:Name', 'Award Date',
-        'Recipient Org:0:Name', 'Recipient Org:0:Identifier',
-        'Currency', 'Funding Org:0:Identifier', "Identifier",
-        "Title",
+        'Recipient Org:0:Name', 'Recipient Org:0:Identifier'
     ]
 
     def run(self):
-
-        def normalise(s):
-            s = s.replace("Organization", "Org")
-            s = re.sub(r"\bid\b", "Identifier", s)
-            return re.sub(r'[^A-Za-z0-9]', "",  s).lower()
-
         renames = {}
         for c in self.df.columns:
             for w in self.columns_to_check:
-                if normalise(c) == normalise(w) and c != w:
+                if c.replace(" ", "").lower() == w.replace(" ", "").lower() and c != w:
                     renames[c] = w
-                if c == "id":
-                    renames[c] = "Identifier"
                 # @TODO: could include a replacement of (eg) "Recipient Org:Name" with "Recipient Org:0:Name"
         self.df = self.df.rename(columns=renames)
         return self.df
