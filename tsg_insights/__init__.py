@@ -15,8 +15,12 @@ def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
         SECRET_KEY='dev',
-        DATABASE=os.path.join(app.instance_path, 'flaskr.sqlite'),
+        UPLOADS_FOLDER=os.environ.get(
+            "UPLOADS_FOLDER",
+            os.path.join(os.getcwd(), "uploads")
+        ),
         JSON_SORT_KEYS=False,
+        REQUESTS_CACHE_ON=True,
 
         # Newsletter
         NEWSLETTER_FORM_ACTION=os.environ.get("NEWSLETTER_FORM_ACTION"),
@@ -35,12 +39,11 @@ def create_app(test_config=None):
         FILE_SIZE_LIMIT=os.environ.get("FILE_SIZE_LIMIT", 50000000),
 
         # google analytics property ID
-        GOOGLE_ANALYTICS_TRACKING_ID=os.environ.get("GOOGLE_ANALYTICS_TRACKING_ID")
+        GOOGLE_ANALYTICS_TRACKING_ID=os.environ.get("GOOGLE_ANALYTICS_TRACKING_ID"),
 
-        # Redis variables - not set here
-        # REDIS_DEFAULT_URL='redis://localhost:6379/0' # default URL for redis instance
-        # REDIS_ENV_VAR='REDIS_URL'                    # name of the environmental variable that will be looked up for the redis url
-        # CACHE_DEFAULT_PREFIX='file_'
+        # Redis variables
+        REDIS_DEFAULT_URL='redis://localhost:6379/0', # default URL for redis instance
+        REDIS_ENV_VAR='REDIS_URL',                    # name of the environmental variable that will be looked up for the redis url
     )
 
     if test_config is None:
@@ -49,6 +52,12 @@ def create_app(test_config=None):
     else:
         # load the test config if passed in
         app.config.from_mapping(test_config)
+
+    # set the redis URL
+    app.config["REDIS_URL"] = os.environ.get(
+        app.config["REDIS_ENV_VAR"],
+        app.config["REDIS_DEFAULT_URL"]
+    )
 
     # ensure the instance folder exists
     try:
@@ -78,13 +87,15 @@ def create_app(test_config=None):
         return send_from_directory('static/images', path)
 
     # add caching
-    one_week_in_seconds = 60*60*24*7
-    requests_cache.install_cache(
-        backend='redis',
-        connection=get_cache(),
-        expire_after=one_week_in_seconds,
-        allowable_methods=('GET', 'HEAD',),
-    )
+    with app.app_context():
+        if app.config["REQUESTS_CACHE_ON"]:
+            one_week_in_seconds = 60*60*24*7
+            requests_cache.install_cache(
+                backend='redis',
+                connection=get_cache(),
+                expire_after=one_week_in_seconds,
+                allowable_methods=('GET', 'HEAD',),
+            )
 
     # add cookie check
     @app.context_processor

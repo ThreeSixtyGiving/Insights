@@ -2,10 +2,12 @@ import os
 import random
 import string
 import re
+import tempfile
 
 import pytest
 import requests_mock
 
+from tsg_insights import create_app
 from tsg_insights.data.process import *
 from tsg_insights.data.cache import get_from_cache, get_metadata_from_cache
 
@@ -43,40 +45,51 @@ def m():
     m.start()
     return m
 
-def test_file_upload(get_file, m):
-    files = [
-        'sample-data/ExampleTrust-grants-fixed.json',
-        'sample-data/ExampleTrust-grants-fixed.xlsx',
-        'sample-data/ExampleTrust-grants-fixed.csv',
-    ]
-    for filename in files:
-        salt = ''.join(random.choices(
-            string.ascii_uppercase + string.digits, k=6))
-        with open(get_file(filename), 'rb') as a:
-            fileid, return_filename = get_dataframe_from_file(filename, a.read(), date=salt)
+@pytest.fixture
+def test_app():
+    return create_app({
+        "UPLOAD_FOLDER": tempfile.mkdtemp(),
+        "REQUESTS_CACHE_ON": False,
+    })
+
+
+def test_file_upload(get_file, m, test_app):
+    with test_app.app_context():
+        files = [
+            'sample-data/ExampleTrust-grants-fixed.json',
+            'sample-data/ExampleTrust-grants-fixed.xlsx',
+            'sample-data/ExampleTrust-grants-fixed.csv',
+        ]
+        for filename in files:
+            salt = ''.join(random.choices(
+                string.ascii_uppercase + string.digits, k=6))
+            with open(get_file(filename), 'rb') as a:
+                fileid, return_filename = get_dataframe_from_file(filename, a.read(), date=salt)
+                assert isinstance(fileid, str)
+                assert return_filename == filename
+
+            df = get_from_cache(fileid)
+            assert isinstance(df, pd.DataFrame)
+            assert len(df) > 0
+
+
+def test_file_fetch_from_url(get_file, m, test_app):
+    with test_app.app_context():
+        test_urls = [
+            'https://findthatcharity.uk/grants/grants.json',
+            'https://findthatcharity.uk/grants/grants.xlsx',
+            'https://findthatcharity.uk/grants/grants.csv',
+        ]
+
+        for url in test_urls:
+            fileid, return_filename, headers = get_dataframe_from_url(url)
             assert isinstance(fileid, str)
-            assert return_filename == filename
+            assert return_filename == url
 
-        df = get_from_cache(fileid)
-        assert isinstance(df, pd.DataFrame)
-        assert len(df) > 0
+            df = get_from_cache(fileid)
+            assert isinstance(df, pd.DataFrame)
+            assert len(df) > 0
 
-def test_file_fetch_from_url(get_file, m):
-    test_urls = [
-        'https://findthatcharity.uk/grants/grants.json',
-        'https://findthatcharity.uk/grants/grants.xlsx',
-        'https://findthatcharity.uk/grants/grants.csv',
-    ]
-
-    for url in test_urls:
-        fileid, return_filename, headers = get_dataframe_from_url(url)
-        assert isinstance(fileid, str)
-        assert return_filename == url
-
-        df = get_from_cache(fileid)
-        assert isinstance(df, pd.DataFrame)
-        assert len(df) > 0
-
-        metadata = get_metadata_from_cache(fileid)
-        assert len(metadata.keys())==6
-        assert metadata["url"] == url
+            metadata = get_metadata_from_cache(fileid)
+            assert len(metadata.keys())==6
+            assert metadata["url"] == url

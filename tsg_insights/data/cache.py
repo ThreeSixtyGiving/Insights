@@ -3,6 +3,7 @@ import pickle
 import logging
 import json
 
+from flask import current_app
 from redis import StrictRedis, from_url
 from .utils import CustomJSONEncoder
 
@@ -10,14 +11,16 @@ REDIS_DEFAULT_URL = 'redis://localhost:6379/0'
 REDIS_ENV_VAR = 'REDIS_URL'
 CACHE_DEFAULT_PREFIX = 'file_'
 
-def redis_cache(strict=False):
-    redis_url = os.environ.get(REDIS_ENV_VAR, REDIS_DEFAULT_URL)
+
+def get_cache(strict=False):
+    redis_url = current_app.config.get("REDIS_URL")
     if strict:
         return StrictRedis.from_url(redis_url)
     return from_url(redis_url)
 
-def get_cache():
-    return redis_cache()
+def get_filename(fileid):
+    uploads_folder = current_app.config.get("UPLOADS_FOLDER")
+    return os.path.join(uploads_folder, "{}.pkl".format(fileid))
 
 
 def save_to_cache(fileid, df, prefix=CACHE_DEFAULT_PREFIX, metadata=None):

@@ -3,7 +3,7 @@ import sys
 
 import click
 from flask import Flask, url_for, current_app
-from flask.cli import AppGroup
+from flask.cli import AppGroup, with_appcontext
 from tqdm import tqdm
 import requests
 import pandas as pd
@@ -30,6 +30,7 @@ def cli_header(title:str):
 
 @cli.command('fetch')
 @click.argument('url')
+@with_appcontext
 def cli_fetch_file(url):
     fileid, filename, headers = get_dataframe_from_url(url)
     click.echo("File loaded")
@@ -39,6 +40,7 @@ def cli_fetch_file(url):
 @cli.command('fetchall')
 @click.argument('output', type=click.Path())
 @click.option('--file-limit', default=None, type=int, help='maximum file size to import')
+@with_appcontext
 def cli_fetch_all_files(output, file_limit):
 
     if not file_limit:
@@ -85,11 +87,13 @@ def cli_fetch_all_files(output, file_limit):
 
 @cli.command('remove')
 @click.argument('fileid')
+@with_appcontext
 def cli_remove_file(fileid):
     delete_from_cache(fileid)
 
 
 @cli.command('removeall')
+@with_appcontext
 def cli_remove_all_files():
     click.confirm('This will delete all cached data. Are you sure you want to continue?', abort=True)
     cache = get_cache()
@@ -101,6 +105,7 @@ def cli_remove_all_files():
 @cli.command('preview')
 @click.argument('fileid')
 @click.option('--field')
+@with_appcontext
 def cli_preview_file(fileid, field=None):
     df = get_from_cache(fileid)
 

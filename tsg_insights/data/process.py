@@ -54,7 +54,7 @@ def get_dataframe_from_url(url):
 
     # 2. Get the registry entry for the file (if available)
     registry = get_reg_file_from_url(url)
-    if registry.get("identifier"):
+    if registry and registry.get("identifier"):
         fileid = registry.get("identifier")
     else:
         # work out the version of the file
