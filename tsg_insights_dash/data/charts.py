@@ -117,18 +117,53 @@ def get_bar_data(values, name="Grants", chart_type='bar', colour=0):
         bar_data['y'] = x
     return bar_data
 
+
+def series_to_list(data):
+    return html.P([
+        html.Span(
+            style={'marginRight': '6px'},
+            children=[
+                html.Span(
+                    className='results-page__body__content__title',
+                    style={'fontSize': '1.2rem', 'lineHeight': '12px'},
+                    children=i,
+                ),
+                " (",
+                html.Span(children=count),
+                ") ",
+            ]
+        )
+        for i, count in data.iteritems()
+    ])
+
 def funder_chart(df):
     chart = CHARTS['funders']
     data = chart['get_results'](df)
+    layout = copy.deepcopy(DEFAULT_LAYOUT)
+    chart_type = 'bar'
+
     if len(data) <= 1:
         return
+    elif len(data) > 14:
+        return chart_wrapper(
+            series_to_list(data),
+            chart['title'],
+            subtitle=chart.get("units"),
+            description=chart.get("desc"),
+        )
+    elif len(data) > 5:
+        layout['yaxis']['visible'] = True
+        layout['yaxis']['automargin'] = True
+        layout['xaxis']['visible'] = False
+        chart_type = 'column'
+        data = data[::-1]
 
     return chart_wrapper(
         dcc.Graph(
             id="funding_org_chart",
             figure={
-                'data': [get_bar_data(data)],
-                'layout': DEFAULT_LAYOUT
+                'data': [get_bar_data(data, chart_type=chart_type)],
+                'layout': layout
             },
             config={
                 'displayModeBar': False
@@ -147,13 +182,32 @@ def grant_programme_chart(df):
 
     chart = CHARTS['grant_programmes']
     data = chart['get_results'](df)
+    layout = copy.deepcopy(DEFAULT_LAYOUT)
+    chart_type = 'bar'
+
+    if len(data) <= 1:
+        return
+    elif len(data) > 14:
+        return chart_wrapper(
+            series_to_list(data),
+            chart['title'],
+            subtitle=chart.get("units"),
+            description=chart.get("desc"),
+        )
+    elif len(data) > 5:
+        layout['yaxis']['visible'] = True
+        layout['yaxis']['automargin'] = True
+        layout['xaxis']['visible'] = False
+        chart_type = 'column'
+        data = data[::-1]
+
 
     return chart_wrapper(
         dcc.Graph(
             id="grant_programme_chart",
             figure={
                 'data': [get_bar_data(data)],
-                'layout': DEFAULT_LAYOUT
+                'layout': layout
             },
             config=DEFAULT_CONFIG
         ),
