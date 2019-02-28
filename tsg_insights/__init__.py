@@ -21,6 +21,7 @@ def create_app(test_config=None):
         ),
         JSON_SORT_KEYS=False,
         REQUESTS_CACHE_ON=True,
+        FILE_CACHE=os.environ.get("FILE_CACHE", 'redis'), # use 'redis' or 'filesystem'
 
         # Newsletter
         NEWSLETTER_FORM_ACTION=os.environ.get("NEWSLETTER_FORM_ACTION"),
@@ -44,6 +45,7 @@ def create_app(test_config=None):
         # Redis variables
         REDIS_DEFAULT_URL='redis://localhost:6379/0', # default URL for redis instance
         REDIS_ENV_VAR='REDIS_URL',                    # name of the environmental variable that will be looked up for the redis url
+        CACHE_DEFAULT_PREFIX='file_',                 # name of the prefix for saving a file to redis
     )
 
     if test_config is None:
