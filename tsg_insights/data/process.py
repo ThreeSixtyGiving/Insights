@@ -394,19 +394,22 @@ class MergeCompanyAndCharityDetails(DataPreparationStage):
         return "Registered Charity (E&W)"
 
     def _create_orgid_df(self):
+
+        orgids = self.df["Recipient Org:0:Identifier:Clean"].unique()
         charity_rows = []
         for k, c in self.cache.hscan_iter("charity"):
             c = json.loads(c)
-            charity_rows.append({
-                "orgid": k.decode("utf8"),
-                "charity_number": c.get('id'),
-                "company_number": c.get("company_number")[0].get("number") if c.get("company_number") else None,
-                "date_registered": c.get("date_registered"),
-                "date_removed": c.get("date_removed"),
-                "postcode": c.get("geo", {}).get("postcode"),
-                "latest_income": c.get("latest_income"),
-                "org_type": self._get_org_type(c.get("id")),
-            })
+            if k.decode("utf8") in orgids:
+                charity_rows.append({
+                    "orgid": k.decode("utf8"),
+                    "charity_number": c.get('id'),
+                    "company_number": c.get("company_number")[0].get("number") if c.get("company_number") else None,
+                    "date_registered": c.get("date_registered"),
+                    "date_removed": c.get("date_removed"),
+                    "postcode": c.get("geo", {}).get("postcode"),
+                    "latest_income": c.get("latest_income"),
+                    "org_type": self._get_org_type(c.get("id")),
+                })
 
         orgid_df = pd.DataFrame(charity_rows).set_index("orgid")
 
@@ -419,23 +422,26 @@ class MergeCompanyAndCharityDetails(DataPreparationStage):
 
     def _create_company_df(self):
 
+        orgids = self.df["Recipient Org:0:Identifier:Clean"].unique()
+
         company_rows = []
         for k, c in self.cache.hscan_iter("company"):
             c = json.loads(c)
-            company = c.get("primaryTopic", {})
-            company = {} if company is None else company
-            address = c.get("primaryTopic", {}).get("RegAddress", {})
-            address = {} if address is None else address
-            company_rows.append({
-                "orgid": k.decode("utf8"),
-                "charity_number": None,
-                "company_number": company.get("CompanyNumber"),
-                "date_registered": company.get("IncorporationDate"),
-                "date_removed": company.get("DissolutionDate"),
-                "postcode": address.get("Postcode"),
-                "latest_income": None,
-                "org_type": self.COMPANY_REPLACE.get(company.get("CompanyCategory"), company.get("CompanyCategory")),
-            })
+            if k.decode("utf8") in orgids:
+                company = c.get("primaryTopic", {})
+                company = {} if company is None else company
+                address = c.get("primaryTopic", {}).get("RegAddress", {})
+                address = {} if address is None else address
+                company_rows.append({
+                    "orgid": k.decode("utf8"),
+                    "charity_number": None,
+                    "company_number": company.get("CompanyNumber"),
+                    "date_registered": company.get("IncorporationDate"),
+                    "date_removed": company.get("DissolutionDate"),
+                    "postcode": address.get("Postcode"),
+                    "latest_income": None,
+                    "org_type": self.COMPANY_REPLACE.get(company.get("CompanyCategory"), company.get("CompanyCategory")),
+                })
         
         if not company_rows:
             return None
@@ -518,13 +524,15 @@ class MergeGeoData(DataPreparationStage):
         return geocode_name
 
     def _create_postcode_df(self):
+        postcodes = self.df["Recipient Org:0:Postal Code"].unique()
         postcode_rows = []
         for k, c in self.cache.hscan_iter("postcode"):
             c = json.loads(c)
-            postcode_rows.append({
-                **{"postcode": k.decode("utf8")},
-                **{j: c.get("data", {}).get("attributes", {}).get(j) for j in self.POSTCODE_FIELDS}
-            })
+            if k.decode("utf8") in postcodes:
+                postcode_rows.append({
+                    **{"postcode": k.decode("utf8")},
+                    **{j: c.get("data", {}).get("attributes", {}).get(j) for j in self.POSTCODE_FIELDS}
+                })
         postcode_df = pd.DataFrame(postcode_rows).set_index(
             "postcode")[self.POSTCODE_FIELDS]
 
