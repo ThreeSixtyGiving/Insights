@@ -1,4 +1,4 @@
-from .results import get_identifier_schemes
+from .results import get_identifier_schemes, AGE_BAND_CHANGES, AWARD_BAND_CHANGES, INCOME_BAND_CHANGES
 from tsg_insights.data.cache import get_from_cache
 
 
@@ -136,7 +136,7 @@ FILTERS = {
         "defaults": [{"label": "All amounts", "value": "__all"}],
         "get_values": (lambda df: [
             {
-                'label': '{} ({})'.format(i[0], i[1]),
+                'label': '{} ({})'.format(AWARD_BAND_CHANGES.get(i[0], i[0]), i[1]),
                 'value': i[0]
             } for i in df["Amount Awarded:Bands"].value_counts().sort_index().iteritems()
         ]),
@@ -149,7 +149,7 @@ FILTERS = {
         "defaults": [{"label": "All sizes", "value": "__all"}],
         "get_values": (lambda df: [
             {
-                'label': '{} ({})'.format(i[0], i[1]),
+                'label': '{} ({})'.format(INCOME_BAND_CHANGES.get(i[0], i[0]), i[1]),
                 'value': i[0]
             } for i in df["__org_latest_income_bands"].value_counts().sort_index().iteritems()
         ] if df["__org_latest_income_bands"].value_counts().sum() else []),
@@ -162,7 +162,7 @@ FILTERS = {
         "defaults": [{"label": "All ages", "value": "__all"}],
         "get_values": (lambda df: [
             {
-                'label': '{} ({})'.format(i[0], i[1]),
+                'label': '{} ({})'.format(AGE_BAND_CHANGES.get(i[0], i[0]), i[1]),
                 'value': i[0]
             } for i in df["__org_age_bands"].value_counts().sort_index().iteritems()
         ] if df["__org_age_bands"].value_counts().sum() else []),

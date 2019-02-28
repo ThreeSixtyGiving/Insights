@@ -29,6 +29,7 @@ DEFAULT_LAYOUT = {
         },
     },
     'xaxis': {
+        'automargin': True,
         'showgrid': False,
         'showline': False,
         'layer': 'below traces',
@@ -621,7 +622,7 @@ def location_map(df, mapbox_access_token=None, mapbox_style=None):
         
 This map is based on postcodes found in the grants data.
 If postcodes aren’t present, they are sourced from UK
-charity or company registers Mapping is UK only.'''.format(
+charity or company registers. Mapping is UK only.'''.format(
             grant_count, len(df)
         ),
         children=[chart_n(geo["grants"].sum(), 'grant')],

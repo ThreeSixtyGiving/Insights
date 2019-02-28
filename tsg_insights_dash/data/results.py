@@ -32,6 +32,14 @@ IDENTIFIER_MAP = {
     # JE-FSC            1
 }
 
+INCOME_BAND_CHANGES = {
+    "Under £10k": "Up to £10k",
+    "£10k - £100k": "£11k - £100k",
+    "£100k - £1m": "£101k - £1m",
+    "£1m - £10m": "£1.1m - £10m",
+    "Over £10m": "Over £10m"
+}
+
 AWARD_BAND_CHANGES = {
     "Under £500": "Up to £500",
     "£500 - £1k": "£501 - £1,000",
@@ -213,7 +221,7 @@ organisation identifier.''',
         'missing': '''This chart can\'t be shown as there are no recipients in the data with 
 organisation income data. Add company or charity numbers to your data to show a chart of
 the income of organisations.''',
-        'get_results': (lambda df: df["__org_latest_income_bands"].value_counts().sort_index()),
+        'get_results': (lambda df: df["__org_latest_income_bands"].cat.rename_categories(INCOME_BAND_CHANGES).value_counts().sort_index()),
     },
     org_age={
         'title': 'Age of recipient organisations',

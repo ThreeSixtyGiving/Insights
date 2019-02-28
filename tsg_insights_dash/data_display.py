@@ -59,7 +59,6 @@ layout = html.Div(id="dashboard-container", className='results-page', children=[
                 children=[
                     "360Giving ",
                     html.Span(style={"color": "#9c1f61"}, children="Insights"),
-                    html.Span(style={"color": "rgba(11, 40, 51, 0.3)"}, children="Beta"),
                 ]
             )
         ]),
@@ -304,6 +303,8 @@ def what_next_missing_fields(_, fileid):
                 '''If you like 360Insights, found a bug or want to request features, email ''',
                 html.A('labs@threesixtygiving.org',
                        href='mailto:labs@threesixtygiving.org'),
+                '''.''',
+                html.Br(),
                 '''You could share what you’ve learned with your communities (perhaps including
                 screenshots or the URL) using the hashtag ''',
                 html.A('#360Insights',
