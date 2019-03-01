@@ -26,7 +26,7 @@ POSTCODE_FIELDS = ['ctry', 'cty', 'laua', 'pcon', 'rgn', 'imd', 'ru11ind',
                    'oac11', 'lat', 'long']  # fields to care about from the postcodes)
 
 
-def get_dataframe_from_file(filename, contents, date=None, expire_days=(6 * (365/12))):
+def get_dataframe_from_file(filename, contents, date=None, expire_days=(2 * (365/12))):
     fileid = get_fileid(contents, filename, date)
 
     # 2. Check cache for file

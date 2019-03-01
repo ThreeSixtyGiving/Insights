@@ -2,6 +2,7 @@ import json
 
 import requests
 import pandas as pd
+import requests_cache
 
 from .cache import get_cache
 from .utils import format_currency, get_fileid
@@ -18,7 +19,8 @@ def get_registry(reg_url=THREESIXTY_STATUS_JSON, cache_expire=DEFAULT_CACHE, ski
         if reg:
             return json.loads(reg.decode('utf8'))
 
-    reg = requests.get(reg_url).json()
+    with requests_cache.disabled():
+        reg = requests.get(reg_url).json()
     r.set(REG_KEY, json.dumps(reg), ex=cache_expire)
     return reg
 
