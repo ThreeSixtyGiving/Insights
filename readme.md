@@ -90,12 +90,12 @@ chown -R 32767:32767 /var/lib/dokku/data/storage/insights-uploads
 dokku storage:mount insights /var/lib/dokku/data/storage/insights-uploads:/app/uploads
 ```
 
-## Get newsletter section to appear
+## Allow bigger upload file size
 
-Add the following environmental variables
+By default dokku only allows 2mb file uploads. You can change this by
+installing the [Dokku Nginx Max Upload Size](https://github.com/Zeilenwerk/dokku-nginx-max-upload-size) plugin.
 
 ```
-NEWSLETTER_FORM_ACTION=https://threesixtygiving.us10.list-manage.com/subscribe
-NEWSLETTER_FORM_U=216b8b926250184f90c7198e8
-NEWSLETTER_FORM_ID=91870dde44
+sudo dokku plugin:install https://github.com/Zeilenwerk/dokku-nginx-max-upload-size.git
+dokku config:set insights MAX_UPLOAD_SIZE=20M
 ```
