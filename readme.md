@@ -99,3 +99,29 @@ installing the [Dokku Nginx Max Upload Size](https://github.com/Zeilenwerk/dokku
 sudo dokku plugin:install https://github.com/Zeilenwerk/dokku-nginx-max-upload-size.git
 dokku config:set insights MAX_UPLOAD_SIZE=20M
 ```
+
+## Caching
+
+### Caches used
+
+- `requests_cache` for caching URL requests
+- `redis_queue` for managing worker process
+- `get_from_cache` & `save_to_cache` use both redis and filesystem cache
+  to store files & metadata about files
+
+### When is the cache used
+
+#### `tsg_insights\data\process.py`
+
+- save to cache when dataset is loaded from file or URL
+- requests_cache used for looking up postcodes, charities & companies
+
+#### redis_queue
+
+- used in worker process for managed the tasks
+
+#### `tsg_insights\data\registry.py`
+
+- used when fetching registry file (can be switched off)
+- used when fetching files from registry
+
