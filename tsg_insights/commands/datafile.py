@@ -2,15 +2,13 @@ import logging
 import sys
 
 import click
-from flask import Flask, url_for, current_app
+from flask import Flask, current_app
 from flask.cli import AppGroup, with_appcontext
-from tqdm import tqdm
-import requests
 import pandas as pd
 
 from ..data.registry import process_registry, get_reg_file
 from ..data.process import get_dataframe_from_url
-from ..data.cache import delete_from_cache, get_from_cache, get_cache, get_filename, save_to_cache
+from ..data.cache import delete_from_cache, get_from_cache, get_cache, save_to_cache
 
 cli = AppGroup('data')
 
