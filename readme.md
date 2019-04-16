@@ -105,10 +105,10 @@ dokku config:set insights MAX_UPLOAD_SIZE=20M
 There are a number of server commands that can be used to maintain the database. They
 need to be run from the server(eg via SSH access).
 
-When running from a dokku instance then `dokku run` needs to be added to the start, so for exmaple:
+When running from a dokku instance then `dokku run insights` needs to be added to the start, so for exmaple:
 
 ```sh
-dokku run flask registry update
+dokku run insights flask registry update
 ```
 
 ### Registry
