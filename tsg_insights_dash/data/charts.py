@@ -7,7 +7,7 @@ import plotly.graph_objs as go
 import pandas as pd
 
 from tsg_insights.data.utils import list_to_string, pluralize, get_unique_list, format_currency
-from .results import CHARTS
+from .results import CHARTS, get_statistics
 
 DEFAULT_TABLE_FIELDS = ["Title", "Description", "Amount Awarded", 
                         "Award Date", "Recipient Org:0:Name", 
@@ -628,38 +628,49 @@ charity or company registers. Mapping is UK only.'''.format(
         children=[chart_n(geo["grants"].sum(), 'grant')],
     )
 
-def get_statistics(df):
-    amount_awarded = df.groupby("Currency").sum()["Amount Awarded"]
-    amount_awarded = [format_currency(amount, currency) for currency, amount in amount_awarded.items()]
+def get_statistics_output(df):
+    stats = get_statistics(df)
 
     return html.Div(
         className='results-page__body__content__spheres',
         children=[
             html.Div(
                 className='results-page__body__content__sphere',
-                style={'backgroundColor': '#9c1f61'},
+                style={'backgroundColor': THREESIXTY_COLOURS[0]},
                 children=[
-                    html.P(className='', children="{:,.0f}".format(len(df))),
-                    html.H4(className='', children=pluralize("grant", len(df)))
+                    html.P(className='', children="{:,.0f}".format(stats["grants"])),
+                    html.H4(className='', children=pluralize("grant", stats["grants"]))
                 ]
             ),
             html.Div(
                 className='results-page__body__content__sphere',
-                style={'backgroundColor': '#f4831f'},
+                style={'backgroundColor': THREESIXTY_COLOURS[1]},
                 children=[
-                    html.P(className='', children="{:,.0f}".format(df["Recipient Org:0:Identifier"].unique().size)),
-                    html.H4(className='', children=pluralize("recipient", df["Recipient Org:0:Identifier"].unique().size))
+                    html.P(className='', children="{:,.0f}".format(stats["recipients"])),
+                    html.H4(className='', children=pluralize("recipient", stats["recipients"]))
                 ]
             ),
         ] + [
             html.Div(
                 className='results-page__body__content__sphere',
-                style={'backgroundColor': '#50aae4'},
+                style={'backgroundColor': THREESIXTY_COLOURS[3]},
                 children=[
                     html.P(className='', children=i[0]),
-                    html.H4(className='', children=i[1])
+                    html.H4(className='', children=i[1]),
+                    html.H4(className='', children="Total"),
                 ]
-            ) for i in amount_awarded
+            ) for i in stats["amount_awarded"]
+        ] + [
+            html.Div(
+                className='results-page__body__content__sphere',
+                style={
+                    'backgroundColor': THREESIXTY_COLOURS[2], 'color': '#0b2833'},
+                children=[
+                    html.P(className='', children=i[0]),
+                    html.H4(className='', children=i[1]),
+                    html.H4(className='', children="(Average grant)"),
+                ]
+            ) for i in stats["median_grant"]
         ]
     )
 
