@@ -502,6 +502,11 @@ class MergeCompanyAndCharityDetails(DataPreparationStage):
         # merge org details into main dataframe
         self.df = self.df.join(orgid_df.rename(columns=lambda x: self.org_prefix + x),
                      on="Recipient Org:0:Identifier:Clean", how="left")
+
+        # add age based on time of grant
+        self.df.loc[:, self.org_prefix + "age"] = self.df["Award Date"] - \
+            self.df[self.org_prefix + "date_registered"]
+
         return self.df
 
 class FetchPostcodes(DataPreparationStage):

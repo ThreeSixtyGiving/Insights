@@ -243,7 +243,7 @@ the income of organisations.''',
     org_age={
         'title': 'Age of recipient organisations',
         'units': '(number of grants)',
-        'desc': 'Organisation age uses the registration date of that organisation. Based only on recipients with charity or company numbers.',
+        'desc': 'Organisation age at the time of the grant award, based on the registration date of that organisation. Only available for recipients with charity or company numbers.',
         'missing': '''This chart can\'t be shown as there are no recipients in the data with 
 organisation age data. Add company or charity numbers to your data to show a chart of
 the age of organisations.''',

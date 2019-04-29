@@ -1,5 +1,6 @@
 import os
 import json
+from datetime import date
 
 import pytest
 import requests_mock
@@ -227,7 +228,9 @@ def test_org_merge():
         "Recipient Org:0:Identifier:Clean": ["GB-CHC-225922", "GB-CHC-225922", "GB-COH-09668396",
                                              "GB-COH-00198344", "GB-NIC-100012", "GB-SC-SC003558",
                                              "GB-CHC-DOESNOTEXIST", "GB-COH-04325234"],
+        "Award Date": date(2018, 1, 1),
     })
+    df.loc[:, "Award Date"] = pd.to_datetime(df["Award Date"])
     stage = MergeCompanyAndCharityDetails(df, cache, None)
 
     orgid_df = stage._create_orgid_df()
