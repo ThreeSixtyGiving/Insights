@@ -41,16 +41,28 @@ def process_registry(reg=None, reg_url=THREESIXTY_STATUS_JSON, cache_expire=DEFA
             grant_amount = format_currency(grant_amount, abbreviate=True)
             grant_amount = "{}{}".format(*grant_amount)
 
-        min_award_date = pd.to_datetime(v.get("datagetter_aggregates", {}).get("min_award_date", None))
-        max_award_date = pd.to_datetime(v.get("datagetter_aggregates", {}).get("max_award_date", None))
+        min_award_date = pd.to_datetime(
+            str(v.get("datagetter_aggregates", {}).get("min_award_date", None)),
+            errors='coerce',
+            format='%Y-%m-%d',
+            exact=True,
+        )
+        max_award_date = pd.to_datetime(
+            str(v.get("datagetter_aggregates", {}).get("max_award_date", None)),
+            errors='coerce',
+            format='%Y-%m-%d',
+            exact=True,
+        )
 
-        min_award_date = min_award_date.strftime("%b '%y") if not pd.isna(min_award_date) else None
-        max_award_date = max_award_date.strftime("%b '%y") if not pd.isna(max_award_date) else None
-
-        if min_award_date == max_award_date:
-            award_date_str = min_award_date
-        else:
-            award_date_str = "{} - {}".format(min_award_date, max_award_date)
+        award_date_str = ""
+        if not pd.isna(min_award_date) or not pd.isna(max_award_date):
+            if not pd.isna(min_award_date) and min_award_date.strftime("%b '%y") == max_award_date.strftime("%b '%y"):
+                award_date_str = min_award_date.strftime("%b '%y")
+            elif not pd.isna(min_award_date):
+                award_date_str = "{:%b '%y} - {:%b '%y}".format(
+                    min_award_date, max_award_date)
+            else:
+                award_date_str =  "- {:%b '%y}".format(max_award_date)
 
         if publisher_sort not in publishers:
             publishers[publisher_sort] = []
@@ -59,12 +71,14 @@ def process_registry(reg=None, reg_url=THREESIXTY_STATUS_JSON, cache_expire=DEFA
             'identifier': v.get('identifier'),
             'title': v.get("title", ""),
             'grant_count': grant_count,
-            'award_date': award_date_str,
             'grant_amount': grant_amount,
+            'award_date': award_date_str,
+            'max_award_date': max_award_date,
             'file_size': v.get("datagetter_metadata", {}).get("file_size"),
             'file_type': v.get("datagetter_metadata", {}).get("file_type"),
             'download_url': v.get("distribution", [{}])[0].get("downloadURL"),
         })
+        publishers[publisher_sort] = sorted(publishers[publisher_sort], key=lambda x: x['max_award_date'], reverse=True)
 
     return publishers
 
