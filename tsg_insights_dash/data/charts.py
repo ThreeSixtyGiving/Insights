@@ -47,7 +47,10 @@ DEFAULT_LAYOUT = {
     ),
 }
 DEFAULT_CONFIG = {
-    'displayModeBar': False,
+    'displayModeBar': 'hover',
+    'modeBarButtons': [[
+        'toImage', 'sendDataToCloud'
+    ]],
     'scrollZoom': 'gl3d',
 }
 
@@ -166,9 +169,7 @@ def funder_chart(df):
                 'data': [get_bar_data(data, chart_type=chart_type)],
                 'layout': layout
             },
-            config={
-                'displayModeBar': False
-            }
+            config=DEFAULT_CONFIG
         ),
         chart['title'], 
         subtitle=chart.get("units"),
