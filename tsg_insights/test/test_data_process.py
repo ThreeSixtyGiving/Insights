@@ -317,14 +317,14 @@ def test_add_extra_fields():
     assert "__org_age_bands" in result_df.columns
     assert "Grant Programme:0:Title" in result_df.columns
     
-    assert result_df.loc[0, "Amount Awarded:Bands"] == "Under £500"
+    assert pd.isna(result_df.loc[0, "Amount Awarded:Bands"])
     assert result_df.loc[1, "Amount Awarded:Bands"] == "Under £500"
     assert result_df.loc[2, "Amount Awarded:Bands"] == "£100k - £1m"
     assert result_df.loc[3, "Amount Awarded:Bands"] == "Over £1m"
 
     assert result_df.loc[0, "__org_latest_income_bands"] == "Under £10k"
     assert result_df.loc[1, "__org_latest_income_bands"] == "Under £10k"
-    assert result_df.loc[2, "__org_latest_income_bands"] == "£100k - £1m"
+    assert result_df.loc[2, "__org_latest_income_bands"] == "£250k - £1m"
     assert result_df.loc[3, "__org_latest_income_bands"] == "Over £10m"
 
     assert result_df.loc[0, "__org_age_bands"] == "Under 1 year"
