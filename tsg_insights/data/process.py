@@ -595,9 +595,9 @@ class AddExtraFieldsExternal(DataPreparationStage):
     AMOUNT_BINS = [-1, 500, 1000, 2000, 5000, 10000, 100000, 1000000, float("inf")]
     AMOUNT_BIN_LABELS = ["Under £500", "£500 - £1k", "£1k - £2k", "£2k - £5k", "£5k - £10k",
                         "£10k - £100k", "£100k - £1m", "Over £1m"]
-    INCOME_BINS = [-1, 10000, 100000, 1000000, 10000000, float("inf")]
-    INCOME_BIN_LABELS = ["Under £10k", "£10k - £100k",
-                        "£100k - £1m", "£1m - £10m", "Over £10m"]
+    INCOME_BINS = [-1, 10000, 100000, 250000, 1000000, 10000000, float("inf")]
+    INCOME_BIN_LABELS = ["Under £10k", "£10k - £100k", "£100k - £250k",
+                         "£250k - £1m", "£1m - £10m", "Over £10m"]
     AGE_BINS = pd.to_timedelta(
         [x * 365 for x in [-1, 1, 2, 5, 10, 25, 200]], unit="D")
     AGE_BIN_LABELS = ["Under 1 year", "1-2 years", "2-5 years",

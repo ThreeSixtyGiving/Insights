@@ -1,6 +1,7 @@
 import pandas as pd
 
 from tsg_insights.data.utils import format_currency
+from tsg_insights.data.process import AddExtraFieldsExternal
 
 IDENTIFIER_MAP = {
     "360G": "Identifier not recognised",        # 360G          41190
@@ -144,6 +145,18 @@ def get_ctry_rgn(df):
     return ctry_rgn
 
 
+def get_org_income_bands(df):
+    return pd.cut(
+        df["__org_latest_income"],
+        bins=AddExtraFieldsExternal.INCOME_BINS,
+        labels=AddExtraFieldsExternal.INCOME_BIN_LABELS
+    )
+
+def get_org_income(df):
+    bands = get_org_income_bands(df)
+    return bands.value_counts().sort_index()
+
+
 def get_org_type(df):
     return get_identifier_schemes(df).value_counts().sort_index()
 
@@ -221,7 +234,7 @@ organisation identifier.''',
         'missing': '''This chart can\'t be shown as there are no recipients in the data with 
 organisation income data. Add company or charity numbers to your data to show a chart of
 the income of organisations.''',
-        'get_results': (lambda df: df["__org_latest_income_bands"].cat.rename_categories(INCOME_BAND_CHANGES).value_counts().sort_index()),
+        'get_results': get_org_income,
     },
     org_age={
         'title': 'Age of recipient organisations',
