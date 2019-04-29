@@ -10,3 +10,4 @@ uploads/
 archive/
 
 Thumbs.db
+*.sqlite
