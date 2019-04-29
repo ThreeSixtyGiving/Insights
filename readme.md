@@ -100,6 +100,69 @@ sudo dokku plugin:install https://github.com/Zeilenwerk/dokku-nginx-max-upload-s
 dokku config:set insights MAX_UPLOAD_SIZE=20M
 ```
 
+## Commands
+
+There are a number of server commands that can be used to maintain the database. They
+need to be run from the server(eg via SSH access).
+
+When running from a dokku instance then `dokku run insights` needs to be added to the start, so for exmaple:
+
+```sh
+dokku run insights flask registry update
+```
+
+### Registry
+
+Update the registry to the latest version
+
+```sh
+flask registry update
+```
+
+### Datafiles
+
+Fetch a file (by URL or registry identifier):
+
+```sh
+flask data fetch <file_url>
+```
+
+Fetch all files in the registry. `<output>` should be a path to a csv, json or excel 
+file which will have a line with log details for each file.
+
+```sh
+flask data fetchall <output>
+flask data fetchall <output> --file-limit=1000000 # max file size in bytes
+```
+
+Remove a file:
+
+```sh
+flask data remove <fileid>
+```
+
+Remove all files (use with caution!) It will ask you to confirm.
+
+```sh
+flask data removeall
+```
+
+Preview a file (Shows columns and rows from data):
+
+```sh
+flask data preview <fileid>
+flask data preview <fileid> --field=Description # preview a single field
+```
+
+### Cache management
+
+Move all files from redis to filesystem caching or vice versa:
+
+```sh
+flask data redistofile
+flask data filetoredis
+```
+
 ## Caching
 
 ### Caches used
