@@ -393,6 +393,8 @@ class MergeCompanyAndCharityDetails(DataPreparationStage):
         "PRIV LTD SECT. 30 (Private limited company, section 30 of the Companies Act)": "Private Limited Company",
     }  # replacement values for companycategory
 
+    org_prefix = "__org_"
+
     def _get_org_type(self, id):
         if id.startswith("S") or id.startswith("GB-SC-"):
             return "Registered Charity (Scotland)"
@@ -417,6 +419,9 @@ class MergeCompanyAndCharityDetails(DataPreparationStage):
                     "latest_income": c.get("latest_income"),
                     "org_type": self._get_org_type(c.get("id")),
                 })
+
+        if not charity_rows:
+            return None
 
         orgid_df = pd.DataFrame(charity_rows).set_index("orgid")
 
@@ -473,6 +478,18 @@ class MergeCompanyAndCharityDetails(DataPreparationStage):
             orgid_df = companies_df
         
         if not isinstance(orgid_df, pd.DataFrame):
+            org_columns = [
+                "orgid",
+                "charity_number",
+                "company_number",
+                "date_registered",
+                "date_removed",
+                "postcode",
+                "latest_income",
+                "org_type",
+            ]
+            for c in org_columns:
+                self.df.loc[:, self.org_prefix + c] = None
             return self.df
 
         # drop any duplicates
@@ -483,7 +500,7 @@ class MergeCompanyAndCharityDetails(DataPreparationStage):
         orgid_df.loc[:, "latest_income"] = orgid_df["latest_income"].astype(float)
 
         # merge org details into main dataframe
-        self.df = self.df.join(orgid_df.rename(columns=lambda x: "__org_" + x),
+        self.df = self.df.join(orgid_df.rename(columns=lambda x: self.org_prefix + x),
                      on="Recipient Org:0:Identifier:Clean", how="left")
         return self.df
 

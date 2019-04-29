@@ -243,7 +243,21 @@ def test_org_merge():
 
     result_df = stage.run()
     assert len(result_df) == len(df) # no rows should have been deleted
-    assert len(result_df["__org_org_type"].dropna()) == 6 # these rows have been matched with the cache
+    # these rows have been matched with the cache
+    assert len(result_df["__org_org_type"].dropna()) == 6
+
+    # check instances where there's no external data
+    df = pd.DataFrame({
+        "Recipient Org:0:Identifier:Clean": ["GB-XXX-225922", "GB-XXX-225922", "GB-XXX-09668396",
+                                             "GB-XXX-00198344", "GB-XXX-100012", "GB-XXX-SC003558",
+                                             "GB-XXX-DOESNOTEXIST", "GB-XXX-04325234"],
+    })
+    stage = MergeCompanyAndCharityDetails(df, cache, None)
+
+    result_df = stage.run()
+    assert len(result_df) == len(df)  # no rows should have been deleted
+    # these rows have no value for org type
+    assert len(result_df["__org_org_type"].dropna()) == 0
 
 
 def test_postcode_lookup(m):
