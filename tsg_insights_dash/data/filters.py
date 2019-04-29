@@ -42,9 +42,16 @@ def apply_org_size_filter(df, filter_args, filter_def):
         return
 
     bands = get_org_income_bands(df)
-    print(bands)
-    print(bands.isin(filter_args))
     return df[bands.isin(filter_args)]
+
+
+def apply_org_type_filter(df, filter_args, filter_def):
+
+    if not filter_args or filter_args == ['__all']:
+        return
+
+    org_type = get_identifier_schemes(df)
+    return df[org_type.isin(filter_args)]
 
 
 def apply_field_filter(df, filter_args, filter_def):
@@ -134,10 +141,10 @@ FILTERS = {
             {
                 'label': '{} ({})'.format(i[0], i[1]),
                 'value': i[0]
-            } for i in df["__org_org_type"].value_counts().iteritems()
+            } for i in get_identifier_schemes(df).value_counts().iteritems()
         ]),
         "field": "__org_org_type",
-        "apply_filter": apply_field_filter,
+        "apply_filter": apply_org_type_filter,
     },
     "award_amount": {
         "label": "Amount awarded",

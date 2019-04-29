@@ -153,8 +153,7 @@ def get_org_income_bands(df):
     )
 
 def get_org_income(df):
-    bands = get_org_income_bands(df)
-    return bands.value_counts().sort_index()
+    return get_org_income_bands(df).value_counts().sort_index()
 
 
 def get_org_type(df):
