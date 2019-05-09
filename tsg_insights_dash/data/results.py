@@ -1,6 +1,7 @@
 import pandas as pd
 
 from tsg_insights.data.utils import format_currency
+from tsg_insights.data.process import AddExtraFieldsExternal
 
 IDENTIFIER_MAP = {
     "360G": "Identifier not recognised",        # 360G          41190
@@ -93,10 +94,15 @@ def get_statistics(df):
     amount_awarded = [format_currency(amount, currency)
                       for currency, amount in amount_awarded.items()]
 
+    median_grant = df.groupby("Currency").median()["Amount Awarded"]
+    median_grant = [format_currency(amount, currency)
+                    for currency, amount in median_grant.items()]
+
     return {
         "grants": len(df),
         "recipients": df["Recipient Org:0:Identifier"].unique().size,
         "amount_awarded": amount_awarded,
+        "median_grant": median_grant,
         "award_years": {
             "min": df["Award Date"].dt.year.min(),
             "max": df["Award Date"].dt.year.max(),
@@ -142,6 +148,17 @@ def get_ctry_rgn(df):
     ctry_rgn = ctry_rgn.reindex(new_idx)
 
     return ctry_rgn
+
+
+def get_org_income_bands(df):
+    return pd.cut(
+        df["__org_latest_income"],
+        bins=AddExtraFieldsExternal.INCOME_BINS,
+        labels=AddExtraFieldsExternal.INCOME_BIN_LABELS
+    )
+
+def get_org_income(df):
+    return get_org_income_bands(df).value_counts().sort_index()
 
 
 def get_org_type(df):
@@ -221,12 +238,12 @@ organisation identifier.''',
         'missing': '''This chart can\'t be shown as there are no recipients in the data with 
 organisation income data. Add company or charity numbers to your data to show a chart of
 the income of organisations.''',
-        'get_results': (lambda df: df["__org_latest_income_bands"].cat.rename_categories(INCOME_BAND_CHANGES).value_counts().sort_index()),
+        'get_results': get_org_income,
     },
     org_age={
         'title': 'Age of recipient organisations',
         'units': '(number of grants)',
-        'desc': 'Organisation age uses the registration date of that organisation. Based only on recipients with charity or company numbers.',
+        'desc': 'Organisation age at the time of the grant award, based on the registration date of that organisation. Only available for recipients with charity or company numbers.',
         'missing': '''This chart can\'t be shown as there are no recipients in the data with 
 organisation age data. Add company or charity numbers to your data to show a chart of
 the age of organisations.''',

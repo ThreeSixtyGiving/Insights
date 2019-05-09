@@ -1,5 +1,6 @@
 import os
 import json
+from datetime import date
 
 import pytest
 import requests_mock
@@ -227,7 +228,9 @@ def test_org_merge():
         "Recipient Org:0:Identifier:Clean": ["GB-CHC-225922", "GB-CHC-225922", "GB-COH-09668396",
                                              "GB-COH-00198344", "GB-NIC-100012", "GB-SC-SC003558",
                                              "GB-CHC-DOESNOTEXIST", "GB-COH-04325234"],
+        "Award Date": date(2018, 1, 1),
     })
+    df.loc[:, "Award Date"] = pd.to_datetime(df["Award Date"])
     stage = MergeCompanyAndCharityDetails(df, cache, None)
 
     orgid_df = stage._create_orgid_df()
@@ -243,7 +246,21 @@ def test_org_merge():
 
     result_df = stage.run()
     assert len(result_df) == len(df) # no rows should have been deleted
-    assert len(result_df["__org_org_type"].dropna()) == 6 # these rows have been matched with the cache
+    # these rows have been matched with the cache
+    assert len(result_df["__org_org_type"].dropna()) == 6
+
+    # check instances where there's no external data
+    df = pd.DataFrame({
+        "Recipient Org:0:Identifier:Clean": ["GB-XXX-225922", "GB-XXX-225922", "GB-XXX-09668396",
+                                             "GB-XXX-00198344", "GB-XXX-100012", "GB-XXX-SC003558",
+                                             "GB-XXX-DOESNOTEXIST", "GB-XXX-04325234"],
+    })
+    stage = MergeCompanyAndCharityDetails(df, cache, None)
+
+    result_df = stage.run()
+    assert len(result_df) == len(df)  # no rows should have been deleted
+    # these rows have no value for org type
+    assert len(result_df["__org_org_type"].dropna()) == 0
 
 
 def test_postcode_lookup(m):
@@ -303,14 +320,14 @@ def test_add_extra_fields():
     assert "__org_age_bands" in result_df.columns
     assert "Grant Programme:0:Title" in result_df.columns
     
-    assert result_df.loc[0, "Amount Awarded:Bands"] == "Under £500"
+    assert pd.isna(result_df.loc[0, "Amount Awarded:Bands"])
     assert result_df.loc[1, "Amount Awarded:Bands"] == "Under £500"
     assert result_df.loc[2, "Amount Awarded:Bands"] == "£100k - £1m"
     assert result_df.loc[3, "Amount Awarded:Bands"] == "Over £1m"
 
     assert result_df.loc[0, "__org_latest_income_bands"] == "Under £10k"
     assert result_df.loc[1, "__org_latest_income_bands"] == "Under £10k"
-    assert result_df.loc[2, "__org_latest_income_bands"] == "£100k - £1m"
+    assert result_df.loc[2, "__org_latest_income_bands"] == "£250k - £1m"
     assert result_df.loc[3, "__org_latest_income_bands"] == "Over £10m"
 
     assert result_df.loc[0, "__org_age_bands"] == "Under 1 year"

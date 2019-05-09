@@ -1,4 +1,4 @@
-from .results import get_identifier_schemes, AGE_BAND_CHANGES, AWARD_BAND_CHANGES, INCOME_BAND_CHANGES
+from .results import get_identifier_schemes, AGE_BAND_CHANGES, AWARD_BAND_CHANGES, INCOME_BAND_CHANGES, get_org_income, get_org_income_bands
 from tsg_insights.data.cache import get_from_cache
 
 
@@ -36,12 +36,28 @@ def apply_area_filter(df, filter_args, filter_def):
         ]
 
 
-def apply_field_filter(df, filter_args, filter_def):
+def apply_org_size_filter(df, filter_args, filter_def):
 
     if not filter_args or filter_args == ['__all']:
         return
 
-    
+    bands = get_org_income_bands(df)
+    return df[bands.isin(filter_args)]
+
+
+def apply_org_type_filter(df, filter_args, filter_def):
+
+    if not filter_args or filter_args == ['__all']:
+        return
+
+    org_type = get_identifier_schemes(df)
+    return df[org_type.isin(filter_args)]
+
+
+def apply_field_filter(df, filter_args, filter_def):
+
+    if not filter_args or filter_args == ['__all']:
+        return
 
     return df[df[filter_def["field"]].isin(filter_args)]
 
@@ -125,10 +141,10 @@ FILTERS = {
             {
                 'label': '{} ({})'.format(i[0], i[1]),
                 'value': i[0]
-            } for i in df["__org_org_type"].value_counts().iteritems()
+            } for i in get_identifier_schemes(df).value_counts().iteritems()
         ]),
         "field": "__org_org_type",
-        "apply_filter": apply_field_filter,
+        "apply_filter": apply_org_type_filter,
     },
     "award_amount": {
         "label": "Amount awarded",
@@ -151,10 +167,10 @@ FILTERS = {
             {
                 'label': '{} ({})'.format(INCOME_BAND_CHANGES.get(i[0], i[0]), i[1]),
                 'value': i[0]
-            } for i in df["__org_latest_income_bands"].value_counts().sort_index().iteritems()
-        ] if df["__org_latest_income_bands"].value_counts().sum() else []),
+            } for i in get_org_income(df).iteritems()
+        ] if get_org_income(df).sum() else []),
         "field": "__org_latest_income_bands",
-        "apply_filter": apply_field_filter,
+        "apply_filter": apply_org_size_filter,
     },
     "org_age": {
         "label": "Organisation age",

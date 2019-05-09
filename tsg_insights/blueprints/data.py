@@ -88,7 +88,7 @@ def download_file(fileid, format):
         "__org_latest_income_bands": "Insights:Recipient Org:Latest Income:Bands",
         "__org_org_type": "Insights:Recipient Org:Organisation Type",
         "__org_postcode": "Insights:Recipient Org:Postcode",
-        "__org_age": "Insights:Recipient Org:Age",
+        "__org_age": "Insights:Recipient Org:Age:Days",
         "__org_age_bands": "Insights:Recipient Org:Age:Bands",
         "__geo_ctry": "Insights:Geo:Country",
         "__geo_cty": "Insights:Geo:County",

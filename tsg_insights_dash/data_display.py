@@ -167,7 +167,7 @@ def dashboard_output(fileid, *args):
     outputs = []
     
     outputs.extend(get_funder_output(df, filter_args.get("grant_programmes")))
-    outputs.append(get_statistics(df))
+    outputs.append(get_statistics_output(df))
     outputs.extend(get_file_output(metadata))
 
     charts = []
