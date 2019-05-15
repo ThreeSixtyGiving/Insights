@@ -55,14 +55,16 @@ def process_registry(reg=None, reg_url=THREESIXTY_STATUS_JSON, cache_expire=DEFA
         )
 
         award_date_str = ""
-        if not pd.isna(min_award_date) or not pd.isna(max_award_date):
-            if not pd.isna(min_award_date) and min_award_date.strftime("%b '%y") == max_award_date.strftime("%b '%y"):
+        if not pd.isnull(min_award_date) and not pd.isnull(max_award_date):
+            if min_award_date.strftime("%b '%y") == max_award_date.strftime("%b '%y"):
                 award_date_str = min_award_date.strftime("%b '%y")
-            elif not pd.isna(min_award_date):
+            else:
                 award_date_str = "{:%b '%y} - {:%b '%y}".format(
                     min_award_date, max_award_date)
-            else:
-                award_date_str =  "- {:%b '%y}".format(max_award_date)
+        elif not pd.isnull(max_award_date):
+            award_date_str =  "- {:%b '%y}".format(max_award_date)
+        elif not pd.isnull(min_award_date):
+            award_date_str =  "{:%b '%y} -".format(min_award_date)
 
         if publisher_sort not in publishers:
             publishers[publisher_sort] = []
