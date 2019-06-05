@@ -11,7 +11,7 @@ from rq import get_current_job
 import tqdm
 from threesixty import ThreeSixtyGiving
 
-from .cache import get_cache, get_from_cache, save_to_cache
+from .cache import get_cache, get_from_cache, save_to_cache, get_metadata_from_cache
 from .utils import get_fileid, charity_number_to_org_id
 from .registry import fetch_reg_file, get_reg_file_from_url
 
@@ -54,26 +54,36 @@ def get_dataframe_from_file(filename, contents, date=None, expire_days=(2 * (365
 
     return (fileid, filename)
 
-def get_dataframe_from_url(url):
+def get_dataframe_from_url(url, use_cache=True):
     # 1. Work out the file id
     headers = fetch_reg_file(url, 'HEAD')
+
+    # work out the version of the file
+    # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Last-Modified
+    last_modified = headers.get("ETag", headers.get("Last-Modified"))
 
     # 2. Get the registry entry for the file (if available)
     registry = get_reg_file_from_url(url)
     if registry and registry.get("identifier"):
         fileid = registry.get("identifier")
+        metadata = get_metadata_from_cache(fileid)
+        if metadata:
+            previous_headers = metadata.get("headers", {}) or {}
+            previous_modified = previous_headers.get(
+                "ETag",
+                previous_headers.get("Last-Modified")
+            )
+            if previous_modified != last_modified:
+                use_cache = False
     else:
-        # work out the version of the file
-        # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Last-Modified
-        last_modified = headers.get("ETag", headers.get("Last-Modified"))
-
         fileid = get_fileid(None, url, last_modified)
 
     # 2. Check cache for file
-    df = get_from_cache(fileid)
-    if df is not None:
-        print("using cache")
-        return (fileid, url, headers)
+    if use_cache:
+        df = get_from_cache(fileid)
+        if df is not None:
+            print("using cache")
+            return (fileid, url, headers)
 
     # 3. Fetch and prepare the data
     df = None
