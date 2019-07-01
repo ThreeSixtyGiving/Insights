@@ -81,6 +81,7 @@ app.index_string = '''
         {%app_entry%}
         {%config%}
         {%scripts%}
+        {%renderer%}
         ''' + analytics_script + '''
     </body>
 </html>
