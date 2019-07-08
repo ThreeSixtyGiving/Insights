@@ -73,7 +73,7 @@ def get_dataframe_from_url(url, use_cache=True):
                 "ETag",
                 previous_headers.get("Last-Modified")
             )
-            if previous_modified != last_modified:
+            if previous_modified != last_modified or metadata.get("url", None) != url:
                 use_cache = False
     else:
         fileid = get_fileid(None, url, last_modified)
