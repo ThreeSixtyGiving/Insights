@@ -327,7 +327,7 @@ def test_add_extra_fields():
 
     assert result_df.loc[0, "__org_latest_income_bands"] == "Under £10k"
     assert result_df.loc[1, "__org_latest_income_bands"] == "Under £10k"
-    assert result_df.loc[2, "__org_latest_income_bands"] == "£250k - £1m"
+    assert result_df.loc[2, "__org_latest_income_bands"] == "£500k - £1m"
     assert result_df.loc[3, "__org_latest_income_bands"] == "Over £10m"
 
     assert result_df.loc[0, "__org_age_bands"] == "Under 1 year"
