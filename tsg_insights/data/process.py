@@ -73,7 +73,7 @@ def get_dataframe_from_url(url, use_cache=True):
                 "ETag",
                 previous_headers.get("Last-Modified")
             )
-            if previous_modified != last_modified:
+            if previous_modified != last_modified or metadata.get("url", None) != url:
                 use_cache = False
     else:
         fileid = get_fileid(None, url, last_modified)
@@ -610,9 +610,9 @@ class AddExtraFieldsExternal(DataPreparationStage):
     AMOUNT_BINS = [0, 500, 1000, 2000, 5000, 10000, 100000, 1000000, float("inf")]
     AMOUNT_BIN_LABELS = ["Under £500", "£500 - £1k", "£1k - £2k", "£2k - £5k", "£5k - £10k",
                         "£10k - £100k", "£100k - £1m", "Over £1m"]
-    INCOME_BINS = [-1, 10000, 100000, 250000, 1000000, 10000000, float("inf")]
+    INCOME_BINS = [-1, 10000, 100000, 250000, 500000, 1000000, 10000000, float("inf")]
     INCOME_BIN_LABELS = ["Under £10k", "£10k - £100k", "£100k - £250k",
-                         "£250k - £1m", "£1m - £10m", "Over £10m"]
+                         "£250k - £500k", "£500k - £1m", "£1m - £10m", "Over £10m"]
     AGE_BINS = pd.to_timedelta(
         [x * 365 for x in [-1, 1, 2, 5, 10, 25, 200]], unit="D")
     AGE_BIN_LABELS = ["Under 1 year", "1-2 years", "2-5 years",
