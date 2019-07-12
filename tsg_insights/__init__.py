@@ -37,7 +37,7 @@ def create_app(test_config=None):
         MAPBOX_STYLE=os.environ.get("MAPBOX_STYLE"),
 
         # limit of file size for the tool
-        FILE_SIZE_LIMIT=os.environ.get("FILE_SIZE_LIMIT", 50000000),
+        FILE_SIZE_LIMIT=int(os.environ.get("FILE_SIZE_LIMIT", 50000000)),
 
         # google analytics property ID
         GOOGLE_ANALYTICS_TRACKING_ID=os.environ.get("GOOGLE_ANALYTICS_TRACKING_ID"),
