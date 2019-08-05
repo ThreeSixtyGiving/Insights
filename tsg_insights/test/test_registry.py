@@ -84,6 +84,19 @@ def test_process_registry_broken(get_file, m, test_app):
         assert publishers['A B Charitable Trust'][0]['award_date'] == "- Jan '18"
 
 
+def test_showing_registry(get_file, m, test_app):
+    with test_app.app_context():
+        reg = get_registry(skip_cache=True)
+        publishers = process_registry(reg)
+        client = test_app.test_client()
+        rv = client.get('/')
+        assert b'<strong>[File not available]</strong> Zing grants' in rv.data
+        assert b'<strong>[Not available due to large file size]</strong> Grants data 2004 - 2015 (CSV, 100MB+)' in rv.data
+        assert b'<a href="/fetch/registry/a002400000lzwL8AAI" class="fetch-from-registry" data-identifier="a002400000lzwL8AAI">' in rv.data
+        assert b'Nationwide Foundation grants awarded since 2009' in rv.data
+
+
+
 # def test_file_fetch_from_url(get_file, m, test_app):
 #     with test_app.app_context():
 #         test_urls = [
