@@ -76,6 +76,7 @@ def process_registry(reg=None, reg_url=THREESIXTY_STATUS_JSON, cache_expire=DEFA
             'grant_amount': grant_amount,
             'award_date': award_date_str,
             'max_award_date': max_award_date,
+            'downloads': v.get("datagetter_metadata", {}).get("downloads", False),
             'file_size': v.get("datagetter_metadata", {}).get("file_size"),
             'file_type': v.get("datagetter_metadata", {}).get("file_type"),
             'download_url': v.get("distribution", [{}])[0].get("downloadURL"),

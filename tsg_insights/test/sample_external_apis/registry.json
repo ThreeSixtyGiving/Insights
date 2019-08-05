@@ -9474,13 +9474,7 @@
       "unique_ids_count": 59
     },
     "datagetter_metadata": {
-      "acceptable_license": true,
-      "datetime_downloaded": "2019-02-28T19:40:42+00:00",
-      "downloads": true,
-      "file_size": 43292,
-      "file_type": "csv",
-      "json": "data/json_all/a002400000G4KGYAA3.json",
-      "valid": true
+      "downloads": false
     },
     "description": "",
     "distribution": [
