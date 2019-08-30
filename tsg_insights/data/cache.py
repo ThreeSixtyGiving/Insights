@@ -4,6 +4,7 @@ import logging
 import json
 import datetime
 
+import pandas as pd
 from flask import current_app
 from redis import StrictRedis, from_url
 from .utils import CustomJSONEncoder
@@ -76,7 +77,9 @@ def get_from_cache(fileid, cache_type=None):
     metadata = get_metadata_from_cache(fileid)
     if not metadata:
         logging.info("Dataframe [{}] not found".format(fileid))
-        return None
+        df = get_dataframe(fileid)
+        save_to_cache(fileid, df)
+        return df
     if "expires" in metadata:
         if datetime.datetime.strptime(metadata["expires"], "%Y-%m-%dT%H:%M:%S.%f") < datetime.datetime.now():
             logging.info("Dataframe [{}] expired on {}".format(
@@ -108,7 +111,62 @@ def get_from_cache(fileid, cache_type=None):
                     return None
         logging.info("File [{}] doesn't exist".format(filename))
 
-    return None
+    df = get_dataframe(fileid)
+    save_to_cache(fileid, df)
+    return df
+
+
+def get_dataframe(fileid):
+    from tsg_insights.data.process import DataPreparation, CheckColumnNames, CheckColumnsExist, CheckColumnTypes, AddExtraColumns, CleanRecipientIdentifiers, AddExtraFieldsExternal
+    df = pd.read_sql(
+        '''
+        select "grant"."id" as "Identifier",
+            "title" as "Title",
+            "description" as "Description",
+            "currency" as "Currency",
+            "amountAwarded" as "Amount Awarded",
+            "awardDate" as "Award Date",
+            "plannedDates_startDate",
+            "plannedDates_endDate",
+            "plannedDates_duration",
+            "recipientOrganization_id" as "Recipient Org:0:Identifier",
+            "recipientOrganization_name" as "Recipient Org:0:Name",
+            "recipientOrganization_charityNumber" as "Recipient Org:0:Charity Number",
+            "recipientOrganization_companyNumber" as "Recipient Org:0:Company Number",
+            "recipientOrganization_postalCode" as "Recipient Org:0:Postcode",
+            "fundingOrganization_id" as "Funding Org:0:Identifier",
+            "fundingOrganization_name" as "Funding Org:0:Name",
+            "fundingOrganization_department" as "Funding Org:0:Department",
+            "grantProgramme_title" as "Grant Programme:0:Title",
+            "ctry" as "__geo_ctry",
+            "cty" as "__geo_cty",
+            "laua" as "__geo_laua",
+            "pcon" as "__geo_pcon",
+            "rgn" as "__geo_rgn",
+            "imd" as "__geo_imd",
+            "ru11ind" as "__geo_ru11ind",
+            "oac11" as "__geo_oac11",
+            "lat" as "__geo_lat",
+            "long" as "__geo_long"
+        from "grant"
+            left outer join "postcode"
+                on "grant"."recipientOrganization_postalCode" = "postcode"."id"
+        where "dataset" = %(dataset)s
+        ''',
+        current_app.config.get('SQLALCHEMY_DATABASE_URI'),
+        params={'dataset': fileid},
+        parse_dates=['Award Date', 'plannedDates_startDate',
+                     'plannedDates_endDate']
+    )
+    prep = DataPreparation(df)
+    prep.stages = [CheckColumnNames,
+                   CheckColumnsExist,
+                   CheckColumnTypes,
+                   AddExtraColumns,
+                   CleanRecipientIdentifiers,
+                   AddExtraFieldsExternal]
+    df = prep.run()
+    return df
 
 def get_metadata_from_cache(fileid):
     r = get_cache()
