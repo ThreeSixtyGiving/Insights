@@ -10,11 +10,12 @@ import click
 from flask import Flask, url_for, current_app
 from flask.cli import AppGroup, with_appcontext
 import requests
+import requests_cache
 from tqdm import tqdm
 
 from ..db import db
 from ..data import bcp
-from ..data.models import Organisation
+from ..data.models import Organisation, Grant, Postcode
 from ..data.process import COMPANY_REPLACE
 
 cli = AppGroup('import')
@@ -231,3 +232,131 @@ def cli_fetch_charities():
                 db.session.execute(upsert_statement, objects)
                 db.session.commit()
                 objects = []
+
+
+@cli.command('postcodes')
+@with_appcontext
+def cli_fetch_postcodes():
+    logging.info("Starting to import postcodes")
+
+    # get the update statements
+    upsert_statement = Postcode.upsert_statement()
+
+    # find the download ZIP
+    download_url = 'http://geoportal.statistics.gov.uk/datasets/055c2d8135ca4297a85d624bb68aefdb_0.csv'
+    logging.info("Downloading from: {}".format(download_url))
+
+    # start the download
+    with requests_cache.disabled():
+        tmp_zip = TemporaryFile(encoding='utf-8-sig')
+        r = requests.head(download_url)
+        total_size = int(r.headers.get('content-length', 0))
+        logging.info("File size: {:,.0f}".format(total_size))
+        r = requests.get(download_url)
+
+        tmp_zip.write(r.content)
+    
+    # open the file
+    reader = csv.DictReader(tmp_zip)
+    row_count = 0
+    objects = []
+
+    for i, row in tqdm(enumerate(reader)):
+        org = Postcode(
+            id=row['pcds'],
+            ctry=row['ctry'],
+            cty=row['cty'],
+            laua=row['laua'],
+            pcon=row['pcon'],
+            rgn=row['rgn'],
+            imd=int(row['imd']) if row['imd'] else None,
+            ru11ind=row['ru11ind'],
+            oac11=row['oac11'],
+            lat=float(row['Y']) if row['Y'] else None,
+            long=float(row['X']) if row['X'] else None,
+        )
+        objects.append(org.__dict__)
+
+        if len(objects) == 1000:
+            db.session.execute(upsert_statement, objects)
+            db.session.commit()
+            objects = []
+
+    db.session.execute(upsert_statement, objects)
+    db.session.commit()
+    objects = []
+
+    tmp_zip.close()
+
+
+@cli.command('grants')
+@click.argument('dataset')
+@click.argument('infile')
+@with_appcontext
+def cli_fetch_postcodes(dataset, infile):
+    logging.info("Starting to import grants")
+
+    # get the update statements
+    upsert_statement = Grant.upsert_statement()
+
+    # open the grants file
+    data_csv = open(infile, mode='r', encoding='utf-8')
+
+    # open the file
+    reader = csv.DictReader(data_csv)
+    row_count = 0
+    objects = []
+
+    def parse_date(value, dformat='%Y-%m-%d'):
+        if not value:
+            return None
+        return datetime.strptime(value, dformat)
+
+    def parse_orgid_scheme(value):
+        if value.startswith("360G-"):
+            return "360G"
+        return "-".join(value.split("-")[:2])
+
+    for i, row in tqdm(enumerate(reader)):
+        org = Grant(
+            dataset= dataset,
+            id= row.get('id'),
+            title= row.get('title'),
+            description= row.get('description'),
+            currency= row.get('currency'),
+            amountAwarded=int(float(row.get('amountAwarded'))) if row.get('amountAwarded') else None,
+            awardDate=parse_date(row.get('awardDate')),
+            awardDateYear=parse_date(row.get('awardDate')).year,
+            plannedDates_startDate=parse_date(row.get(
+                'plannedDates.0.startDate')) if row.get(
+                'plannedDates.0.startDate') else None,
+                plannedDates_endDate=parse_date(row.get(
+                    'plannedDates.0.endDate')) if row.get(
+                'plannedDates.0.startDate') else None,
+            plannedDates_duration=int(row.get('plannedDates.0.duration')) if row.get('plannedDates.0.duration') else None,
+            recipientOrganization_id= row.get('recipientOrganization.0.id'),
+            recipientOrganization_idScheme=parse_orgid_scheme(row.get(
+                    'recipientOrganization.0.id')),
+            recipientOrganization_name=row.get('recipientOrganization.0.name'),
+            recipientOrganization_charityNumber=row.get('recipientOrganization.0.charityNumber') if row.get('recipientOrganization.0.charityNumber') else None,
+            recipientOrganization_companyNumber=row.get('recipientOrganization.0.companyNumber') if row.get(
+                    'recipientOrganization.0.companyNumber') else None,
+            recipientOrganization_postalCode=row.get('recipientOrganization.0.postalCode') if row.get('recipientOrganization.0.postalCode') else None,
+            fundingOrganization_id=row.get('fundingOrganization.0.id'),
+            fundingOrganization_name=row.get('fundingOrganization.0.name'),
+            fundingOrganization_department=row.get('fundingOrganization.0.department') if row.get('fundingOrganization.0.department') else None,
+            grantProgramme_title=row.get('grantProgramme.0.title') if row.get(
+                    'grantProgramme.0.title') else None,
+        )
+        objects.append(org.__dict__)
+
+        if len(objects) == 1000:
+            db.session.execute(upsert_statement, objects)
+            db.session.commit()
+            objects = []
+
+    db.session.execute(upsert_statement, objects)
+    db.session.commit()
+    objects = []
+
+    data_csv.close()
