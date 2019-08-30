@@ -175,7 +175,7 @@ class DataPreparation(object):
         self.job.save_meta()
 
     def run(self):
-        df = None
+        df = self.df
         self._setup_job_meta()
         for k, Stage in enumerate(self.stages):
             stage = Stage(df, self.cache, self.job, **self.attributes)
