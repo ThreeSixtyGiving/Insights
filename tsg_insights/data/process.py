@@ -25,6 +25,17 @@ FTC_SCHEMES = ["GB-CHC", "GB-NIC", "GB-SC", "GB-COH"]
 POSTCODE_FIELDS = ['ctry', 'cty', 'laua', 'pcon', 'rgn', 'imd', 'ru11ind',
                    'oac11', 'lat', 'long']  # fields to care about from the postcodes)
 
+COMPANY_REPLACE = {
+    "PRI/LBG/NSC (Private, Limited by guarantee, no share capital, use of 'Limited' exemption)": "Company Limited by Guarantee",
+    "PRI/LTD BY GUAR/NSC (Private, limited by guarantee, no share capital)": "Company Limited by Guarantee",
+    "PRIV LTD SECT. 30 (Private limited company, section 30 of the Companies Act)": "Private Limited Company",
+    "Other Company Type": "Other company type",
+    "Private Unlimited": "Private Unlimited Company",
+    "Protected Cell Company": "Other company type",
+    "Investment Company with Variable Capital (Securities)": "Investment Company with Variable Capital",
+    "Investment Company with Variable Capital(Umbrella)": "Investment Company with Variable Capital",
+}  # replacement values for companycategory
+
 
 def get_dataframe_from_file(filename, contents, date=None, expire_days=(2 * (365/12))):
     fileid = get_fileid(contents, filename, date)
@@ -397,12 +408,6 @@ class MergeCompanyAndCharityDetails(DataPreparationStage):
 
     name = 'Add charity and company details to data'
 
-    COMPANY_REPLACE = {
-        "PRI/LBG/NSC (Private, Limited by guarantee, no share capital, use of 'Limited' exemption)": "Company Limited by Guarantee",
-        "PRI/LTD BY GUAR/NSC (Private, limited by guarantee, no share capital)": "Company Limited by Guarantee",
-        "PRIV LTD SECT. 30 (Private limited company, section 30 of the Companies Act)": "Private Limited Company",
-    }  # replacement values for companycategory
-
     org_prefix = "__org_"
 
     def _get_org_type(self, id):
@@ -462,7 +467,7 @@ class MergeCompanyAndCharityDetails(DataPreparationStage):
                     "date_removed": company.get("DissolutionDate"),
                     "postcode": address.get("Postcode"),
                     "latest_income": None,
-                    "org_type": self.COMPANY_REPLACE.get(company.get("CompanyCategory"), company.get("CompanyCategory")),
+                    "org_type": COMPANY_REPLACE.get(company.get("CompanyCategory"), company.get("CompanyCategory")),
                 })
         
         if not company_rows:

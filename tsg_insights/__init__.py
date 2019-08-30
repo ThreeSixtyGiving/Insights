@@ -6,9 +6,10 @@ import pandas as pd
 
 from .data.registry import THREESIXTY_STATUS_JSON
 from .blueprints import home, fetch, job, data, cache
-from .commands import registry, worker, datafile
+from .commands import registry, worker, datafile, dataimport
 from .data.cache import get_cache
 from .data.utils import CustomJSONEncoder
+from .db import db, migrate
 
 def create_app(test_config=None):
     # create and configure the app
@@ -46,6 +47,10 @@ def create_app(test_config=None):
         REDIS_DEFAULT_URL='redis://localhost:6379/0', # default URL for redis instance
         REDIS_ENV_VAR='REDIS_URL',                    # name of the environmental variable that will be looked up for the redis url
         CACHE_DEFAULT_PREFIX='file_',                 # name of the prefix for saving a file to redis
+
+        # database variables
+        SQLALCHEMY_TRACK_MODIFICATIONS=False,
+        SQLALCHEMY_DATABASE_URI=os.environ.get("DATABASE_URL"),
     )
 
     if test_config is None:
@@ -82,11 +87,17 @@ def create_app(test_config=None):
     app.cli.add_command(registry.cli)
     app.cli.add_command(worker.cli)
     app.cli.add_command(datafile.cli)
+    app.cli.add_command(dataimport.cli)
 
     # where to serve images from
     @app.route('/images/<path:path>')
     def send_images(path):
         return send_from_directory('static/images', path)
+
+    # add database
+    db.init_app(app)
+    migrate.init_app(app, db)
+    from .data import models
 
     # add caching
     with app.app_context():
