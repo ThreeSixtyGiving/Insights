@@ -150,10 +150,10 @@ def funder_chart(df):
         return
     elif len(data) > 14:
         return chart_wrapper(
-            series_to_list(data),
-            chart['title'],
+            series_to_list(data.head(10)),
+            pluralize("Funder", len(data)),
             subtitle=chart.get("units"),
-            description=chart.get("desc"),
+            description="Showing 10 largest funders" if len(data) > 10 else "",
         )
     elif len(data) > 5:
         layout['yaxis']['visible'] = True
@@ -191,10 +191,10 @@ def grant_programme_chart(df):
         return
     elif len(data) > 14:
         return chart_wrapper(
-            series_to_list(data),
-            chart['title'],
+            series_to_list(data.head(10)),
+            pluralize("Grant programme", len(data)),
             subtitle=chart.get("units"),
-            description=chart.get("desc"),
+            description="Showing 10 largest grant programmes" if len(data) > 10 else "",
         )
     elif len(data) > 5:
         layout['yaxis']['visible'] = True
