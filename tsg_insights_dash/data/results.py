@@ -177,7 +177,7 @@ def get_identifier_schemes(df):
     return identifier_schemes.fillna(
         "Identifier not recognised"
     ).apply(
-        lambda x: IDENTIFIER_MAP.get(x, x)
+        lambda x: IDENTIFIER_MAP.get(x, "Other identifier")
     )
 
 
