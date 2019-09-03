@@ -314,10 +314,14 @@ def award_dates_change(fileid):
     if df is None:
         return {f: FILTERS[f]["defaults"] for f in FILTERS}
 
-    try:
-        return {f: FILTERS[f]["get_values"](df) for f in FILTERS}
-    except Exception as e:
-        return {f: FILTERS[f]["defaults"] for f in FILTERS}
+    filts = {}
+    for f in FILTERS:
+        try:
+            filts[f] = FILTERS[f]["get_values"](df)
+        except Exception as e:
+            filts[f] = FILTERS[f]["defaults"]
+            print("filters could not be found for", f)
+    return filts
 
 # ================
 # Functions that return a function to be used in callbacks
