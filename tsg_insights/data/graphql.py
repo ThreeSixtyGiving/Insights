@@ -2,6 +2,7 @@ from decimal import Decimal
 
 import graphene
 from graphene_sqlalchemy import SQLAlchemyObjectType
+from graphene.utils.str_converters import to_camel_case, to_snake_case
 from sqlalchemy import or_, func
 
 from ..data.models import Grant as GrantModel, Organisation as OrganisationModel, Postcode as PostcodeModel
@@ -25,6 +26,10 @@ class GrantBucket(graphene.ObjectType):
 
 class GrantAggregate(graphene.ObjectType):
     by_funder = graphene.List(GrantBucket)
+    by_grant_programme = graphene.List(GrantBucket)
+    # by_amount_awarded = graphene.List(GrantBucket)
+    by_award_year = graphene.List(GrantBucket)
+    by_award_date = graphene.List(GrantBucket)
 
 
 class Organisation(SQLAlchemyObjectType):
@@ -122,23 +127,38 @@ class Query(graphene.ObjectType):
         # if kwargs.get("org_age", {}).get("max"):
         #     query = query
 
-        result = query.add_columns(
-            GrantModel.fundingOrganization_id.label("bucket_id"),
-            GrantModel.fundingOrganization_name.label("bucket_name"),
-            func.count(GrantModel.id).label("grants"),
-            func.sum(GrantModel.amountAwarded).label("grant_amount")
-        ).group_by(
-            GrantModel.fundingOrganization_id,
-            GrantModel.fundingOrganization_name
-        ).all()
+        group_bys = {
+            "by_funder": [GrantModel.fundingOrganization_id, GrantModel.fundingOrganization_name],
+            "by_grant_programme": [GrantModel.grantProgramme_title, GrantModel.grantProgramme_title],
+            "by_award_year": [GrantModel.awardDateYear, GrantModel.awardDateYear],
+            "by_award_date": [GrantModel.awardDate, GrantModel.awardDate],
+        }
+        return_result = {}
 
-        x = dict(
-            by_funder = [{
+        # get the names of the operations so we can only perform those that are requested
+        operations = []
+        for s in info.operation.selection_set.selections:
+            if s.name.value != 'grants':
+                continue
+            operations.extend([x.name.value for x in s.selection_set.selections])
+        
+        for k, fields in group_bys.items():
+
+            # skip the query if it hasn't been requested
+            if k not in operations and to_camel_case(k) not in operations:
+                continue
+
+            result = query.add_columns(
+                fields[0].label("bucket_id"),
+                fields[1].label("bucket_name"),
+                func.count(GrantModel.id).label("grants"),
+                func.sum(GrantModel.amountAwarded).label("grant_amount")
+            ).group_by(*fields).all()
+            return_result[k]= [{
                 k: float(v) if isinstance(v, Decimal) else v
                 for k, v in r._asdict().items()} for r in result]
-        )
-        print(x)
-        return x
+
+        return return_result
 
     organisations = graphene.List(Organisation)
     organisation = graphene.Field(
