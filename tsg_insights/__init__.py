@@ -5,7 +5,7 @@ from flask import Flask, send_from_directory, request
 import pandas as pd
 
 from .data.registry import THREESIXTY_STATUS_JSON
-from .blueprints import home, fetch, job, data, cache
+from .blueprints import home, fetch, job, data, cache, api
 from .commands import registry, worker, datafile, dataimport
 from .data.cache import get_cache
 from .data.utils import CustomJSONEncoder
@@ -81,6 +81,7 @@ def create_app(test_config=None):
     app.register_blueprint(job.bp, url_prefix='/job')
     app.register_blueprint(data.bp, url_prefix='/data')
     app.register_blueprint(cache.bp, url_prefix='/cache')
+    app.register_blueprint(api.bp, url_prefix='/api')
     app.add_url_rule('/', endpoint='index')
 
     # register command line interface

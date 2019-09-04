@@ -1,3 +1,5 @@
+import datetime
+
 from sqlalchemy import func
 from sqlalchemy.dialects import postgresql
 
@@ -16,6 +18,17 @@ class ModelWithUpsert:
                 for c in cls.__table__.columns
             }
         )
+
+    def as_json(self):
+
+        def convert_date(value):
+            if isinstance(value, (datetime.date, datetime.datetime)):
+                return str(value)
+            return value
+
+        return {
+            c.name: convert_date(getattr(self, c.name)) for c in self.__table__.columns
+        }
 
 
 class Organisation(db.Model, ModelWithUpsert):
