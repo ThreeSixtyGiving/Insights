@@ -12,10 +12,6 @@ from ..db import db
 class Grant(SQLAlchemyObjectType):
     class Meta:
         model = GrantModel
-        # # only return specified fields
-        # only_fields = ("name",)
-        # # exclude specified fields
-        # exclude_fields = ("last_name",)
 
 class GrantBucket(graphene.ObjectType):
     bucket_id = graphene.String()
@@ -25,11 +21,12 @@ class GrantBucket(graphene.ObjectType):
 
 
 class GrantAggregate(graphene.ObjectType):
-    by_funder = graphene.List(GrantBucket)
+    by_funder = graphene.List(GrantBucket, description='Group by the funder')
     by_grant_programme = graphene.List(GrantBucket)
     # by_amount_awarded = graphene.List(GrantBucket)
     by_award_year = graphene.List(GrantBucket)
     by_award_date = graphene.List(GrantBucket)
+    by_org_type = graphene.List(GrantBucket)
 
 
 class Organisation(SQLAlchemyObjectType):
@@ -132,6 +129,7 @@ class Query(graphene.ObjectType):
             "by_grant_programme": [GrantModel.grantProgramme_title, GrantModel.grantProgramme_title],
             "by_award_year": [GrantModel.awardDateYear, GrantModel.awardDateYear],
             "by_award_date": [GrantModel.awardDate, GrantModel.awardDate],
+            "by_org_type": [GrantModel.recipientOrganization_idScheme, GrantModel.recipientOrganization_idScheme],
         }
         return_result = {}
 
