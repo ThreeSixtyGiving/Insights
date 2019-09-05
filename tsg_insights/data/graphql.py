@@ -125,7 +125,6 @@ class Query(graphene.ObjectType):
                     "award_amount", {}).get("max"),
             )
         
-        # not yet implemented
         if kwargs.get("area"):
             query = query.filter(or_(
                 GrantModel.geoCtry.in_(kwargs.get("area")),
