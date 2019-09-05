@@ -5,6 +5,7 @@ from zipfile import ZipFile
 import csv
 import codecs
 from datetime import datetime
+from io import TextIOWrapper
 
 import click
 from flask import Flask, url_for, current_app
@@ -12,6 +13,7 @@ from flask.cli import AppGroup, with_appcontext
 import requests
 import requests_cache
 from tqdm import tqdm
+from sqlalchemy.sql import text
 
 from ..db import db
 from ..data import bcp
@@ -76,7 +78,7 @@ def cli_fetch_companies():
             logging.info("Importing from: {}".format(filename))
 
             f = z.open(filename)
-            reader = csv.DictReader(codecs.iterdecode(f, 'utf-8'))
+            reader = csv.DictReader(TextIOWrapper(f, encoding='utf-8-sig'))
             row_count = 0
             objects = []
 
@@ -99,6 +101,9 @@ def cli_fetch_companies():
                     db.session.execute(upsert_statement, objects)
                     db.session.commit()
                     objects = []
+
+            db.session.execute(upsert_statement, objects)
+            db.session.commit()
 
 @cli.command('charities')
 @with_appcontext
@@ -233,6 +238,9 @@ def cli_fetch_charities():
                 db.session.commit()
                 objects = []
 
+        db.session.execute(upsert_statement, objects)
+        db.session.commit()
+
 
 @cli.command('postcodes')
 @with_appcontext
@@ -248,7 +256,7 @@ def cli_fetch_postcodes():
 
     # start the download
     with requests_cache.disabled():
-        tmp_zip = TemporaryFile(encoding='utf-8-sig')
+        tmp_zip = TemporaryFile()
         r = requests.head(download_url)
         total_size = int(r.headers.get('content-length', 0))
         logging.info("File size: {:,.0f}".format(total_size))
@@ -256,8 +264,11 @@ def cli_fetch_postcodes():
 
         tmp_zip.write(r.content)
     
+    tmp_zip.seek(0)
+    tmp_stream = TextIOWrapper(tmp_zip, encoding='utf-8-sig')
+
     # open the file
-    reader = csv.DictReader(tmp_zip)
+    reader = csv.DictReader(tmp_stream)
     row_count = 0
     objects = []
 
@@ -286,6 +297,7 @@ def cli_fetch_postcodes():
     db.session.commit()
     objects = []
 
+    tmp_stream.close()
     tmp_zip.close()
 
 
@@ -293,7 +305,7 @@ def cli_fetch_postcodes():
 @click.argument('dataset')
 @click.argument('infile')
 @with_appcontext
-def cli_fetch_postcodes(dataset, infile):
+def cli_fetch_grants(dataset, infile):
     logging.info("Starting to import grants")
 
     # get the update statements
@@ -318,7 +330,7 @@ def cli_fetch_postcodes(dataset, infile):
         return "-".join(value.split("-")[:2])
 
     for i, row in tqdm(enumerate(reader)):
-        org = Grant(
+        grant = Grant(
             dataset= dataset,
             id= row.get('id'),
             title= row.get('title'),
@@ -330,8 +342,8 @@ def cli_fetch_postcodes(dataset, infile):
             plannedDates_startDate=parse_date(row.get(
                 'plannedDates.0.startDate')) if row.get(
                 'plannedDates.0.startDate') else None,
-                plannedDates_endDate=parse_date(row.get(
-                    'plannedDates.0.endDate')) if row.get(
+            plannedDates_endDate=parse_date(row.get(
+                'plannedDates.0.endDate')) if row.get(
                 'plannedDates.0.startDate') else None,
             plannedDates_duration=int(row.get('plannedDates.0.duration')) if row.get('plannedDates.0.duration') else None,
             recipientOrganization_id= row.get('recipientOrganization.0.id'),
@@ -348,7 +360,7 @@ def cli_fetch_postcodes(dataset, infile):
             grantProgramme_title=row.get('grantProgramme.0.title') if row.get(
                     'grantProgramme.0.title') else None,
         )
-        objects.append(org.__dict__)
+        objects.append(grant.__dict__)
 
         if len(objects) == 1000:
             db.session.execute(upsert_statement, objects)
@@ -360,3 +372,143 @@ def cli_fetch_postcodes(dataset, infile):
     objects = []
 
     data_csv.close()
+
+    # afterwards need to:
+    #  - clean company number
+    #  - create canon org ID (company numbers & charity numbers)
+    #  - add postcode from org if not present
+    #  - clean postcode
+    #  - add geo data
+    #  - add organisation data
+    #  - add funder type
+    #  - work out amount awarded band
+    #  - work out duration band
+    #  - work out age at time of award
+    #  - work out age bands
+
+
+@cli.command('updategrants')
+@click.argument('dataset')
+@click.argument('stage', nargs=-1)
+def cli_update_grants():
+
+    queries = {
+        "Add missing company numbers": '''update "grant"
+            set "recipientOrganization_companyNumber" = "organisation"."company_number"
+            from "organisation"
+            where "grant"."recipientOrganization_charityNumber" = "organisation"."charity_number"
+                and "organisation"."company_number" is not null
+                and "grant"."recipientOrganization_companyNumber" is null
+                and "grant"."dataset" = :dataset''',
+        "Format company numbers": '''update "grant"
+            set "recipientOrganization_companyNumber" = LPAD("recipientOrganization_companyNumber", 8, '0')
+            where "recipientOrganization_companyNumber" is not null
+                and "grant"."dataset" = :dataset''',
+        "Add missing charity numbers": '''update "grant"
+            set "recipientOrganization_charityNumber" = "organisation"."charity_number"
+            from "organisation"
+            where "grant"."recipientOrganization_companyNumber" = "organisation"."company_number"
+                and "organisation"."charity_number" is not null
+                and "grant"."recipientOrganization_charityNumber" is null
+                and "grant"."dataset" = :dataset''',
+        "Produce canonical ID": '''update "grant"
+            set "recipientOrganization_idCanonical" = case 
+                    when "recipientOrganization_charityNumber" like 'SC%' then 'GB-SC-' || "recipientOrganization_charityNumber"
+                    when "recipientOrganization_charityNumber" like 'NI%' then 'GB-NIC-' || "recipientOrganization_charityNumber"
+                    when "recipientOrganization_charityNumber" is not null then 'GB-CHC-' || "recipientOrganization_charityNumber"
+                    when "recipientOrganization_companyNumber" is not null then 'GB-COH-' || "recipientOrganization_companyNumber"
+                    else "recipientOrganization_id" end,
+                "fundingOrganization_type" = case
+                    when "fundingOrganization_id" in ('GB-COH-RC000766', '360G-blf', 'GB-CHC-1036733', 'GB-GOR-PC390') then 'National Lottery'
+                    when "fundingOrganization_id" ilike 'GB-GOR-%' then 'Government'
+                    when "fundingOrganization_id" ilike 'GB-LAE-%' then 'Local Authority'
+                    when "fundingOrganization_id" ilike 'GB-LAN-%' then 'Local Authority'
+                    when "fundingOrganization_id" ilike 'GB-LAS-%' then 'Local Authority'
+                    when "fundingOrganization_id" ilike 'GB-PLA-%' then 'Local Authority'
+                    else 'Charitable Funder' end
+            where "grant"."dataset" = :dataset''',
+        "Produce ID scheme": '''update "grant"
+            set "recipientOrganization_idScheme" = case when "recipientOrganization_idCanonical" ~* '360G.*' then '360G' 
+                    when "recipientOrganization_idCanonical" ~* '[A-Z]{2}-.*-.*' then 
+                        array_to_string((string_to_array("recipientOrganization_idCanonical", '-'))[1:2], '-')
+                    else '' end
+            wher "grant"."dataset" = :dataset''',
+        "Add organisation details": '''update "grant"
+            set "recipientOrganization_latestIncome" = "organisation"."latest_income",
+                "recipientOrganization_latestIncomeDate" = "organisation"."latest_income_date",
+                "recipientOrganization_registrationDate" = "organisation"."date_registered",
+                "recipientOrganization_ageAtGrant" = ("awardDate" - "recipientOrganization_registrationDate"),
+                "recipientOrganization_postalCode" = coalesce("grant"."recipientOrganization_postalCode", "organisation"."postcode"),
+                "recipientOrganization_organisationType" = "organisation"."org_type"
+            from "organisation"
+            where "grant"."recipientOrganization_idCanonical" = "organisation"."orgid"
+                and "grant"."dataset" = :dataset''',
+        "Format postcode": '''update "grant"
+            set "recipientOrganization_postalCodeCanonical" = upper(concat_ws(' ',
+                    left(regexp_replace("recipientOrganization_postalCode", '[^A-Za-z0-9]', '', 'g'), -3),
+                    right(regexp_replace("recipientOrganization_postalCode", '[^A-Za-z0-9]', '', 'g'), 3)
+                ))
+            where "recipientOrganization_postalCode" is not null
+                and "grant"."dataset" = :dataset''',
+        "Add geography details": '''update "grant"
+            set "geoCtry" = "postcode"."ctry",
+                "geoCty" = "postcode"."cty",
+                "geoLaua" = "postcode"."laua",
+                "geoPcon" = "postcode"."pcon",
+                "geoRgn" = "postcode"."rgn",
+                "geoImd" = "postcode"."imd",
+                "geoRu11ind" = "postcode"."ru11ind",
+                "geoOac11" = "postcode"."oac11",
+                "geoLat" = "postcode"."lat",
+                "geoLong" = "postcode"."long"
+            from "postcode"
+            where "grant"."recipientOrganization_postalCodeCanonical" = "postcode"."id"
+                and "grant"."dataset" = :dataset''',
+        "Work out missing durations": '''update "grant"
+            set "plannedDates_duration" = (((("plannedDates_endDate" - "plannedDates_startDate")::float + 1)  / 365) * 12)::int
+            where "plannedDates_startDate" > '1980-01-01'
+                and "plannedDates_endDate" > '1980-01-01'
+                and "plannedDates_endDate" > "plannedDates_startDate"
+                and "plannedDates_duration" is null
+                and "grant"."dataset" = :dataset''',
+        "Put values into bands": '''update "grant"
+            set "plannedDates_durationBand" = case
+                    when "plannedDates_duration" <= 12 then 'Up to 1 year'
+                    when "plannedDates_duration" <= 24 then '2 years'
+                    when "plannedDates_duration" <= 36 then '3 years'
+                    when "plannedDates_duration" > 36 then 'More than 3 year'
+                    else null end,
+                "amountAwardedBand" = case
+                    when "amountAwarded" <= 500 then 'Under 500'
+                    when "amountAwarded" <= 1000 then '500 - 1k'
+                    when "amountAwarded" <= 2000 then '1k - 2k'
+                    when "amountAwarded" <= 5000 then '2k - 5k'
+                    when "amountAwarded" <= 10000 then '5k - 10k'
+                    when "amountAwarded" <= 100000 then '10k - 100k'
+                    when "amountAwarded" <= 1000000 then '100k - 1m'
+                    when "amountAwarded" >  1000000 then 'Over 1m'
+                    else null end,
+                "recipientOrganization_latestIncomeBand" = case
+                    when "recipientOrganization_latestIncome" <=    10000 then 'Under £10k'
+                    when "recipientOrganization_latestIncome" <=   100000 then '£10k - £100k'
+                    when "recipientOrganization_latestIncome" <=   250000 then '£100k - £250k'
+                    when "recipientOrganization_latestIncome" <=   500000 then '£250k - £500k'
+                    when "recipientOrganization_latestIncome" <=  1000000 then '£500k - £1m'
+                    when "recipientOrganization_latestIncome" <= 10000000 then '£1m - £10m'
+                    when "recipientOrganization_latestIncome" >  10000000 then 'Over £10m'
+                    else null end,
+                "recipientOrganization_ageAtGrantBands" = case
+                    when "recipientOrganization_ageAtGrant" <=  (1 * 365) then 'Under 1 year'
+                    when "recipientOrganization_ageAtGrant" <=  (2 * 365) then '1-2 years'
+                    when "recipientOrganization_ageAtGrant" <=  (5 * 365) then '2-5 years'
+                    when "recipientOrganization_ageAtGrant" <= (10 * 365) then '5-10 years'
+                    when "recipientOrganization_ageAtGrant" <= (25 * 365) then '10-25 years'
+                    when "recipientOrganization_ageAtGrant" >  (25 * 365) then 'Over 25 years'
+                    else null end
+            where "grant"."dataset" = :dataset'''
+    }
+
+    for k, query in queries.items():
+        logging.info(f"SQL {k}")
+        db.session.execute(text(query), dataset=dataset)
+

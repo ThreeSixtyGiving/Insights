@@ -3,7 +3,7 @@ from decimal import Decimal
 import graphene
 from graphene_sqlalchemy import SQLAlchemyObjectType
 from graphene.utils.str_converters import to_camel_case, to_snake_case
-from sqlalchemy import or_, func
+from sqlalchemy import or_, func, distinct
 
 from ..data.models import Grant as GrantModel, Organisation as OrganisationModel, Postcode as PostcodeModel
 from ..db import db
@@ -15,18 +15,27 @@ class Grant(SQLAlchemyObjectType):
 
 class GrantBucket(graphene.ObjectType):
     bucket_id = graphene.String()
-    bucket_name = graphene.String()
+    bucket_2_id = graphene.String()
     grants = graphene.Int()
     grant_amount = graphene.Float()
+    mean_grant = graphene.Float()
+    max_grant = graphene.Float()
+    min_grant = graphene.Float()
+    recipients = graphene.Int()
+    funders = graphene.Int()
 
 
 class GrantAggregate(graphene.ObjectType):
     by_funder = graphene.List(GrantBucket, description='Group by the funder')
+    by_funder_type = graphene.List(GrantBucket, description='Group by the type of funder')
     by_grant_programme = graphene.List(GrantBucket)
-    # by_amount_awarded = graphene.List(GrantBucket)
     by_award_year = graphene.List(GrantBucket)
     by_award_date = graphene.List(GrantBucket)
     by_org_type = graphene.List(GrantBucket)
+    by_org_size = graphene.List(GrantBucket)
+    by_org_age = graphene.List(GrantBucket)
+    by_amount_awarded = graphene.List(GrantBucket)
+    by_country_region = graphene.List(GrantBucket)
 
 
 class Organisation(SQLAlchemyObjectType):
@@ -49,15 +58,13 @@ class Query(graphene.ObjectType):
         dataset=graphene.Argument(type=graphene.String, required=True),
         q=graphene.Argument(type=graphene.String, description='Search in the title and description of grant'),
         funders=graphene.Argument(type=graphene.List(graphene.String)),
-        grant_programmes=graphene.Argument(
-            type=graphene.List(graphene.String)),
+        grant_programmes=graphene.Argument(type=graphene.List(graphene.String)),
         award_dates=graphene.Argument(type=MaxMin),
         award_amount=graphene.Argument(type=MaxMin),
-        # Not yet implemented
-        # area=graphene.Argument(type=graphene.String),
-        # orgtype=graphene.Argument(type=graphene.String),
-        # org_size=graphene.Argument(type=MaxMin),
-        # org_age=graphene.Argument(type=MaxMin),
+        area=graphene.Argument(type=graphene.List(graphene.String)),
+        orgtype=graphene.Argument(type=graphene.List(graphene.String)),
+        org_size=graphene.Argument(type=MaxMin),
+        org_age=graphene.Argument(type=MaxMin),
     )
     grant = graphene.Field(
         Grant,
@@ -111,25 +118,48 @@ class Query(graphene.ObjectType):
             )
         
         # not yet implemented
-        # if kwargs.get("area"):
-        #     query = query
-        # if kwargs.get("orgtype"):
-        #     query = query
-        # if kwargs.get("org_size", {}).get("min"):
-        #     query = query
-        # if kwargs.get("org_size", {}).get("max"):
-        #     query = query
-        # if kwargs.get("org_age", {}).get("min"):
-        #     query = query
-        # if kwargs.get("org_age", {}).get("max"):
-        #     query = query
+        if kwargs.get("area"):
+            query = query.filter(or_(
+                GrantModel.geoCtry.in_(kwargs.get("area")),
+                GrantModel.geoRgn.in_(kwargs.get("area")),
+            ))
+        if kwargs.get("orgtype"):
+            query = query.filter(
+                GrantModel.recipientOrganization_organisationType.in_(
+                    kwargs.get("orgtype")),
+            )
+        if kwargs.get("org_size", {}).get("min"):
+            query = query.filter(
+                GrantModel.recipientOrganization_latestIncome >= kwargs.get(
+                    "org_size", {}).get("min"),
+            )
+        if kwargs.get("org_size", {}).get("max"):
+            query = query.filter(
+                GrantModel.recipientOrganization_latestIncome <= kwargs.get(
+                    "org_size", {}).get("mac"),
+            )
+        if kwargs.get("org_age", {}).get("min"):
+            query = query.filter(
+                GrantModel.recipientOrganization_ageAtGrant >= kwargs.get(
+                    "org_age", {}).get("min"),
+            )
+        if kwargs.get("org_age", {}).get("max"):
+            query = query.filter(
+                GrantModel.recipientOrganization_ageAtGrant <= kwargs.get(
+                    "org_age", {}).get("max"),
+            )
 
         group_bys = {
-            "by_funder": [GrantModel.fundingOrganization_id, GrantModel.fundingOrganization_name],
-            "by_grant_programme": [GrantModel.grantProgramme_title, GrantModel.grantProgramme_title],
-            "by_award_year": [GrantModel.awardDateYear, GrantModel.awardDateYear],
-            "by_award_date": [GrantModel.awardDate, GrantModel.awardDate],
-            "by_org_type": [GrantModel.recipientOrganization_idScheme, GrantModel.recipientOrganization_idScheme],
+            "by_funder": [GrantModel.fundingOrganization_id],
+            "by_funder_type": [GrantModel.fundingOrganization_type],
+            "by_grant_programme": [GrantModel.grantProgramme_title],
+            "by_award_year": [GrantModel.awardDateYear],
+            "by_award_date": [GrantModel.awardDate],
+            "by_org_type": [GrantModel.recipientOrganization_organisationType],
+            "by_org_size": [GrantModel.recipientOrganization_latestIncomeBand],
+            "by_org_age": [GrantModel.recipientOrganization_ageAtGrantBands],
+            "by_amount_awarded": [GrantModel.amountAwardedBand],
+            "by_country_region": [GrantModel.geoCtry, GrantModel.geoRgn],
         }
         return_result = {}
 
@@ -146,12 +176,18 @@ class Query(graphene.ObjectType):
             if k not in operations and to_camel_case(k) not in operations:
                 continue
 
-            result = query.add_columns(
-                fields[0].label("bucket_id"),
-                fields[1].label("bucket_name"),
+            labels = ['bucket_id', 'bucket_2_id']
+            new_cols = [v.label(labels[k]) for k, v in enumerate(fields)] + [
                 func.count(GrantModel.id).label("grants"),
-                func.sum(GrantModel.amountAwarded).label("grant_amount")
-            ).group_by(*fields).all()
+                func.sum(GrantModel.amountAwarded).label("grant_amount"),
+                func.avg(GrantModel.amountAwarded).label("mean_grant"),
+                func.max(GrantModel.amountAwarded).label("max_grant"),
+                func.min(GrantModel.amountAwarded).label("min_grant"),
+                func.count(distinct(GrantModel.recipientOrganization_idCanonical)).label("recipients"),
+                func.count(distinct(GrantModel.fundingOrganization_id)).label("funders"),
+            ]
+
+            result = query.add_columns(*new_cols).group_by(*fields).all()
             return_result[k]= [{
                 k: float(v) if isinstance(v, Decimal) else v
                 for k, v in r._asdict().items()} for r in result]
