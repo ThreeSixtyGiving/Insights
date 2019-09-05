@@ -13,16 +13,22 @@ class Grant(SQLAlchemyObjectType):
     class Meta:
         model = GrantModel
 
+
+class GrantCurrencyBucket(graphene.ObjectType):
+    currency = graphene.String()
+    value = graphene.Float()
+
 class GrantBucket(graphene.ObjectType):
     bucket_id = graphene.String()
     bucket_2_id = graphene.String()
     grants = graphene.Int()
-    grant_amount = graphene.Float()
-    mean_grant = graphene.Float()
-    max_grant = graphene.Float()
-    min_grant = graphene.Float()
     recipients = graphene.Int()
     funders = graphene.Int()
+    grant_amount = graphene.List(GrantCurrencyBucket)
+    mean_grant = graphene.List(GrantCurrencyBucket)
+    max_grant = graphene.List(GrantCurrencyBucket)
+    min_grant = graphene.List(GrantCurrencyBucket)
+
 
 
 class GrantAggregate(graphene.ObjectType):
@@ -36,6 +42,8 @@ class GrantAggregate(graphene.ObjectType):
     by_org_age = graphene.List(GrantBucket)
     by_amount_awarded = graphene.List(GrantBucket)
     by_country_region = graphene.List(GrantBucket)
+    by_local_authority = graphene.List(GrantBucket)
+    summary = graphene.List(GrantBucket)
 
 
 class Organisation(SQLAlchemyObjectType):
@@ -158,8 +166,10 @@ class Query(graphene.ObjectType):
             "by_org_type": [GrantModel.recipientOrganization_organisationType],
             "by_org_size": [GrantModel.recipientOrganization_latestIncomeBand],
             "by_org_age": [GrantModel.recipientOrganization_ageAtGrantBands],
-            "by_amount_awarded": [GrantModel.amountAwardedBand],
+            "by_amount_awarded": [GrantModel.currency, GrantModel.amountAwardedBand],
             "by_country_region": [GrantModel.geoCtry, GrantModel.geoRgn],
+            "by_local_authority": [GrantModel.geoLaua],
+            "summary": [],
         }
         return_result = {}
 
@@ -177,20 +187,43 @@ class Query(graphene.ObjectType):
                 continue
 
             labels = ['bucket_id', 'bucket_2_id']
-            new_cols = [v.label(labels[k]) for k, v in enumerate(fields)] + [
+            new_cols = [v.label(labels[k]) for k, v in enumerate(fields)]
+            agg_cols = [
                 func.count(GrantModel.id).label("grants"),
+                func.count(distinct(GrantModel.recipientOrganization_idCanonical)).label("recipients"),
+                func.count(distinct(GrantModel.fundingOrganization_id)).label("funders"),
+            ]
+            currency_col = [GrantModel.currency]
+            money_cols = [
                 func.sum(GrantModel.amountAwarded).label("grant_amount"),
                 func.avg(GrantModel.amountAwarded).label("mean_grant"),
                 func.max(GrantModel.amountAwarded).label("max_grant"),
                 func.min(GrantModel.amountAwarded).label("min_grant"),
-                func.count(distinct(GrantModel.recipientOrganization_idCanonical)).label("recipients"),
-                func.count(distinct(GrantModel.fundingOrganization_id)).label("funders"),
             ]
 
-            result = query.add_columns(*new_cols).group_by(*fields).all()
+            result = query.add_columns(*(new_cols + agg_cols)).group_by(*fields).all()
             return_result[k]= [{
-                k: float(v) if isinstance(v, Decimal) else v
-                for k, v in r._asdict().items()} for r in result]
+                l: float(v) if isinstance(v, Decimal) else v
+                for l, v in r._asdict().items()} for r in result]
+
+            currency_result = query.add_columns(
+                *(new_cols + currency_col + money_cols)).group_by(*(fields + currency_col)).all()
+            for l in return_result[k]:
+                for c in money_cols:
+                    l[c._label] = []
+                for r in currency_result:
+                    r = r._asdict()
+                    if l.get("bucket_id") == r.get("bucket_id") and l.get("bucket_2_id") == r.get("bucket_2_id"):
+                        for c in money_cols:
+                            v = r.get(c._label)
+                            l[c._label].append({
+                                "currency": r.get("currency"),
+                                "value": float(v) if isinstance(v, Decimal) else v,
+                            })
+
+            currency_result = ([{
+                l: float(v) if isinstance(v, Decimal) else v
+                for l, v in r._asdict().items()} for r in currency_result])
 
         return return_result
 
