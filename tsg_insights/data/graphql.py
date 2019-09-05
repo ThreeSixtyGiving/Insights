@@ -157,7 +157,7 @@ class Query(graphene.ObjectType):
             )
 
         group_bys = {
-            "by_funder": [GrantModel.fundingOrganization_id],
+            "by_funder": [GrantModel.fundingOrganization_id, GrantModel.fundingOrganization_name],
             "by_funder_type": [GrantModel.fundingOrganization_type],
             "by_grant_programme": [GrantModel.grantProgramme_title],
             "by_award_year": [GrantModel.awardDateYear],
