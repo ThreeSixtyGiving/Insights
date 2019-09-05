@@ -173,56 +173,72 @@ class Query(graphene.ObjectType):
         return_result = {}
 
         # get the names of the operations so we can only perform those that are requested
-        operations = []
+        operations = {}
         for s in info.operation.selection_set.selections:
             if s.name.value != 'grants':
                 continue
-            operations.extend([x.name.value for x in s.selection_set.selections])
+
+            for x in s.selection_set.selections:
+                operations[to_snake_case(x.name.value)] = [
+                    to_snake_case(y.name.value) for y in x.selection_set.selections]
         
         for k, fields in group_bys.items():
 
             # skip the query if it hasn't been requested
-            if k not in operations and to_camel_case(k) not in operations:
+            if k not in operations:
                 continue
 
             labels = ['bucket_id', 'bucket_2_id']
             new_cols = [v.label(labels[k]) for k, v in enumerate(fields)]
-            agg_cols = [
-                func.count(GrantModel.id).label("grants"),
-                func.count(distinct(GrantModel.recipientOrganization_idCanonical)).label("recipients"),
-                func.count(distinct(GrantModel.fundingOrganization_id)).label("funders"),
-            ]
-            currency_col = [GrantModel.currency]
-            money_cols = [
-                func.sum(GrantModel.amountAwarded).label("grant_amount"),
-                func.avg(GrantModel.amountAwarded).label("mean_grant"),
-                func.max(GrantModel.amountAwarded).label("max_grant"),
-                func.min(GrantModel.amountAwarded).label("min_grant"),
-            ]
+
+            agg_cols = []
+            if "grants" in operations[k]:
+                agg_cols.append(func.count(GrantModel.id).label("grants"))
+            if "recipients" in operations[k]:
+                agg_cols.append(
+                    func.count(distinct(GrantModel.recipientOrganization_idCanonical)).label("recipients")
+                )
+            if "funders" in operations[k]:
+                agg_cols.append(
+                    func.count(distinct(GrantModel.fundingOrganization_id)).label("funders")
+                )
+            
+            money_cols = []
+            if "grant_amount" in operations[k]:
+                money_cols.append(
+                    func.sum(GrantModel.amountAwarded).label("grant_amount"))
+            if "mean_grant" in operations[k]:
+                money_cols.append(
+                    func.avg(GrantModel.amountAwarded).label("mean_grant"))
+            if "max_grant" in operations[k]:
+                money_cols.append(
+                    func.max(GrantModel.amountAwarded).label("max_grant"))
+            if "min_grant" in operations[k]:
+                money_cols.append(
+                    func.min(GrantModel.amountAwarded).label("min_grant"))
+
+            currency_col = [GrantModel.currency] if money_cols else []
 
             result = query.add_columns(*(new_cols + agg_cols)).group_by(*fields).all()
             return_result[k]= [{
                 l: float(v) if isinstance(v, Decimal) else v
                 for l, v in r._asdict().items()} for r in result]
 
-            currency_result = query.add_columns(
-                *(new_cols + currency_col + money_cols)).group_by(*(fields + currency_col)).all()
-            for l in return_result[k]:
-                for c in money_cols:
-                    l[c._label] = []
-                for r in currency_result:
-                    r = r._asdict()
-                    if l.get("bucket_id") == r.get("bucket_id") and l.get("bucket_2_id") == r.get("bucket_2_id"):
-                        for c in money_cols:
-                            v = r.get(c._label)
-                            l[c._label].append({
-                                "currency": r.get("currency"),
-                                "value": float(v) if isinstance(v, Decimal) else v,
-                            })
-
-            currency_result = ([{
-                l: float(v) if isinstance(v, Decimal) else v
-                for l, v in r._asdict().items()} for r in currency_result])
+            if currency_col:
+                currency_result = query.add_columns(
+                    *(new_cols + currency_col + money_cols)).group_by(*(fields + currency_col)).all()
+                for l in return_result[k]:
+                    for c in money_cols:
+                        l[c._label] = []
+                    for r in currency_result:
+                        r = r._asdict()
+                        if l.get("bucket_id") == r.get("bucket_id") and l.get("bucket_2_id") == r.get("bucket_2_id"):
+                            for c in money_cols:
+                                v = r.get(c._label)
+                                l[c._label].append({
+                                    "currency": r.get("currency"),
+                                    "value": float(v) if isinstance(v, Decimal) else v,
+                                })
 
         return return_result
 
