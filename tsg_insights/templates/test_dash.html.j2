@@ -3,6 +3,29 @@
 {% block footer %}{% endblock %}
 
 {% block content %}
+<template id="js-foldable-template">
+    <div id="df-change-funders-wrapper" class="results-page__menu__subsection">
+        <h4 class="results-page__menu__subsection-title js-foldable js-foldable-more">
+            <slot name="foldable-heading">HEADING</slot></h4>
+        <h5 class="results-page__menu__subsection-value js-foldable-target"
+            style="max-height: 16px; opacity: 1;"><slot name="foldable-selected-value">SELECTED_VALUE</slot></h5>
+        <div class="js-foldable-target js-foldable-foldTarget" style="opacity: 0;">
+            <fieldset id="df-change-funders">
+                <slot name="foldable-options">
+                <ul class="results-page__menu__checkbox">
+                    <li class="">
+                        <input type="checkbox" id="df-change-funders-Essex Community Foundation"
+                            class="" value="on">
+                        <label for="df-change-funders-Essex Community Foundation" class="">Essex
+                            Community Foundation (1299)</label>
+                    </li>
+                </ul>
+                </slot>
+            </fieldset>
+        </div>
+    </div>
+</template>
+
 <div id="page-content" class="cf">
     <h1><span class="total-grants"></span> Grants</h1>
     <h1><span class="total-amount"></span> Amount (£)</h1>
@@ -24,7 +47,8 @@
             <form id="filters-form">
                 <div class="cf">
                     <form id="dashboard-filter" class="">
-                        <div id="df-change-funders-wrapper" class="results-page__menu__subsection undefined"
+                        <div id="dashboard-filter-items"></div>
+                        {# <div id="df-change-funders-wrapper" class="results-page__menu__subsection undefined"
                             style="display: none;">
                             <h4 class="results-page__menu__subsection-title js-foldable js-foldable-more undefined">
                                 Funders</h4>
@@ -1014,7 +1038,7 @@
                                     </ul>
                                 </fieldset>
                             </div>
-                        </div>
+                        </div> #}
                         <div class="results-page__menu__subsection"><a id="df-reset-filters" href="#"
                                 class="results-page__menu__reset">Reset all filters</a></div>
                         <div class="results-page__menu__subsection">
