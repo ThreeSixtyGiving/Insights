@@ -179,8 +179,9 @@ class Query(graphene.ObjectType):
                 continue
 
             for x in s.selection_set.selections:
-                operations[to_snake_case(x.name.value)] = [
-                    to_snake_case(y.name.value) for y in x.selection_set.selections]
+                if hasattr(x.selection_set, 'selections'):
+                    operations[to_snake_case(x.name.value)] = [
+                        to_snake_case(y.name.value) for y in x.selection_set.selections]
         
         for k, fields in group_bys.items():
 
