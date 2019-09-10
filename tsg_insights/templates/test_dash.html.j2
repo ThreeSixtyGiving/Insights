@@ -5,25 +5,23 @@
 {% block content %}
 <template id="js-foldable-template">
     <div id="df-change-funders-wrapper" class="results-page__menu__subsection">
-        <h4 class="results-page__menu__subsection-title js-foldable js-foldable-more">
-            <slot name="foldable-heading">HEADING</slot></h4>
+        <h4 class="results-page__menu__subsection-title js-foldable js-foldable-more"></h4>
         <h5 class="results-page__menu__subsection-value js-foldable-target"
-            style="max-height: 16px; opacity: 1;"><slot name="foldable-selected-value">SELECTED_VALUE</slot></h5>
+            style="max-height: 16px; opacity: 1;"></h5>
         <div class="js-foldable-target js-foldable-foldTarget" style="opacity: 0;">
             <fieldset id="df-change-funders">
-                <slot name="foldable-options">
                 <ul class="results-page__menu__checkbox">
-                    <li class="">
-                        <input type="checkbox" id="df-change-funders-Essex Community Foundation"
-                            class="" value="on">
-                        <label for="df-change-funders-Essex Community Foundation" class="">Essex
-                            Community Foundation (1299)</label>
-                    </li>
                 </ul>
-                </slot>
             </fieldset>
         </div>
     </div>
+</template>
+
+<template id="filter-item-template">
+    <li>
+        <input type="checkbox">
+        <label></label>
+    </li>
 </template>
 
 <div id="page-content" class="cf">

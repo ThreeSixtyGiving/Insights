@@ -192,29 +192,31 @@ class Query(graphene.ObjectType):
             labels = ['bucket_id', 'bucket_2_id']
             new_cols = [v.label(labels[k]) for k, v in enumerate(fields)]
 
+            print(operations[k])
+
             agg_cols = []
-            if "grants" in operations[k]:
+            if "grants" in operations[k] or "bucket" in operations[k]:
                 agg_cols.append(func.count(GrantModel.id).label("grants"))
-            if "recipients" in operations[k]:
+            if "recipients" in operations[k] or "bucket" in operations[k]:
                 agg_cols.append(
                     func.count(distinct(GrantModel.recipientOrganization_idCanonical)).label("recipients")
                 )
-            if "funders" in operations[k]:
+            if "funders" in operations[k] or "bucket" in operations[k]:
                 agg_cols.append(
                     func.count(distinct(GrantModel.fundingOrganization_id)).label("funders")
                 )
             
             money_cols = []
-            if "grant_amount" in operations[k]:
+            if "grant_amount" in operations[k] or "bucket" in operations[k]:
                 money_cols.append(
                     func.sum(GrantModel.amountAwarded).label("grant_amount"))
-            if "mean_grant" in operations[k]:
+            if "mean_grant" in operations[k] or "bucket" in operations[k]:
                 money_cols.append(
                     func.avg(GrantModel.amountAwarded).label("mean_grant"))
-            if "max_grant" in operations[k]:
+            if "max_grant" in operations[k] or "bucket" in operations[k]:
                 money_cols.append(
                     func.max(GrantModel.amountAwarded).label("max_grant"))
-            if "min_grant" in operations[k]:
+            if "min_grant" in operations[k] or "bucket" in operations[k]:
                 money_cols.append(
                     func.min(GrantModel.amountAwarded).label("min_grant"))
 
