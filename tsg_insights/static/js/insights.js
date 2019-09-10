@@ -1,72 +1,74 @@
-
+const selectedFilters = {};
 
 const render_filters = function(data) {
-    var filter_form = document.getElementById("dashboard-filter-items");
-    filter_form.innerHTML = '';
+    var filterForm = document.getElementById("dashboard-filter-items");
+    filterForm.innerHTML = '';
+
+    var filterTemplate = document.getElementById("js-foldable-template");
+    var filterItemTemplate = document.getElementById("filter-item-template");
 
     for (let [key, value] of Object.entries(data.data.grants)) {
-        console.log(`${key}: ${value}`);
-        var containerDiv = document.createElement('div');
-        containerDiv.setAttribute('id', `df-change-${key}-wrappper`);
-        containerDiv.classList.add("results-page__menu__subsection");
+        selectedFilters[key] = [];
 
-        var heading = document.createElement('h4');
-        heading.classList = ["results-page__menu__subsection-title js-foldable js-foldable-more"];
-        heading.innerText = key;
-        containerDiv.appendChild(heading);
+        // use template to set up filter element
+        var filterEl = document.importNode(filterTemplate.content, true);
+        filterEl.querySelector("div.results-page__menu__subsection").setAttribute('id', `df-change-${key}-wrappper`);
+        filterEl.querySelector("h4.results-page__menu__subsection-title").innerText = key;
+        filterEl.querySelector("h5.results-page__menu__subsection-value").innerText = key;
+        filterEl.querySelector("h5.results-page__menu__subsection-value").setAttribute('data-original', key);
+        filterEl.querySelector("fieldset").setAttribute('id', `df-change-${key}`);
 
-        var subhead = document.createElement('h4');
-        subhead.classList = ["results-page__menu__subsection-value js-foldable-target"];
-        subhead.innerText = key;
-        containerDiv.appendChild(subhead);
+        // Add list of filters
+        var ul = filterEl.querySelector('ul.results-page__menu__checkbox');
 
-        var target = document.createElement('div');
-        target.classList = ["js-foldable-target js-foldable-foldTarget"];
-        
-        var fieldset = document.createElement('fieldset');
-        fieldset.setAttribute("id", "df-change-funders");
-
-        var ul = document.createElement('ul');
-        ul.classList = ["results-page__menu__checkbox"];
-
-        for(let o of value){
-            var li = document.createElement('li');
-            var input = document.createElement('input');
-            input.setAttribute('type', 'checkbox');
+        for (let o of value) {
+            var filterItemEl = document.importNode(filterItemTemplate.content, true);
+            var input = filterItemEl.querySelector('input');
             input.setAttribute('id', `df-change-${key}-${o.bucketId}`);
-            var label = document.createElement('label');
+            input.setAttribute('value', o.bucketId);
+            var label = filterItemEl.querySelector('label');
             label.setAttribute('for', `df-change-${key}-${o.bucketId}`)
             label.innerText = `${o.bucketId} (${o.grants})`;
-            li.appendChild(input);
-            li.appendChild(label);
-            ul.appendChild(li);
+
+            // set up what happens when element is clicked
+            input.addEventListener("change", function () {
+                selectedFilters[key] = [];
+                var parentFieldset = this.closest("fieldset");
+                for (const inputValue of parentFieldset.querySelectorAll("input[type=checkbox]")) {
+                    if (inputValue.checked) {
+                        selectedFilters[key].push(inputValue.value);
+                    }
+                }
+
+                // set the values displayed to the user
+                var subsectionValue = this.closest(".results-page__menu__subsection").querySelector("h5.results-page__menu__subsection-value");
+                if(selectedFilters[key].length > 0){
+                    subsectionValue.innerText = selectedFilters[key].join(", ");
+                } else {
+                    subsectionValue.innerText = subsectionValue.getAttribute("data-original");
+                }
+                get_data();
+            });
+
+            ul.appendChild(filterItemEl);
         }
-
-        fieldset.appendChild(ul);
-        target.appendChild(fieldset);
-        containerDiv.appendChild(target);
-        filter_form.appendChild(containerDiv);
         
+        // set up the filter toggle
+        var titleEl = filterEl.querySelector("h4.results-page__menu__subsection-title");
+        titleEl.innerText = key;
+        titleEl.addEventListener("click", function(){
+            this.classList.toggle("js-foldable-less");
+            for (var el of this.parentElement.getElementsByClassName("js-foldable-target")){
+                el.classList.toggle("js-foldable-foldTarget");
+                if(el.style.opacity==1){
+                    el.style.opacity = 0;
+                } else {
+                    el.style.opacity = 1;
+                }
+            };
+        });
 
-        // <div id="df-change-funders-wrapper" class="results-page__menu__subsection undefined"
-        //     style="display: none;">
-        //     <h4 class="results-page__menu__subsection-title js-foldable js-foldable-more undefined">
-        //         Funders</h4>
-        //     <h5 class="results-page__menu__subsection-value js-foldable-target undefined"
-        //         style="max-height: 16px; opacity: 1;">Funder</h5>
-        //     <div class="js-foldable-target js-foldable-foldTarget" style="opacity: 0;">
-        //         <fieldset id="df-change-funders">
-        //             <ul class="results-page__menu__checkbox">
-        //                 <li class="">
-        //                     <input type="checkbox" id="df-change-funders-Essex Community Foundation"
-        //                         class="" value="on">
-        //                         <label for="df-change-funders-Essex Community Foundation" class="">Essex
-        //                                         Community Foundation (1299)</label>
-        //                                 </li>
-        //                             </ul>
-        //                         </fieldset>
-        //                     </div>
-        //     </div>
+        filterForm.appendChild(filterEl);
     }
 }
 
@@ -132,17 +134,6 @@ query fetchFilters($dataset: String!) {
     })
         .then(r => r.json())
         .then(render_filters);
-        // .then(data => {
-        //     var funderSelect = document.getElementById("funder-select");
-        //     funderSelect.innerHTML = '';
-        //     var funders = data.data.grants.byFunder.sort((a, b) => b.grants - a.grants);
-        //     for (const f of funders){
-        //         var opt = document.createElement("option");
-        //         opt.value = f.bucketId;
-        //         opt.innerText = `${f.bucket2Id} (${f.grants})`;
-        //         funderSelect.append(opt);
-        //     }
-        // });
 }
 
 const render_data = function (data) {
@@ -166,11 +157,23 @@ const render_data = function (data) {
 
 const get_data = function(){
 
-    var funders = Array.from(document.getElementById("funder-select").querySelectorAll("option:checked"), e => e.value);
+    console.log(selectedFilters);
 
     var query = `
-    query fetchGrants($dataset: String!, $funders: [String]){
-        grants(dataset: $dataset, funders: $funders) {
+    query fetchGrants(
+        $dataset: String!, 
+        $funders: [String],
+        $grantProgrammes: [String], 
+        $area: [String], 
+        $orgtype: [String]
+    ){
+        grants(
+            dataset: $dataset,
+            funders: $funders,
+            grantProgrammes: $grantProgrammes,
+            area: $area,
+            orgtype: $orgtype
+        ) {
             summary {
                 bucketId
                 grants
@@ -193,7 +196,13 @@ const get_data = function(){
         },
         body: JSON.stringify({ 
             query: query,
-            variables: { dataset, funders }
+            variables: { 
+                dataset: dataset, 
+                funders: selectedFilters["byFunder"],
+                grantProgrammes: selectedFilters["byGrantProgramme"],
+                orgtype: selectedFilters["byOrgType"],
+                area: selectedFilters["byCountryRegion"],
+            }
         })
     })
         .then(r => r.json())
