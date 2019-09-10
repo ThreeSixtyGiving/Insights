@@ -82,6 +82,11 @@ query fetchFilters($dataset: String!) {
       bucket2Id
       grants
     }
+    byFunderType {
+      bucketId
+      bucket2Id
+      grants
+    }
     byGrantProgramme {
       bucketId
       bucket2Id
@@ -163,6 +168,7 @@ const get_data = function(){
     query fetchGrants(
         $dataset: String!, 
         $funders: [String],
+        $funderTypes: [String],
         $grantProgrammes: [String], 
         $area: [String], 
         $orgtype: [String]
@@ -170,6 +176,7 @@ const get_data = function(){
         grants(
             dataset: $dataset,
             funders: $funders,
+            funderTypes: $funderTypes,
             grantProgrammes: $grantProgrammes,
             area: $area,
             orgtype: $orgtype
@@ -199,6 +206,7 @@ const get_data = function(){
             variables: { 
                 dataset: dataset, 
                 funders: selectedFilters["byFunder"],
+                funderTypes: selectedFilters["byFunderType"],
                 grantProgrammes: selectedFilters["byGrantProgramme"],
                 orgtype: selectedFilters["byOrgType"],
                 area: selectedFilters["byCountryRegion"],

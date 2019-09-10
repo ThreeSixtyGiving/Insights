@@ -66,6 +66,7 @@ class Query(graphene.ObjectType):
         dataset=graphene.Argument(type=graphene.String, required=True),
         q=graphene.Argument(type=graphene.String, description='Search in the title and description of grant'),
         funders=graphene.Argument(type=graphene.List(graphene.String)),
+        funder_types=graphene.Argument(type=graphene.List(graphene.String)),
         grant_programmes=graphene.Argument(type=graphene.List(graphene.String)),
         award_dates=graphene.Argument(type=MaxMin),
         award_amount=graphene.Argument(type=MaxMin),
@@ -99,6 +100,11 @@ class Query(graphene.ObjectType):
                 GrantModel.fundingOrganization_id.in_(kwargs.get("funders")),
                 GrantModel.fundingOrganization_name.in_(kwargs.get("funders")),
             ))
+        if kwargs.get("funder_types"):
+            query = query.filter(
+                GrantModel.fundingOrganization_type.in_(
+                    kwargs.get("funder_types")),
+            )
         if kwargs.get("grant_programmes"):
             query = query.filter(
                 GrantModel.grantProgramme_title.in_(
@@ -191,8 +197,6 @@ class Query(graphene.ObjectType):
 
             labels = ['bucket_id', 'bucket_2_id']
             new_cols = [v.label(labels[k]) for k, v in enumerate(fields)]
-
-            print(operations[k])
 
             agg_cols = []
             if "grants" in operations[k] or "bucket" in operations[k]:
