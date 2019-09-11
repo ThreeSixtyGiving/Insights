@@ -1,4 +1,5 @@
 const selectedFilters = {};
+const THREESIXTY_COLOURS = ['#9c2061', '#f48320', '#cddc2b', '#53aadd'];
 
 const render_filters = function(data) {
     var filterForm = document.getElementById("dashboard-filter-items");
@@ -77,12 +78,12 @@ const get_filters = function () {
     var query = `
 query fetchFilters($dataset: String!) {
   grants(dataset: $dataset) {
-    byFunder {
+    byFunderType {
       bucketId
       bucket2Id
       grants
     }
-    byFunderType {
+    byFunder {
       bucketId
       bucket2Id
       grants
@@ -141,30 +142,131 @@ query fetchFilters($dataset: String!) {
         .then(render_filters);
 }
 
+const render_summary = function(data){
+    console.log(data); 
+
+    var funderTitle = document.getElementsByClassName('funder-title');
+    var datePrefix = document.getElementsByClassName('date-prefix');
+    var dateRange = document.getElementsByClassName('date-range');
+    Array.from(document.getElementsByClassName('total-grants')).forEach(el => el.innerText = data.grants);
+    Array.from(document.getElementsByClassName('total-recipients')).forEach(el => el.innerText = data.recipients);
+    var totalAmount = document.getElementsByClassName('total-amount');
+    var totalAmountSuffix = document.getElementsByClassName('total-amount-suffix');
+    var meanAmount = document.getElementsByClassName('mean-amount');
+    var meanAmountSuffix = document.getElementsByClassName('mean-amount-suffix');
+
+    // for (const g of totalGrantsNodes) {
+    //     g.innerText = data.grants;
+    // }
+
+    // for (const g of numFundersNodes) {
+    //     g.innerText = data.funders;
+    // }
+
+    // var totalAmount = data.grantAmount.find(item => item.currency == "GBP").value;
+    // for (const g of totalAmountNodes) {
+    //     g.innerText = totalAmount;
+    // }
+}
+
+const render_chart = function (title, data) {
+    // funder type chart
+    var chartTemplate = document.getElementById("chart-wrapper-template");
+    var funderTypeChart = document.importNode(chartTemplate.content, true);
+    console.log(data);
+    funderTypeChart.querySelector(".results-page__body__section-title").innerText = title;
+    Plotly.plot(funderTypeChart.querySelector(".js-plotly-plot"), [{
+        x: data.map(x => x.bucketId),
+        y: data.map(x => x.grants),
+        text: data.map(x => x.grants),
+        textposition: 'outside',
+        cliponaxis: false,
+        constraintext: 'none',
+        textfont: {
+            size: 18,
+            family: 'neusa-next-std-compact, sans-serif;',
+        },
+        hoverinfo: 'text+x',
+        type: 'bar',
+        name: title,
+        marker: {
+            color: THREESIXTY_COLOURS[0]
+        },
+        fill: 'tozeroy',
+    }], {
+        font: {
+            family: 'neusa-next-std-compact, "Source Sans Pro", sans-serif;',
+            size: 18
+        },
+        yaxis: {
+            visible: false,
+            showgrid: false,
+            showline: false,
+            layer: 'below traces',
+            linewidth: 0,
+            tickfont: {
+                size: 20
+            },
+        },
+        xaxis: {
+            automargin: true,
+            showgrid: false,
+            showline: false,
+            layer: 'below traces',
+            linewidth: 0,
+            tickfont: {
+                size: 20
+            },
+        },
+        margin: {
+            l: 40,
+            r: 24,
+            b: 40,
+            t: 24,
+            pad: 4
+        },
+    }, {
+        displayModeBar: 'hover',
+        modeBarButtons: [[
+            'toImage', 'sendDataToCloud'
+        ]],
+        scrollZoom: 'gl3d',
+    });
+
+    const dashboardOutput = document.getElementById("dashboard-output");
+    dashboardOutput.appendChild(funderTypeChart);
+}
+
 const render_data = function (data) {
-    const totalGrantsNodes = document.getElementsByClassName('total-grants');
-    const totalAmountNodes = document.getElementsByClassName('total-amount');
-    const numFundersNodes = document.getElementsByClassName('num-funders');
-
-    for (const g of totalGrantsNodes) {
-        g.innerText = data.data.grants.summary[0].grants;
-    }
-
-    for (const g of numFundersNodes) {
-        g.innerText = data.data.grants.summary[0].funders;
-    }
-
-    var totalAmount = data.data.grants.summary[0].grantAmount.find(item => item.currency == "GBP").value;
-    for (const g of totalAmountNodes) {
-        g.innerText = totalAmount;
+    for(const [title, itemData] of Object.entries(data.data.grants)){
+        if(title=='summary'){
+            render_summary(itemData[0]);
+        } else if(title=='byAmountAwarded') {
+            var newItemData = itemData.filter(d => d.bucketId == 'GBP').map(d => Object.assign(d, {
+                bucketId: d.bucket2Id
+            }))
+            render_chart(title, newItemData);
+        } else {
+            render_chart(title, itemData);
+        }
     }
 }
 
 const get_data = function(){
 
-    console.log(selectedFilters);
-
     var query = `
+    fragment bucket on GrantBucket {
+        bucketId
+        bucket2Id
+        grants
+        recipients
+        funders
+        grantAmount {
+            currency
+            value
+        }
+    }
+
     query fetchGrants(
         $dataset: String!, 
         $funders: [String],
@@ -181,16 +283,18 @@ const get_data = function(){
             area: $area,
             orgtype: $orgtype
         ) {
-            summary {
-                bucketId
-                grants
-                recipients
-                funders
-                grantAmount {
-                    currency
-                    value
-                }
-            }
+          summary {
+              ...bucket
+          }
+          byFunder {
+              ...bucket
+          }
+          byFunderType {
+              ...bucket
+          }
+          byAmountAwarded {
+              ...bucket
+          }
         }
     }
     `;
@@ -222,7 +326,3 @@ document.addEventListener("DOMContentLoaded", function () {
     get_filters();
     get_data();
 });
-
-document.getElementById("funder-select").addEventListener("change", function(){
-    get_data();
-})
