@@ -28,8 +28,12 @@ const render_filters = function(data) {
             input.setAttribute('id', `df-change-${key}-${o.bucketId}`);
             input.setAttribute('value', o.bucketId);
             var label = filterItemEl.querySelector('label');
-            label.setAttribute('for', `df-change-${key}-${o.bucketId}`)
-            label.innerText = `${o.bucketId} (${o.grants})`;
+            label.setAttribute('for', `df-change-${key}-${o.bucketId}`);
+            if(key=='byFunder'){
+                label.innerText = `${o.bucket2Id} (${o.grants})`;
+            } else {
+                label.innerText = `${o.bucketId} (${o.grants})`;
+            }
 
             // set up what happens when element is clicked
             input.addEventListener("change", function () {
@@ -142,43 +146,107 @@ query fetchFilters($dataset: String!) {
         .then(render_filters);
 }
 
-const render_summary = function(data){
-    console.log(data); 
+const format_number = function(value, currency, suffixType){
 
-    var funderTitle = document.getElementsByClassName('funder-title');
-    var datePrefix = document.getElementsByClassName('date-prefix');
-    var dateRange = document.getElementsByClassName('date-range');
-    Array.from(document.getElementsByClassName('total-grants')).forEach(el => el.innerText = data.grants);
-    Array.from(document.getElementsByClassName('total-recipients')).forEach(el => el.innerText = data.recipients);
-    var totalAmount = document.getElementsByClassName('total-amount');
-    var totalAmountSuffix = document.getElementsByClassName('total-amount-suffix');
-    var meanAmount = document.getElementsByClassName('mean-amount');
-    var meanAmountSuffix = document.getElementsByClassName('mean-amount-suffix');
+    var suffix = null;
+    var dp = 0;
+    if (suffixType!==false){
+        if(value > 1000000000){
+            suffix = suffixType=='short' ? 'bn' : 'billion';
+            dp = 1;
+            value = value / 1000000000.0;
+        } else if (value > 1000000) {
+            suffix = suffixType == 'short' ? 'm' : 'million';
+            dp = 1;
+            value = value / 1000000.0;
+        } else if (value > 10000) {
+            suffix = suffixType == 'short' ? 'k' : 'k';
+            dp = 0;
+            value = value / 1000.0;
+        }
+    }
 
-    // for (const g of totalGrantsNodes) {
-    //     g.innerText = data.grants;
-    // }
-
-    // for (const g of numFundersNodes) {
-    //     g.innerText = data.funders;
-    // }
-
-    // var totalAmount = data.grantAmount.find(item => item.currency == "GBP").value;
-    // for (const g of totalAmountNodes) {
-    //     g.innerText = totalAmount;
-    // }
+    if(currency){
+        return [value.toLocaleString('en-gb', {
+            style: 'currency',
+            currency: 'GBP',
+            minimumFractionDigits: dp,
+            maximumFractionDigits: dp,
+        }), suffix];
+    }
+    return [value.toLocaleString('en-gb', {
+        minimumFractionDigits: dp,
+        maximumFractionDigits: dp,
+    }), suffix];
 }
 
-const render_chart = function (title, data) {
+const render_summary = function(data){
+    var summary = data.summary[0];
+    console.log(data);
+
+    // work out date string
+    if (summary.maxDate == summary.minDate) {
+        var dateRangePrefix = 'in';
+        var dateRange = `${summary.minDate}`;
+    } else {
+        var dateRangePrefix = 'between';
+        var dateRange = `${summary.minDate} and ${summary.maxDate}`;
+    }
+
+    // work out funder title
+    if (summary.funders > 1){
+        var funderTitle = `${format_number(summary.funders).join("")} funders`;
+    } else {
+        var funderTitle = data.byFunder[0].bucket2Id;
+    }
+
+    // work out the amount string
+    var totalAmount = format_number(summary.grantAmount.find(item => item.currency == "GBP").value, 'GBP');
+    var meanAmount = format_number(summary.meanGrant.find(item => item.currency == "GBP").value, 'GBP');
+    if(meanAmount[1]=="k"){
+        meanAmount = [`${meanAmount[0]}k`, ''];
+    }
+
+    [
+        ['funder-title', funderTitle],
+        ['date-prefix', dateRangePrefix],
+        ['date-range', dateRange],
+        ['total-grants', format_number(summary.grants).join("")],
+        ['total-recipients', format_number(summary.recipients).join("")],
+        ['total-amount', totalAmount[0]],
+        ['total-amount-suffix', totalAmount[1]],
+        ['mean-amount', meanAmount[0]],
+        ['mean-amount-suffix', meanAmount[1]],
+    ].forEach(newValue => {
+        Array.from(document.getElementsByClassName(newValue[0])).forEach(
+            el => el.innerText = newValue[1]
+        );
+    });
+}
+
+const render_chart = function (title, data, container) {
     // funder type chart
     var chartTemplate = document.getElementById("chart-wrapper-template");
     var funderTypeChart = document.importNode(chartTemplate.content, true);
+
+    data = data.filter(x => x.bucketId); // only include grants where the label is present
+    data.sort((a, b) => b.grants - a.grants); // sort by the largest values
+    var values = data.map(x => x.grants); // get the values
+    // create the labels
+    if(title=='byFunder'){
+        var labels = data.map(x => x.bucket2Id);
+    } else {
+        var labels = data.map(x => x.bucketId);
+    }
+    var totalValues = values.reduce((a, b) => a + b, 0); // get the total N for the data
+    funderTypeChart.querySelector('.figure-n').innerText = format_number(totalValues).join("");
+
     console.log(data);
     funderTypeChart.querySelector(".results-page__body__section-title").innerText = title;
     Plotly.plot(funderTypeChart.querySelector(".js-plotly-plot"), [{
-        x: data.map(x => x.bucketId),
-        y: data.map(x => x.grants),
-        text: data.map(x => x.grants),
+        x: labels,
+        y: values,
+        text: values.map(x => format_number(x).join("")),
         textposition: 'outside',
         cliponaxis: false,
         constraintext: 'none',
@@ -233,21 +301,22 @@ const render_chart = function (title, data) {
         scrollZoom: 'gl3d',
     });
 
-    const dashboardOutput = document.getElementById("dashboard-output");
-    dashboardOutput.appendChild(funderTypeChart);
+    container.appendChild(funderTypeChart);
 }
 
 const render_data = function (data) {
+    const dashboardOutput = document.getElementById("dashboard-output");
+    dashboardOutput.innerHTML = '';
     for(const [title, itemData] of Object.entries(data.data.grants)){
         if(title=='summary'){
-            render_summary(itemData[0]);
+            render_summary(data.data.grants);
         } else if(title=='byAmountAwarded') {
             var newItemData = itemData.filter(d => d.bucketId == 'GBP').map(d => Object.assign(d, {
                 bucketId: d.bucket2Id
             }))
-            render_chart(title, newItemData);
+            render_chart(title, newItemData, dashboardOutput);
         } else {
-            render_chart(title, itemData);
+            render_chart(title, itemData, dashboardOutput);
         }
     }
 }
@@ -284,7 +353,21 @@ const get_data = function(){
             orgtype: $orgtype
         ) {
           summary {
-              ...bucket
+            bucketId
+            bucket2Id
+            grants
+            recipients
+            funders
+            maxDate
+            minDate
+            grantAmount {
+                currency
+                value
+            }
+            meanGrant {
+                currency
+                value
+            }
           }
           byFunder {
               ...bucket
