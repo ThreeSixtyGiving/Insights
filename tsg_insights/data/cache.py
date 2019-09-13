@@ -6,12 +6,14 @@ import datetime
 
 import pandas as pd
 from flask import current_app
+from flask_caching import Cache
 from redis import StrictRedis, from_url
 from .utils import CustomJSONEncoder
 
 REDIS_DEFAULT_URL = 'redis://localhost:6379/0'
 REDIS_ENV_VAR = 'REDIS_URL'
 
+thiscache = Cache()
 
 def get_cache(strict=False):
     redis_url = current_app.config.get("REDIS_URL")

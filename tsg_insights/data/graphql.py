@@ -6,6 +6,7 @@ from graphene.utils.str_converters import to_camel_case, to_snake_case
 from sqlalchemy import or_, func, distinct
 
 from ..data.models import Grant as GrantModel, Organisation as OrganisationModel, Postcode as PostcodeModel
+from ..data.cache import thiscache
 from ..db import db
 
 
@@ -86,6 +87,7 @@ class Query(graphene.ObjectType):
         query = Grant.get_query(info)
         return query.filter(GrantModel.id == id).first()
 
+    @thiscache.memoize()
     def resolve_grants(self, info, dataset, **kwargs):
 
         # query = Grant.get_query(info)
