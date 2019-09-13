@@ -7,7 +7,7 @@ import pandas as pd
 from .data.registry import THREESIXTY_STATUS_JSON
 from .blueprints import home, fetch, job, data, cache, api
 from .commands import registry, worker, datafile, dataimport
-from .data.cache import get_cache
+from .data.cache import get_cache, thiscache
 from .data.utils import CustomJSONEncoder
 from .db import db, migrate
 
@@ -110,6 +110,13 @@ def create_app(test_config=None):
                 expire_after=one_week_in_seconds,
                 allowable_methods=('GET', 'HEAD',),
             )
+
+        # add flask-cache
+        thiscache.init_app(app, config={
+            'CACHE_TYPE': 'redis',
+            'CACHE_REDIS_URL': app.config.get("REDIS_URL"),
+            'CACHE_KEY_PREFIX': 'insightsFlaskCache'
+        })
 
     # add cookie check
     @app.context_processor

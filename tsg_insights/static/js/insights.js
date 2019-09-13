@@ -240,9 +240,23 @@ const render_chart = function (title, data, container) {
     }
     var totalValues = values.reduce((a, b) => a + b, 0); // get the total N for the data
     funderTypeChart.querySelector('.figure-n').innerText = format_number(totalValues).join("");
+    funderTypeChart.querySelector(".results-page__body__section-title").innerText = title; // set the page title
+
+    if(values.length > 15){
+        var placeholder = document.createElement("p");
+        placeholder.innerText = `${format_number(values.length)} values`;
+        funderTypeChart.appendChild(placeholder);
+        container.appendChild(funderTypeChart);
+        return;
+    } else if (values.length == 1) {
+        var placeholder = document.createElement("p");
+        placeholder.innerText = `${labels[0]} (${values[0]})`;
+        funderTypeChart.appendChild(placeholder);
+        container.appendChild(funderTypeChart);
+        return;
+    }
 
     console.log(data);
-    funderTypeChart.querySelector(".results-page__body__section-title").innerText = title;
     Plotly.plot(funderTypeChart.querySelector(".js-plotly-plot"), [{
         x: labels,
         y: values,
@@ -369,13 +383,31 @@ const get_data = function(){
                 value
             }
           }
-          byFunder {
-              ...bucket
-          }
           byFunderType {
               ...bucket
           }
+          byFunder {
+              ...bucket
+          }
           byAmountAwarded {
+              ...bucket
+          }
+          byGrantProgramme {
+              ...bucket
+          }
+          byAwardDate {
+              ...bucket
+          }
+          byOrgType {
+              ...bucket
+          }
+          byCountryRegion {
+              ...bucket
+          }
+          byOrgAge {
+              ...bucket
+          }
+          byOrgSize {
               ...bucket
           }
         }
