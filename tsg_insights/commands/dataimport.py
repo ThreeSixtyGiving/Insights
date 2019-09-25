@@ -308,6 +308,8 @@ def cli_fetch_postcodes():
 def cli_fetch_grants(dataset, infile):
     logging.info("Starting to import grants")
 
+    # @TODO: remove existing grants first
+
     # get the update statements
     upsert_statement = Grant.upsert_statement()
 
@@ -390,7 +392,7 @@ def cli_fetch_grants(dataset, infile):
 @cli.command('updategrants')
 @click.argument('dataset')
 @click.argument('stage', nargs=-1)
-def cli_update_grants():
+def cli_update_grants(dataset, stage):
 
     queries = {
         "Add missing company numbers": '''update "grant"
@@ -432,7 +434,7 @@ def cli_update_grants():
                     when "recipientOrganization_idCanonical" ~* '[A-Z]{2}-.*-.*' then 
                         array_to_string((string_to_array("recipientOrganization_idCanonical", '-'))[1:2], '-')
                     else '' end
-            wher "grant"."dataset" = :dataset''',
+            where "grant"."dataset" = :dataset''',
         "Add organisation details": '''update "grant"
             set "recipientOrganization_latestIncome" = "organisation"."latest_income",
                 "recipientOrganization_latestIncomeDate" = "organisation"."latest_income_date",
@@ -509,6 +511,9 @@ def cli_update_grants():
     }
 
     for k, query in queries.items():
+        if stage and k not in stage:
+            continue
         logging.info(f"SQL {k}")
-        db.session.execute(text(query), dataset=dataset)
+        db.session.execute(text(query), dict(dataset=dataset))
+        db.session.commit()
 
