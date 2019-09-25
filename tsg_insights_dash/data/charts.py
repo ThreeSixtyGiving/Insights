@@ -372,8 +372,11 @@ def region_and_country_chart(df):
     chart = CHARTS['ctry_rgn']
     data = chart['get_results'](df)
 
-    count_without_unknown = sum(
-        [v[1] for v in data if v[0] != ("Unknown", "Unknown")])
+    if data:
+        count_without_unknown = sum(
+            [v[1] for v in data if v[0] != ("Unknown", "Unknown")])
+    else:
+        count_without_unknown = 0
 
     if count_without_unknown == 0:
         return message_box(
@@ -446,8 +449,8 @@ def organisation_type_chart(df):
             id="organisation_type_chart",
             figure={
                 "data": [go.Pie(
-                    labels=[i[0] for i in data.iteritems()],
-                    values=[i[1] for i in data.iteritems()],
+                    labels=[i[0] for i in data],
+                    values=[i[1] for i in data],
                     hole=0.4,
                     marker={
                         'colors': THREESIXTY_COLOURS
