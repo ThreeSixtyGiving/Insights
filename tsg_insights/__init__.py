@@ -11,6 +11,8 @@ from .data.cache import get_cache, thiscache
 from .data.utils import CustomJSONEncoder
 from .db import db, migrate, cache as app_cache
 
+one_week_in_seconds = 60*60*24*7
+
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
@@ -54,7 +56,8 @@ def create_app(test_config=None):
 
         # Flask-Caching related configs
         CACHE_TYPE="redis",
-        CACHE_DEFAULT_TIMEOUT=300,
+        CACHE_DEFAULT_TIMEOUT=int(os.environ.get(
+            "CACHE_DEFAULT_TIMEOUT", one_week_in_seconds)),
     )
 
     if test_config is None:
@@ -108,7 +111,6 @@ def create_app(test_config=None):
     # add caching
     with app.app_context():
         if app.config["REQUESTS_CACHE_ON"]:
-            one_week_in_seconds = 60*60*24*7
             requests_cache.install_cache(
                 backend='sqlite',
                 cache_name=os.path.join(app.config["UPLOADS_FOLDER"], "http_cache"),
