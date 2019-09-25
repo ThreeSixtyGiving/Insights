@@ -9,7 +9,7 @@ from .blueprints import home, fetch, job, data, cache, api
 from .commands import registry, worker, datafile, dataimport
 from .data.cache import get_cache, thiscache
 from .data.utils import CustomJSONEncoder
-from .db import db, migrate
+from .db import db, migrate, cache as app_cache
 
 def create_app(test_config=None):
     # create and configure the app
@@ -51,6 +51,10 @@ def create_app(test_config=None):
         # database variables
         SQLALCHEMY_TRACK_MODIFICATIONS=False,
         SQLALCHEMY_DATABASE_URI=os.environ.get("DATABASE_URL"),
+
+        # Flask-Caching related configs
+        CACHE_TYPE="redis",
+        CACHE_DEFAULT_TIMEOUT=300,
     )
 
     if test_config is None:
@@ -65,6 +69,7 @@ def create_app(test_config=None):
         app.config["REDIS_ENV_VAR"],
         app.config["REDIS_DEFAULT_URL"]
     )
+    app.config["CACHE_REDIS_URL"] = app.config["REDIS_URL"]
 
     # ensure the instance folder exists
     try:
@@ -117,6 +122,7 @@ def create_app(test_config=None):
             'CACHE_REDIS_URL': app.config.get("REDIS_URL"),
             'CACHE_KEY_PREFIX': 'insightsFlaskCache'
         })
+    app_cache.init_app(app)
 
     # add cookie check
     @app.context_processor

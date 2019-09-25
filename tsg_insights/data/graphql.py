@@ -1,13 +1,15 @@
 from decimal import Decimal
+import logging
+from timeit import default_timer
 
 import graphene
 from graphene_sqlalchemy import SQLAlchemyObjectType
 from graphene.utils.str_converters import to_camel_case, to_snake_case
 from sqlalchemy import or_, func, distinct
+from flask_sqlalchemy_caching import FromCache
 
 from ..data.models import Grant as GrantModel, Organisation as OrganisationModel, Postcode as PostcodeModel
-from ..data.cache import thiscache
-from ..db import db
+from ..db import db, cache
 
 
 class Grant(SQLAlchemyObjectType):
@@ -91,7 +93,7 @@ class Query(graphene.ObjectType):
     def resolve_grants(self, info, dataset, **kwargs):
 
         # query = Grant.get_query(info)
-        query = db.session.query().filter(GrantModel.dataset == dataset)
+        query = db.session.query().options(FromCache(cache)).filter(GrantModel.dataset == dataset)
         
         if kwargs.get("q"):
             q = f'%{kwargs.get("q")}%'
@@ -237,7 +239,8 @@ class Query(graphene.ObjectType):
                     func.min(GrantModel.amountAwarded).label("min_grant"))
 
             currency_col = [GrantModel.currency] if money_cols else []
-
+            
+            query_start_time = default_timer()
             result = query.add_columns(*(new_cols + agg_cols)).group_by(*fields).all()
             return_result[k]= [{
                 l: float(v) if isinstance(v, Decimal) else v
@@ -258,6 +261,8 @@ class Query(graphene.ObjectType):
                                     "currency": r.get("currency"),
                                     "value": float(v) if isinstance(v, Decimal) else v,
                                 })
+            logging.info('{} query took {}'.format(
+                k, (default_timer() - query_start_time)))
 
         return return_result
 
