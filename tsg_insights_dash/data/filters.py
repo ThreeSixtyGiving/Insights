@@ -1,20 +1,46 @@
+import os
+import logging
+
 from .results import get_identifier_schemes, AGE_BAND_CHANGES, AWARD_BAND_CHANGES, INCOME_BAND_CHANGES, get_org_income, get_org_income_bands
 from tsg_insights.data.cache import get_from_cache
+from tsg_insights.data.graphql import schema
+
+with open(os.path.join(os.path.dirname(__file__), 'query.gql')) as gql:
+    QUERY_GQL = gql.read()
 
 
 def get_filtered_df(fileid, **filters):
-    df = get_from_cache(fileid)
 
-    for filter_id, filter_def in FILTERS.items():
-        new_df = filter_def["apply_filter"](
-            df,
-            filters.get(filter_id),
-            filter_def
-        )
-        if new_df is not None:
-            df = new_df
+    gql_filters = dict(
+        dataset=fileid,
+        awardDates=dict(
+            min=filters.get("award_dates")[0],
+            max=filters.get("award_dates")[1],
+        ),
+    )
 
-    return df
+    for i in ["funders", "grant_programmes", "area", "orgtype"]:
+        values = [f for f in filters.get(i) if f != "__all"]
+        if values:
+            gql_filters[i] = values
+
+    results = schema.execute(QUERY_GQL, variables=gql_filters)
+    logging.info(gql_filters)
+    return results.data["grants"]
+
+
+    # df = get_from_cache(fileid)
+
+    # for filter_id, filter_def in FILTERS.items():
+    #     new_df = filter_def["apply_filter"](
+    #         df,
+    #         filters.get(filter_id),
+    #         filter_def
+    #     )
+    #     if new_df is not None:
+    #         df = new_df
+
+    # return df
 
 
 def apply_area_filter(df, filter_args, filter_def):

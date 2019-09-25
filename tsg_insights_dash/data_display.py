@@ -174,7 +174,7 @@ def dashboard_output(fileid, *args):
     
     outputs.extend(get_funder_output(df, filter_args.get("grant_programmes")))
     outputs.append(get_statistics_output(df))
-    outputs.extend(get_file_output(metadata))
+    # outputs.extend(get_file_output(metadata)) # @TODO: add something here
 
     charts = []
     
@@ -185,11 +185,11 @@ def dashboard_output(fileid, *args):
     charts.append(organisation_type_chart(df))
     # charts.append(org_identifier_chart(df))
     charts.append(region_and_country_chart(df))
-    charts.append(location_map(
-        df,
-        app.server.config.get("MAPBOX_ACCESS_TOKEN"),
-        app.server.config.get("MAPBOX_STYLE")
-    ))
+    # charts.append(location_map(
+    #     df,
+    #     app.server.config.get("MAPBOX_ACCESS_TOKEN"),
+    #     app.server.config.get("MAPBOX_STYLE")
+    # ))
     charts.append(organisation_age_chart(df))
     charts.append(organisation_income_chart(df))
     # charts.append(imd_chart(df))
@@ -205,12 +205,12 @@ def what_next_missing_fields(df, fileid):
         return []
 
     missing = []
-    if (df["__geo_ctry"].count() + df["__geo_rgn"].count()) == 0:
+    if not df.get("byCountryRegion", []):
         missing.append(["postcodes or other geo data",
                         "https://postcodes.findthatcharity.uk/"])
 
     org_type = CHARTS['org_type']['get_results'](df)
-    if "Identifier not recognised" in org_type.index and len(org_type.index)==1:
+    if "Identifier not recognised" in [i[0] for i in org_type] and len(org_type)==1:
         missing.append(["external organisation identifiers, like charity numbers",
                         'http://standard.threesixtygiving.org/en/latest/identifiers/#id2'])
 

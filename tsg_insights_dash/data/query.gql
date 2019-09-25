@@ -1,0 +1,80 @@
+fragment bucket on GrantBucket {
+    bucketId
+    bucket2Id
+    grants
+    recipients
+    funders
+    grantAmount {
+        currency
+        value
+    }
+}
+
+query fetchGrants(
+    $dataset: String!, 
+    $funders: [String],
+    $funderTypes: [String],
+    $grantProgrammes: [String], 
+    $area: [String], 
+    $orgtype: [String],
+    $awardDates: MaxMin
+){
+    grants(
+        dataset: $dataset,
+        funders: $funders,
+        funderTypes: $funderTypes,
+        grantProgrammes: $grantProgrammes,
+        area: $area,
+        orgtype: $orgtype,
+        awardDates: $awardDates
+    ) {
+        summary {
+            bucketId
+            bucket2Id
+            grants
+            recipients
+            funders
+            maxDate
+            minDate
+            grantAmount {
+                currency
+                value
+            }
+            meanGrant {
+                currency
+                value
+            }
+        }
+        byFunder {
+            ...bucket
+        }
+        byFunderType {
+            ...bucket
+        }
+        byGrantProgramme {
+            ...bucket
+        }
+        byAmountAwarded {
+            ...bucket
+        }
+        byAwardYear {
+            ...bucket
+        }
+        byAwardDate {
+            bucketId
+            grants
+        }
+        byOrgType {
+            ...bucket
+        }
+        byOrgAge {
+            ...bucket
+        }
+        byOrgSize {
+            ...bucket
+        }
+        byCountryRegion {
+            ...bucket
+        }
+    }
+}

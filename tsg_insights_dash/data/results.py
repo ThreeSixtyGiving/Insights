@@ -1,3 +1,6 @@
+import datetime
+import re
+
 import pandas as pd
 
 from tsg_insights.data.utils import format_currency
@@ -34,22 +37,24 @@ IDENTIFIER_MAP = {
 }
 
 INCOME_BAND_CHANGES = {
-    # "Under £10k": "Up to £10k",
-    # "£10k - £100k": "£11k - £100k",
-    # "£100k - £1m": "£101k - £1m",
-    # "£1m - £10m": "£1.1m - £10m",
-    # "Over £10m": "Over £10m"
+    "Under £10k": "Up to £10k",
+    "£10k - £100k": "£10k - £100k",
+    "£100k - £250k": "£100k - £250k",
+    "£250k - £500k": "£250k - £500k",
+    "£500k - £1m": "£500k - £1m",
+    "£1m - £10m": "£1.1m - £10m",
+    "Over £10m": "Over £10m"
 }
 
 AWARD_BAND_CHANGES = {
-    "Under £500": "Up to £500",
-    "£500 - £1k": "£501 - £1,000",
-    "£1k - £2k": "£1,001 - £2,000",
-    "£2k - £5k": "£2,001 - £5,000",
-    "£5k - £10k": "£5,001 - £10,000",
-    "£10k - £100k": "£10,001 - £100k",
-    "£100k - £1m": "£101k - £1m",
-    "Over £1m": "Over £1m",
+    "Under 500": "Up to 500",
+    "500 - 1k": "501 - 1,000",
+    "1k - 2k": "1,001 - 2,000",
+    "2k - 5k": "2,001 - 5,000",
+    "5k - 10k": "5,001 - 10,000",
+    "10k - 100k": "10,001 - 100k",
+    "100k - 1m": "101k - 1m",
+    "Over 1m": "Over 1m",
 }
 
 AGE_BAND_CHANGES = {
@@ -60,6 +65,11 @@ AGE_BAND_CHANGES = {
     "10-25 years": "11-25 years",
     "Over 25 years": "Over 25 years"
 }
+
+def band_sort(value, l):
+    if value not in l:
+        return 0
+    return l.index(value)
 
 def get_imd_data(df):
 
@@ -90,62 +100,54 @@ def get_imd_data(df):
 
 
 def get_statistics(df):
-    amount_awarded = df.groupby("Currency").sum()["Amount Awarded"]
-    amount_awarded = [format_currency(amount, currency)
-                      for currency, amount in amount_awarded.items()]
-
-    median_grant = df.groupby("Currency").median()["Amount Awarded"]
-    median_grant = [format_currency(amount, currency)
-                    for currency, amount in median_grant.items()]
 
     return {
-        "grants": len(df),
-        "recipients": df["Recipient Org:0:Identifier"].unique().size,
-        "amount_awarded": amount_awarded,
-        "median_grant": median_grant,
+        "grants": df["summary"][0]["grants"],
+        "recipients": df["summary"][0]["recipients"],
+        "amount_awarded": [format_currency(v['value'], v['currency'])
+                           for v in df["summary"][0]["grantAmount"]],
+        "mean_grant": [format_currency(v['value'], v['currency'])
+                       for v in df["summary"][0]["meanGrant"]],
         "award_years": {
-            "min": df["Award Date"].dt.year.min(),
-            "max": df["Award Date"].dt.year.max(),
+            "min": df["summary"][0]["minDate"][0:4],
+            "max": df["summary"][0]["maxDate"][0:4],
         }
     }
 
 
 def get_ctry_rgn(df):
 
-    if "__geo_ctry" not in df.columns or "__geo_rgn" not in df.columns:
+    if not [i for i in df.get("byCountryRegion", []) if i["bucketId"]]:
         return None
 
-    REGION_ORDER = [
-        ("Scotland", "Scotland"),
-        ("Northern Ireland", "Northern Ireland"),
-        ("Wales", "Wales"),
-        ("England", "North East"),
-        ("England", "North West"),
-        ("England", "Yorkshire and The Humber"),
-        ("England", "West Midlands"),
-        ("England", "East Midlands"),
-        ("England", "East of England"),
-        ("England", "London"),
-        ("England", "South West"),
-        ("England", "South East"),
-        ("Isle of Man", "Isle of Man"),
-        ("Unknown", "Unknown"),
-    ]
+    REGION_ORDER = {
+        "S99999999": ("Scotland", "Scotland"),
+        "N99999999": ("Northern Ireland", "Northern Ireland"),
+        "W99999999": ("Wales", "Wales"),
+        "E12000001": ("England", "North East"),
+        "E12000002": ("England", "North West"),
+        "E12000003": ("England", "Yorkshire and The Humber"),
+        "E12000005": ("England", "West Midlands"),
+        "E12000004": ("England", "East Midlands"),
+        "E12000006": ("England", "East of England"),
+        "E12000007": ("England", "London"),
+        "E12000009": ("England", "South West"),
+        "E12000008": ("England", "South East"),
+        "M99999999": ("Isle of Man", "Isle of Man"),
+        "L99999999": ("Channel Islands", "Channel Islands"),
+        "Unknown": ("Unknown", "Unknown"),
+    }
+
+    values = {
+        v["bucket2Id"] if v["bucket2Id"] else "Unknown": v["grants"]
+        for v in df["byCountryRegion"]
+    }
 
     # generate region groupby
-    ctry_rgn = df.groupby([
-        df["__geo_ctry"].fillna("Unknown").str.strip(),
-        # ensure countries where region is null are correctly labelled
-        df.loc[:, "__geo_rgn"].fillna(df["__geo_ctry"]).fillna("Unknown").str.strip(),
-    ]).agg({
-        "Amount Awarded": "sum",
-        "Title": "size"
-    }).rename(columns={"Title": "Grants"})
-
-    # Sort from North -> South
-    idx = ctry_rgn.index.tolist()
-    new_idx = [i for i in REGION_ORDER if i in idx] + [i for i in idx if i not in REGION_ORDER]
-    ctry_rgn = ctry_rgn.reindex(new_idx)
+    ctry_rgn = [
+        (v, values.get(k, 0))
+        for k, v in REGION_ORDER.items()
+    ][::-1]
 
     return ctry_rgn
 
@@ -185,21 +187,26 @@ CHARTS = dict(
     funders={
         'title': 'Funders',
         'units': '(number of grants)',
-        'get_results': (lambda df: df["Funding Org:0:Name"].value_counts()),
+        'get_results': (lambda df: [(v["bucket2Id"], v["grants"]) for v in sorted(df["byFunder"], key=lambda x: -x['grants'])]),
     },
     grant_programmes={
         'title': 'Grant programmes',
         'units': '(number of grants)',
-        'get_results': (lambda df: df["Grant Programme:0:Title"].value_counts()),
+        'get_results': (lambda df: [(v["bucketId"], v["grants"]) for v in sorted(df["byGrantProgramme"], key=lambda x: -x['grants']) if v["bucketId"]]),
     },
     amount_awarded={
         'title': 'Amount awarded',
         'units': '(number of grants)',
-        'get_results': (lambda df: pd.crosstab(
-            df["Amount Awarded:Bands"].cat.rename_categories(AWARD_BAND_CHANGES),
-            df["Currency"],
-            dropna=False
-        ).sort_index()),
+        'get_results': (lambda df: {
+            w["bucketId"]: [
+                (AWARD_BAND_CHANGES[v["bucket2Id"]], v["grants"])
+                for v in sorted(
+                    df["byAmountAwarded"],
+                    key=lambda x: band_sort(x['bucket2Id'], list(AWARD_BAND_CHANGES.keys()))
+                )
+                if w["bucketId"] == v["bucketId"]]
+            for w in df["byAmountAwarded"]
+        }),
     },
     identifier_scheme={
         'title': 'Identifier scheme',
@@ -211,9 +218,11 @@ CHARTS = dict(
         'title': 'Award date',
         'units': '(number of grants)',
         'get_results': (lambda df: {
-            "all": df['Award Date'].dt.strftime("%Y-%m-%d").tolist(),
-            "min": df['Award Date'].dt.year.min(),
-            "max": df['Award Date'].dt.year.max()
+            "all": [inner for outer in [
+                [datetime.datetime.strptime(v["bucketId"], "%Y-%m-%d")] * v["grants"] for v in df["byAwardDate"]
+            ] for inner in outer],
+            "min": datetime.datetime.strptime(df["summary"][0]["minDate"], "%Y-%m-%d"),
+            "max": datetime.datetime.strptime(df["summary"][0]["maxDate"], "%Y-%m-%d")
         }),
     },
     ctry_rgn={
@@ -230,7 +239,10 @@ This can be added by using charity or company numbers, or by including a postcod
         'units': '(proportion of grants)',
         'desc': '''Organisation type is only available for recipients with a valid
 organisation identifier.''',
-        'get_results': get_org_type,
+        'get_results': (lambda df: [
+            (v["bucketId"] if v["bucketId"] else "Identifier not recognised", v["grants"])
+            for v in sorted(df["byOrgType"], key=lambda x: x['grants'] if x["bucketId"] else -x["grants"])
+        ]),
     },
     org_income={
         'title': 'Latest income of charity recipients',
@@ -238,7 +250,11 @@ organisation identifier.''',
         'missing': '''This chart can\'t be shown as there are no recipients in the data with 
 organisation income data. Add company or charity numbers to your data to show a chart of
 the income of organisations.''',
-        'get_results': get_org_income,
+        'get_results': (lambda df: [
+            (v["bucketId"], v["grants"])
+            for v in sorted(df["byOrgSize"], key=lambda x: band_sort(x['bucketId'], list(INCOME_BAND_CHANGES.keys())))
+            if v["bucketId"]
+        ]),
     },
     org_age={
         'title': 'Age of recipient organisations',
@@ -247,7 +263,11 @@ the income of organisations.''',
         'missing': '''This chart can\'t be shown as there are no recipients in the data with 
 organisation age data. Add company or charity numbers to your data to show a chart of
 the age of organisations.''',
-        'get_results': (lambda df: df["__org_age_bands"].cat.rename_categories(AGE_BAND_CHANGES).value_counts().sort_index()),
+        'get_results': (lambda df: [
+            (AGE_BAND_CHANGES.get(v["bucketId"], v["bucketId"]), v["grants"])
+            for v in sorted(df["byOrgAge"], key=lambda x: band_sort(x['bucketId'], list(AGE_BAND_CHANGES.keys())))
+            if v["bucketId"]
+        ]),
     },
     imd={
         'title': 'Index of multiple deprivation',

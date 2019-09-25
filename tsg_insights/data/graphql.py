@@ -31,8 +31,8 @@ class GrantBucket(graphene.ObjectType):
     mean_grant = graphene.List(GrantCurrencyBucket)
     max_grant = graphene.List(GrantCurrencyBucket)
     min_grant = graphene.List(GrantCurrencyBucket)
-    max_date = graphene.Int()
-    min_date = graphene.Int()
+    max_date = graphene.Date()
+    min_date = graphene.Date()
 
 
 
@@ -173,7 +173,7 @@ class Query(graphene.ObjectType):
             "by_funder_type": [GrantModel.fundingOrganization_type],
             "by_grant_programme": [GrantModel.grantProgramme_title],
             "by_award_year": [GrantModel.awardDateYear],
-            "by_award_date": [GrantModel.awardDate],
+            "by_award_date": [func.to_char(GrantModel.awardDate, 'yyyy-mm-01')],
             "by_org_type": [GrantModel.recipientOrganization_organisationType],
             "by_org_size": [GrantModel.recipientOrganization_latestIncomeBand],
             "by_org_age": [GrantModel.recipientOrganization_ageAtGrantBands],
@@ -217,11 +217,11 @@ class Query(graphene.ObjectType):
                 )
             if "max_date" in operations[k]:
                 agg_cols.append(
-                    func.max(GrantModel.awardDateYear).label("max_date")
+                    func.max(GrantModel.awardDate).label("max_date")
                 )
             if "min_date" in operations[k]:
                 agg_cols.append(
-                    func.min(GrantModel.awardDateYear).label("min_date")
+                    func.min(GrantModel.awardDate).label("min_date")
                 )
             
             money_cols = []

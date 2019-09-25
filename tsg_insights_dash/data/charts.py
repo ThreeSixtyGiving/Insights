@@ -1,5 +1,6 @@
 import os
 import copy
+import datetime
 
 import dash_core_components as dcc
 import dash_html_components as html
@@ -91,12 +92,12 @@ def message_box(title, contents, error=False):
     ])
 
 def get_bar_data(values, name="Grants", chart_type='bar', colour=0):
-    titles = [i[0] for i in values.iteritems()]
+    titles = [i[0] for i in values]
     titles = [" - ".join(get_unique_list(i)) if isinstance(i, (list, tuple)) else i for i in titles]
     bar_data = {
         'x': titles, 
-        'y': [i[1] for i in values.iteritems()], 
-        'text': [i[1] for i in values.iteritems()],
+        'y': [i[1] for i in values], 
+        'text': [i[1] for i in values],
         'textposition': 'outside',
         'cliponaxis': False,
         'constraintext': 'none',
@@ -130,14 +131,14 @@ def series_to_list(data):
                 html.Span(
                     className='results-page__body__content__title',
                     style={'fontSize': '1.2rem', 'lineHeight': '12px'},
-                    children=i,
+                    children=i[0],
                 ),
                 " (",
-                html.Span(children=count),
+                html.Span(children=i[1]),
                 ") ",
             ]
         )
-        for i, count in data.iteritems()
+        for i in data
     ])
 
 def funder_chart(df):
@@ -150,10 +151,10 @@ def funder_chart(df):
         return
     elif len(data) > 14:
         return chart_wrapper(
-            series_to_list(data.head(10)),
+            series_to_list(data[0:10]),
             pluralize("Funder", len(data)),
             subtitle=chart.get("units"),
-            description="Showing 10 largest funders" if len(data) > 10 else "",
+            description="Showing 10 largest funders of {}".format(len(data)) if len(data) > 10 else "",
         )
     elif len(data) > 5:
         layout['yaxis']['visible'] = True
@@ -179,7 +180,7 @@ def funder_chart(df):
 
 def grant_programme_chart(df):
 
-    if "Grant Programme:0:Title" not in df.columns or len(df["Grant Programme:0:Title"].unique()) <= 1:
+    if not df.get("byGrantProgramme", []):
         return
 
     chart = CHARTS['grant_programmes']
@@ -191,10 +192,10 @@ def grant_programme_chart(df):
         return
     elif len(data) > 14:
         return chart_wrapper(
-            series_to_list(data.head(10)),
+            series_to_list(data[0:10]),
             pluralize("Grant programme", len(data)),
             subtitle=chart.get("units"),
-            description="Showing 10 largest grant programmes" if len(data) > 10 else "",
+            description="Showing 10 largest grant programmes of {}".format(len(data)) if len(data) > 10 else "",
         )
     elif len(data) > 5:
         layout['yaxis']['visible'] = True
@@ -226,18 +227,22 @@ def amount_awarded_chart(df):
     # if("USD" in data.columns):
     #     data.loc[:, "GBP"] = data["USD"]
     units = chart.get("units", "")
+
+    currencies = list(data.keys())
     
     # replace £ signs if there's more than one currency
-    if (len(data.columns) > 1) or (data.columns[0] not in ["GBP", "EUR", "USD"]):
-        data.index = data.index.astype(str).str.replace("£", "")
-        units += ' Currencies: {}'.format(list_to_string(data.columns.tolist()))
-    elif "USD" in data.columns:
-        data.index = data.index.astype(str).str.replace("£", "$")
-        units += ' Currency: {}'.format(list_to_string(data.columns.tolist()))
-    elif "EUR" in data.columns:
-        data.index = data.index.astype(str).str.replace("£", "€")
-        units += ' Currency: {}'.format(list_to_string(data.columns.tolist()))
+    if (len(currencies) > 1) or (currencies[0] not in ["GBP", "EUR", "USD"]):
+        # data.index = data.index.astype(str).str.replace("£", "")
+        units += ' Currencies: {}'.format(list_to_string(currencies))
+    elif "USD" in data.keys():
+        # data.index = data.index.astype(str).str.replace("£", "$")
+        units += ' Currency: {}'.format(list_to_string(currencies))
+    elif "EUR" in data.keys():
+        # data.index = data.index.astype(str).str.replace("£", "€")
+        units += ' Currency: {}'.format(list_to_string(currencies))
     
+    n = sum([sum([j[1] for j in i]) for i in data.values()])
+
     colours = {
         "GBP": 0,
         "USD": 1,
@@ -252,7 +257,7 @@ def amount_awarded_chart(df):
                     series[1],
                     name=series[0],
                     colour=colours.get(series[0], k+3),
-                ) for k, series in enumerate(data.iteritems())],
+                ) for k, series in enumerate(data.items())],
                 'layout': DEFAULT_LAYOUT
             },
             config=DEFAULT_CONFIG
@@ -260,7 +265,7 @@ def amount_awarded_chart(df):
         chart['title'], 
         subtitle=units,
         description=chart.get("desc"),
-        children=[chart_n(data.sum().sum(), 'grant')],
+        children=[chart_n(n, 'grant')],
     )
 
 def org_identifier_chart(df):
@@ -283,16 +288,18 @@ def org_identifier_chart(df):
 
 def awards_over_time_chart(df):
 
-    # check whether all grants were awarded in the same month
-    if df["Award Date"].max().strftime("%Y-%m") == df["Award Date"].min().strftime("%Y-%m"):
-        return message_box(
-            'Award Date',
-            'All grants were awarded in {}.'.format(df["Award Date"].min().strftime("%B %Y")),
-            error=False
-        )
-
     chart = CHARTS['award_date']
     data = chart['get_results'](df)
+    
+    # check whether all grants were awarded in the same month
+    if data["min"].strftime("%Y-%m") == data["max"].strftime("%Y-%m"):
+        award_date = datetime.datetime.strptime(df["summary"][0]["maxDate"], "%Y-%m-%d")
+        return message_box(
+            'Award Date',
+            'All grants were awarded in {}.'.format(
+                award_date.strftime("%B %Y")),
+            error=False
+        )
 
     xbins_sizes = (
         ('M1', 'by month'),
@@ -301,9 +308,9 @@ def awards_over_time_chart(df):
     )
 
     xbins_size = 'M1'
-    if (data['max'] - data['min']) >= 5:
+    if (data['max'].year - data['min'].year) >= 5:
         xbins_size = 'M12'
-    elif (data['max'] - data['min']) >= 1:
+    elif (data['max'].year - data['min'].year) >= 1:
         xbins_size = 'M3'
 
     chart_data = [dict(
@@ -316,8 +323,8 @@ def awards_over_time_chart(df):
         name = 'date',
         type = 'histogram',
         xbins = dict(
-            start='{}-01-01'.format(data['min']),
-            end='{}-12-31'.format(data['max']),
+            start='{}-01-01'.format(data['min'].year),
+            end='{}-12-31'.format(data['max'].year),
             size=xbins_size,
         ),
     )]
@@ -365,7 +372,10 @@ def region_and_country_chart(df):
     chart = CHARTS['ctry_rgn']
     data = chart['get_results'](df)
 
-    if not isinstance(data, (pd.DataFrame, pd.Series)) or (df["__geo_ctry"].count() + df["__geo_rgn"].count()) == 0:
+    count_without_unknown = sum(
+        [v[1] for v in data if v[0] != ("Unknown", "Unknown")])
+
+    if count_without_unknown == 0:
         return message_box(
             chart["title"],
             chart.get("missing"),
@@ -377,15 +387,13 @@ def region_and_country_chart(df):
     layout['yaxis']['automargin'] = True
     layout['xaxis']['visible'] = False
 
-    count_without_unknown = data["Grants"].sum()
-    if ("Unknown", "Unknown") in data.index:
-        count_without_unknown -= data.loc[("Unknown", "Unknown"), "Grants"]
+    count_without_unknown = sum([v[1] for v in data if v[0]!=("Unknown", "Unknown")])
 
     return chart_wrapper(
         dcc.Graph(
             id="region_and_country_chart",
             figure={
-                'data': [get_bar_data(data["Grants"].iloc[::-1], chart_type='column', colour=2)],
+                'data': [get_bar_data(data, chart_type='column', colour=2)],
                 'layout': layout
             },
             config=DEFAULT_CONFIG
@@ -405,8 +413,8 @@ def organisation_type_chart(df):
     description = html.P('''Organisation type is based on official organisation identifiers,
                             such as registered charity or company numbers, found in the data.''',
                             className='results-page__body__section-note')
-    children = [chart_n(data.sum(), 'grant'), description]
-    if "Identifier not recognised" in data.index:
+    children = [chart_n(sum([i[1] for i in data]), 'grant'), description]
+    if "Identifier not recognised" in [i[1] for i in data]:
         children.append(html.P('''
             "Identifier not recognised" means either that the organisation does not have an official
             identifier, for example because it is an unregistered community group, or the publisher
@@ -422,7 +430,7 @@ def organisation_type_chart(df):
             dcc.Graph(
                 id="organisation_type_chart",
                 figure={
-                    'data': [get_bar_data(data.sort_values(), chart_type='column')],
+                    'data': [get_bar_data(data, chart_type='column')],
                     'layout': layout
                 },
                 config=DEFAULT_CONFIG
@@ -460,15 +468,17 @@ def organisation_type_chart(df):
 
 def organisation_income_chart(df):
     chart = CHARTS["org_income"]
+    data = chart['get_results'](df)
 
-    if "__org_latest_income_bands" not in df.columns or df["__org_latest_income_bands"].count() == 0:
+    if len(data) == 0:
         return message_box(
             chart["title"],
             chart.get("missing"),
             error=True
         )
 
-    data = chart['get_results'](df)
+    n = sum([i[1] for i in data])
+
     return chart_wrapper(
         dcc.Graph(
             id="organisation_income_chart",
@@ -481,19 +491,22 @@ def organisation_income_chart(df):
         chart['title'], 
         subtitle=chart.get("units"),
         description=chart.get("desc"),
-        children=[chart_n(data.sum(), 'grant')],
+        children=[chart_n(n, 'grant')],
     )
 
 def organisation_age_chart(df):
     chart = CHARTS["org_age"]
-    if "__org_age_bands" not in df.columns or df["__org_age_bands"].count()==0:
+    data = chart['get_results'](df)
+
+    if len(data)==0:
         return message_box(
             chart["title"],
             chart.get("missing"),
             error=True
         )
 
-    data = chart['get_results'](df)
+    n = sum([i[1] for i in data])
+
     return chart_wrapper(
         dcc.Graph(
             id="organisation_age_chart",
@@ -506,7 +519,7 @@ def organisation_age_chart(df):
         chart['title'], 
         subtitle=chart.get("units"),
         description=chart.get("desc"),
-        children=[chart_n(data.sum(), 'grant')],
+        children=[chart_n(n, 'grant')],
     )
 
 def imd_chart(df):
@@ -670,20 +683,20 @@ def get_statistics_output(df):
                     html.H4(className='', children=i[1]),
                     html.H4(className='', children="(Average grant)"),
                 ]
-            ) for i in stats["median_grant"]
+            ) for i in stats["mean_grant"]
         ]
     )
 
 def get_funder_output(df, grant_programme=[]):
     
     funder_class = ''
-    funder_names = sorted(df["Funding Org:0:Name"].unique().tolist())
+    funder_names = sorted([f["bucket2Id"] for f in df.get("byFunder", []) if f.get("bucket2Id")])
     subtitle = []
     if len(funder_names)>5:
         funders = html.Span("{:,.0f} funders".format(len(funder_names)), className=funder_class)
         subtitle = [html.Div(className='mt2 gray f4',
                              children=list_to_string(funder_names))]
-    else:
+    elif funder_names:
         funders = list_to_string(
             [html.Span(f, className=funder_class)
              for f in funder_names],
@@ -691,8 +704,8 @@ def get_funder_output(df, grant_programme=[]):
         )
     
     years = {
-        "max": df["Award Date"].dt.year.max(),
-        "min": df["Award Date"].dt.year.min(),
+        "min": df["summary"][0]["minDate"][0:4],
+        "max": df["summary"][0]["maxDate"][0:4],
     }
     if years["max"] == years["min"]:
         years = [
