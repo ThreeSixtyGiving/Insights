@@ -49,8 +49,8 @@ class Organisation(db.Model, ModelWithUpsert):
 
 
 class Grant(db.Model, ModelWithUpsert):
-    dataset = db.Column(db.String, primary_key=True)
-    id = db.Column(db.String, primary_key=True)
+    dataset = db.Column(db.String, primary_key=True, index=True)
+    id = db.Column(db.String, primary_key=True, index=True)
     title = db.Column(db.String)
     description = db.Column(db.String)
     currency = db.Column(db.String, index=True)
