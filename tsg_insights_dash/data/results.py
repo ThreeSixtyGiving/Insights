@@ -199,12 +199,12 @@ CHARTS = dict(
         'units': '(number of grants)',
         'get_results': (lambda df: {
             w["bucketId"]: [
-                (AWARD_BAND_CHANGES[v["bucket2Id"]], v["grants"])
+                (AWARD_BAND_CHANGES.get(v["bucket2Id"], v["bucket2Id"]), v["grants"])
                 for v in sorted(
                     df["byAmountAwarded"],
                     key=lambda x: band_sort(x['bucket2Id'], list(AWARD_BAND_CHANGES.keys()))
                 )
-                if w["bucketId"] == v["bucketId"]]
+                if w.get("bucketId") == v.get("bucketId")]
             for w in df["byAmountAwarded"]
         }),
     },
