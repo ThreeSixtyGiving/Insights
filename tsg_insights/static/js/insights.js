@@ -378,6 +378,18 @@ const get_data = function(){
           byAmountAwarded {
               ...bucket
           }
+          byAwardDate {
+              ...bucket
+          }
+          byOrgType {
+              ...bucket
+          }
+          byOrgAge {
+              ...bucket
+          }
+          byCountryRegion {
+              ...bucket
+          }
         }
     }
     `;
