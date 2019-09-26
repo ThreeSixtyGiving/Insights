@@ -6,6 +6,7 @@ import csv
 import codecs
 from datetime import datetime
 from io import TextIOWrapper
+from timeit import default_timer
 
 import click
 from flask import Flask, url_for, current_app
@@ -15,7 +16,7 @@ import requests_cache
 from tqdm import tqdm
 from sqlalchemy.sql import text
 
-from ..db import db
+from ..db import db, cache
 from ..data import bcp
 from ..data.models import Organisation, Grant, Postcode
 from ..data.process import COMPANY_REPLACE
@@ -439,7 +440,7 @@ def cli_update_grants(dataset, stage):
             set "recipientOrganization_latestIncome" = "organisation"."latest_income",
                 "recipientOrganization_latestIncomeDate" = "organisation"."latest_income_date",
                 "recipientOrganization_registrationDate" = "organisation"."date_registered",
-                "recipientOrganization_ageAtGrant" = ("awardDate" - "recipientOrganization_registrationDate"),
+                "recipientOrganization_ageAtGrant" = ("awardDate" - "organisation"."date_registered"),
                 "recipientOrganization_postalCode" = coalesce("grant"."recipientOrganization_postalCode", "organisation"."postcode"),
                 "recipientOrganization_organisationType" = "organisation"."org_type"
             from "organisation"
@@ -510,10 +511,15 @@ def cli_update_grants(dataset, stage):
             where "grant"."dataset" = :dataset'''
     }
 
+    cache.clear()
+
     for k, query in queries.items():
         if stage and k not in stage:
             continue
         logging.info(f"SQL {k}")
+        query_start_time = default_timer()
         db.session.execute(text(query), dict(dataset=dataset))
         db.session.commit()
+        logging.info('SQL took {:,.4f} seconds'.format(
+            (default_timer() - query_start_time)))
 
