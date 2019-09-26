@@ -261,7 +261,7 @@ class Query(graphene.ObjectType):
                                     "currency": r.get("currency"),
                                     "value": float(v) if isinstance(v, Decimal) else v,
                                 })
-            logging.info('{} query took {}'.format(
+            logging.info('{} query took {:,.4f} seconds'.format(
                 k, (default_timer() - query_start_time)))
 
         return return_result
