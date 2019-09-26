@@ -163,6 +163,8 @@ def funder_chart(df):
         chart_type = 'column'
         data = data[::-1]
 
+    n = sum([v[1] for v in data])
+
     return chart_wrapper(
         dcc.Graph(
             id="funding_org_chart",
@@ -175,6 +177,7 @@ def funder_chart(df):
         chart['title'], 
         subtitle=chart.get("units"),
         description=chart.get("desc"),
+        children=[chart_n(n, 'grant')],
     )
 
 
@@ -204,6 +207,8 @@ def grant_programme_chart(df):
         chart_type = 'column'
         data = data[::-1]
 
+    n = sum([v[1] for v in data])
+
     return chart_wrapper(
         dcc.Graph(
             id="grant_programme_chart",
@@ -216,7 +221,7 @@ def grant_programme_chart(df):
         chart['title'], 
         subtitle=chart.get("units"),
         description=chart.get("desc"),
-        children=[chart_n(data.sum(), 'grant')],
+        children=[chart_n(n, 'grant')],
     )
 
 

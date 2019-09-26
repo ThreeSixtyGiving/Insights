@@ -309,7 +309,7 @@ def what_next_missing_fields(df, fileid):
 @app.callback(Output('award-dates', 'data'),
               [Input('output-data-id', 'data')])
 def award_dates_change(fileid):
-    df = get_from_cache(fileid)
+    df = get_filtered_df(fileid)
     logging.debug("award_dates_change", fileid, df is None)
     if df is None:
         return {f: FILTERS[f]["defaults"] for f in FILTERS}

@@ -145,26 +145,11 @@ def get_ctry_rgn(df):
 
     # generate region groupby
     ctry_rgn = [
-        (v, values.get(k, 0))
+        (v, values.get(k, 0), k)
         for k, v in REGION_ORDER.items()
     ][::-1]
 
     return ctry_rgn
-
-
-def get_org_income_bands(df):
-    return pd.cut(
-        df["__org_latest_income"],
-        bins=AddExtraFieldsExternal.INCOME_BINS,
-        labels=AddExtraFieldsExternal.INCOME_BIN_LABELS
-    )
-
-def get_org_income(df):
-    return get_org_income_bands(df).value_counts().sort_index()
-
-
-def get_org_type(df):
-    return get_identifier_schemes(df).value_counts().sort_index()
 
 
 def get_identifier_schemes(df):
