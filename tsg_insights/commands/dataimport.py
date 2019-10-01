@@ -252,7 +252,7 @@ def cli_fetch_postcodes():
     upsert_statement = Postcode.upsert_statement()
 
     # find the download ZIP
-    download_url = 'http://geoportal.statistics.gov.uk/datasets/055c2d8135ca4297a85d624bb68aefdb_0.csv'
+    download_url = 'http://geoportal.statistics.gov.uk/datasets/75edec484c5d49bcadd4893c0ebca0ff_0.csv'
     logging.info("Downloading from: {}".format(download_url))
 
     # start the download
@@ -277,13 +277,15 @@ def cli_fetch_postcodes():
         org = Postcode(
             id=row['pcds'],
             ctry=row['ctry'],
-            cty=row['cty'],
-            laua=row['laua'],
+            cty=row.get('cty', row.get('oscty')),
+            laua=row.get('laua', row.get('oslaua')),
             pcon=row['pcon'],
             rgn=row['rgn'],
             imd=int(row['imd']) if row['imd'] else None,
             ru11ind=row['ru11ind'],
             oac11=row['oac11'],
+            oa11=row['oa11'],
+            lsoa11=row['lsoa11'],
             lat=float(row['Y']) if row['Y'] else None,
             long=float(row['X']) if row['X'] else None,
         )
@@ -462,6 +464,8 @@ def cli_update_grants(dataset, stage):
                 "geoImd" = "postcode"."imd",
                 "geoRu11ind" = "postcode"."ru11ind",
                 "geoOac11" = "postcode"."oac11",
+                "geoOa11" = "postcode"."oa11",
+                "geoLsoa11" = "postcode"."lsoa11",
                 "geoLat" = "postcode"."lat",
                 "geoLong" = "postcode"."long"
             from "postcode"
