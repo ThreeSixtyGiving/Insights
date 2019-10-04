@@ -1,13 +1,15 @@
 from decimal import Decimal
+import logging
+from timeit import default_timer
 
 import graphene
 from graphene_sqlalchemy import SQLAlchemyObjectType
 from graphene.utils.str_converters import to_camel_case, to_snake_case
 from sqlalchemy import or_, func, distinct
+from flask_sqlalchemy_caching import FromCache
 
 from ..data.models import Grant as GrantModel, Organisation as OrganisationModel, Postcode as PostcodeModel
-from ..data.cache import thiscache
-from ..db import db
+from ..db import db, cache
 
 
 class Grant(SQLAlchemyObjectType):
@@ -29,8 +31,8 @@ class GrantBucket(graphene.ObjectType):
     mean_grant = graphene.List(GrantCurrencyBucket)
     max_grant = graphene.List(GrantCurrencyBucket)
     min_grant = graphene.List(GrantCurrencyBucket)
-    max_date = graphene.Int()
-    min_date = graphene.Int()
+    max_date = graphene.Date()
+    min_date = graphene.Date()
 
 
 
@@ -91,7 +93,7 @@ class Query(graphene.ObjectType):
     def resolve_grants(self, info, dataset, **kwargs):
 
         # query = Grant.get_query(info)
-        query = db.session.query().filter(GrantModel.dataset == dataset)
+        query = db.session.query().options(FromCache(cache)).filter(GrantModel.dataset == dataset)
         
         if kwargs.get("q"):
             q = f'%{kwargs.get("q")}%'
@@ -171,7 +173,7 @@ class Query(graphene.ObjectType):
             "by_funder_type": [GrantModel.fundingOrganization_type],
             "by_grant_programme": [GrantModel.grantProgramme_title],
             "by_award_year": [GrantModel.awardDateYear],
-            "by_award_date": [GrantModel.awardDate],
+            "by_award_date": [func.to_char(GrantModel.awardDate, 'yyyy-mm-01')],
             "by_org_type": [GrantModel.recipientOrganization_organisationType],
             "by_org_size": [GrantModel.recipientOrganization_latestIncomeBand],
             "by_org_age": [GrantModel.recipientOrganization_ageAtGrantBands],
@@ -215,11 +217,11 @@ class Query(graphene.ObjectType):
                 )
             if "max_date" in operations[k]:
                 agg_cols.append(
-                    func.max(GrantModel.awardDateYear).label("max_date")
+                    func.max(GrantModel.awardDate).label("max_date")
                 )
             if "min_date" in operations[k]:
                 agg_cols.append(
-                    func.min(GrantModel.awardDateYear).label("min_date")
+                    func.min(GrantModel.awardDate).label("min_date")
                 )
             
             money_cols = []
@@ -237,7 +239,8 @@ class Query(graphene.ObjectType):
                     func.min(GrantModel.amountAwarded).label("min_grant"))
 
             currency_col = [GrantModel.currency] if money_cols else []
-
+            
+            query_start_time = default_timer()
             result = query.add_columns(*(new_cols + agg_cols)).group_by(*fields).all()
             return_result[k]= [{
                 l: float(v) if isinstance(v, Decimal) else v
@@ -258,6 +261,8 @@ class Query(graphene.ObjectType):
                                     "currency": r.get("currency"),
                                     "value": float(v) if isinstance(v, Decimal) else v,
                                 })
+            logging.info('{} query took {:,.4f} seconds'.format(
+                k, (default_timer() - query_start_time)))
 
         return return_result
 

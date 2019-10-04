@@ -1,83 +1,33 @@
-from .results import get_identifier_schemes, AGE_BAND_CHANGES, AWARD_BAND_CHANGES, INCOME_BAND_CHANGES, get_org_income, get_org_income_bands
+import os
+import logging
+
+from .results import get_identifier_schemes, AGE_BAND_CHANGES, AWARD_BAND_CHANGES, INCOME_BAND_CHANGES, get_ctry_rgn
 from tsg_insights.data.cache import get_from_cache
+from tsg_insights.data.graphql import schema
+
+with open(os.path.join(os.path.dirname(__file__), 'query.gql')) as gql:
+    QUERY_GQL = gql.read()
 
 
 def get_filtered_df(fileid, **filters):
-    df = get_from_cache(fileid)
 
-    for filter_id, filter_def in FILTERS.items():
-        new_df = filter_def["apply_filter"](
-            df,
-            filters.get(filter_id),
-            filter_def
+    gql_filters = dict(dataset=fileid)
+
+    if filters.get("award_dates"):
+        gql_filters["awardDates"] = dict(
+            min=filters.get("award_dates")[0],
+            max=filters.get("award_dates")[1],
         )
-        if new_df is not None:
-            df = new_df
 
-    return df
+    for i in ["funders", "grant_programmes", "area", "orgtype"]:
+        if isinstance(filters.get(i), list):
+            values = [f for f in filters.get(i) if f != "__all"]
+            if values:
+                gql_filters[i] = values
 
-
-def apply_area_filter(df, filter_args, filter_def):
-
-    if not filter_args or filter_args == ['__all']:
-        return
-
-    countries = []
-    regions = []
-    for f in filter_args:
-        if "##" in f:
-            f = f.split('##')
-            countries.append(f[0])
-            regions.append(f[1])
-    if countries and regions:
-        return df[
-            (df["__geo_ctry"].isin(countries)) &
-            (df["__geo_rgn"].isin(regions))
-        ]
-
-
-def apply_org_size_filter(df, filter_args, filter_def):
-
-    if not filter_args or filter_args == ['__all']:
-        return
-
-    bands = get_org_income_bands(df)
-    return df[bands.isin(filter_args)]
-
-
-def apply_org_type_filter(df, filter_args, filter_def):
-
-    if not filter_args or filter_args == ['__all']:
-        return
-
-    org_type = get_identifier_schemes(df)
-    return df[org_type.isin(filter_args)]
-
-
-def apply_field_filter(df, filter_args, filter_def):
-
-    if not filter_args or filter_args == ['__all']:
-        return
-
-    return df[df[filter_def["field"]].isin(filter_args)]
-
-def apply_date_range_filter(df, filter_args, filter_def):
-    if not filter_args or df is None:
-        return
-
-    return df[
-        (df[filter_def["field"]].dt.year >= filter_args[0]) &
-        (df[filter_def["field"]].dt.year <= filter_args[1])
-    ]
-
-def apply_range_filter(df, filter_args, filter_def):
-    if not filter_args or df is None:
-        return
-
-    return df[
-        (df[filter_def["field"]] >= filter_args[0]) &
-        (df[filter_def["field"]] <= filter_args[1])
-    ]
+    results = schema.execute(QUERY_GQL, variables=gql_filters)
+    logging.info(gql_filters)
+    return results.data["grants"]
 
 FILTERS = {
     "funders": {
@@ -86,12 +36,10 @@ FILTERS = {
         "defaults": [{"label": "Funder", "value": "__all"}],
         "get_values": (lambda df: [
             {
-                'label': '{} ({})'.format(i[0], i[1]),
-                'value': i[0]
-            } for i in df["Funding Org:0:Name"].value_counts().iteritems()
+                'label': '{} ({})'.format(v["bucket2Id"], v["grants"]),
+                'value': v["grants"]
+            } for v in sorted(df["byFunder"], key=lambda x: -x['grants'])
         ]),
-        "field": "Funding Org:0:Name",
-        "apply_filter": apply_field_filter,
     },
     "grant_programmes": {
         "label": "Grant programmes",
@@ -99,23 +47,20 @@ FILTERS = {
         "defaults": [{"label": "All grants", "value": "__all"}],
         "get_values": (lambda df: [
             {
-                'label': '{} ({})'.format(i[0], i[1]),
-                'value': i[0]
-            } for i in df["Grant Programme:0:Title"].value_counts().iteritems()
+                'label': '{} ({})'.format(v["bucketId"], v["grants"]),
+                'value': v["grants"]
+            } for v in sorted(df["byGrantProgramme"], key=lambda x: -x['grants'])
+            if v["bucketId"]
         ]),
-        "field": "Grant Programme:0:Title",
-        "apply_filter": apply_field_filter,
     },
     "award_dates": {
         "label": "Date awarded",
         "type": "rangeslider",
         "defaults": {"min": 2015, "max": 2018},
         "get_values": (lambda df: {
-            "min": int(df["Award Date"].dt.year.min()),
-            "max": int(df["Award Date"].dt.year.max()),
+            "min": int(df["summary"][0]["minDate"][0:4]),
+            "max": int(df["summary"][0]["maxDate"][0:4]),
         }),
-        "field": "Award Date",
-        "apply_filter": apply_date_range_filter,
     },
     "area": {
         "label": "Region and country",
@@ -124,14 +69,13 @@ FILTERS = {
         "get_values": (lambda df: [
             {
                 'label': (
-                    '{} ({})'.format(value[0], count)
-                    if value[0].strip() == value[1].strip()
-                    else "{} - {} ({})".format(value[0], value[1], count)
+                    '{} ({})'.format(v[0][0], v[1])
+                    if v[0][0].strip() == v[0][1].strip()
+                    else "{} - {} ({})".format(v[0][0], v[0][1], v[1])
                 ),
-                'value': "{}##{}".format(value[0], value[1])
-            } for value, count in df.fillna({"__geo_ctry": "Unknown", "__geo_rgn": "Unknown"}).groupby(["__geo_ctry", "__geo_rgn"]).size().iteritems()
+                'value': v[2]
+            } for v in get_ctry_rgn(df)
         ]),
-        "apply_filter": apply_area_filter,
     },
     "orgtype": {
         "label": "Organisation type",
@@ -139,12 +83,11 @@ FILTERS = {
         "defaults": [{"label": "All organisation types", "value": "__all"}],
         "get_values": (lambda df: [
             {
-                'label': '{} ({})'.format(i[0], i[1]),
-                'value': i[0]
-            } for i in get_identifier_schemes(df).value_counts().iteritems()
+                'label': '{} ({})'.format(v["bucketId"], v["grants"]),
+                'value': v["grants"]
+            } for v in sorted(df["byOrgType"], key=lambda x: -x['grants'])
+            if v["bucketId"]
         ]),
-        "field": "__org_org_type",
-        "apply_filter": apply_org_type_filter,
     },
     "award_amount": {
         "label": "Amount awarded",
@@ -156,21 +99,12 @@ FILTERS = {
                 'value': i[0]
             } for i in df["Amount Awarded:Bands"].value_counts().sort_index().iteritems()
         ]),
-        "field": "Amount Awarded:Bands",
-        "apply_filter": apply_field_filter,
     },
     "org_size": {
         "label": "Organisation size",
         "type": "multidropdown",
         "defaults": [{"label": "All sizes", "value": "__all"}],
-        "get_values": (lambda df: [
-            {
-                'label': '{} ({})'.format(INCOME_BAND_CHANGES.get(i[0], i[0]), i[1]),
-                'value': i[0]
-            } for i in get_org_income(df).iteritems()
-        ] if get_org_income(df).sum() else []),
-        "field": "__org_latest_income_bands",
-        "apply_filter": apply_org_size_filter,
+        "get_values": (lambda df: [] if get_org_income(df).sum() else []),
     },
     "org_age": {
         "label": "Organisation age",
@@ -182,7 +116,5 @@ FILTERS = {
                 'value': i[0]
             } for i in df["__org_age_bands"].value_counts().sort_index().iteritems()
         ] if df["__org_age_bands"].value_counts().sum() else []),
-        "field": "__org_age_bands",
-        "apply_filter": apply_field_filter,
     },
 }

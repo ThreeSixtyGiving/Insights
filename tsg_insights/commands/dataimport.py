@@ -6,6 +6,7 @@ import csv
 import codecs
 from datetime import datetime
 from io import TextIOWrapper
+from timeit import default_timer
 
 import click
 from flask import Flask, url_for, current_app
@@ -15,7 +16,7 @@ import requests_cache
 from tqdm import tqdm
 from sqlalchemy.sql import text
 
-from ..db import db
+from ..db import db, cache
 from ..data import bcp
 from ..data.models import Organisation, Grant, Postcode
 from ..data.process import COMPANY_REPLACE
@@ -251,7 +252,7 @@ def cli_fetch_postcodes():
     upsert_statement = Postcode.upsert_statement()
 
     # find the download ZIP
-    download_url = 'http://geoportal.statistics.gov.uk/datasets/055c2d8135ca4297a85d624bb68aefdb_0.csv'
+    download_url = 'http://geoportal.statistics.gov.uk/datasets/75edec484c5d49bcadd4893c0ebca0ff_0.csv'
     logging.info("Downloading from: {}".format(download_url))
 
     # start the download
@@ -276,13 +277,15 @@ def cli_fetch_postcodes():
         org = Postcode(
             id=row['pcds'],
             ctry=row['ctry'],
-            cty=row['cty'],
-            laua=row['laua'],
+            cty=row.get('cty', row.get('oscty')),
+            laua=row.get('laua', row.get('oslaua')),
             pcon=row['pcon'],
             rgn=row['rgn'],
             imd=int(row['imd']) if row['imd'] else None,
             ru11ind=row['ru11ind'],
             oac11=row['oac11'],
+            oa11=row['oa11'],
+            lsoa11=row['lsoa11'],
             lat=float(row['Y']) if row['Y'] else None,
             long=float(row['X']) if row['X'] else None,
         )
@@ -307,6 +310,8 @@ def cli_fetch_postcodes():
 @with_appcontext
 def cli_fetch_grants(dataset, infile):
     logging.info("Starting to import grants")
+
+    # @TODO: remove existing grants first
 
     # get the update statements
     upsert_statement = Grant.upsert_statement()
@@ -390,7 +395,7 @@ def cli_fetch_grants(dataset, infile):
 @cli.command('updategrants')
 @click.argument('dataset')
 @click.argument('stage', nargs=-1)
-def cli_update_grants():
+def cli_update_grants(dataset, stage):
 
     queries = {
         "Add missing company numbers": '''update "grant"
@@ -432,12 +437,12 @@ def cli_update_grants():
                     when "recipientOrganization_idCanonical" ~* '[A-Z]{2}-.*-.*' then 
                         array_to_string((string_to_array("recipientOrganization_idCanonical", '-'))[1:2], '-')
                     else '' end
-            wher "grant"."dataset" = :dataset''',
+            where "grant"."dataset" = :dataset''',
         "Add organisation details": '''update "grant"
             set "recipientOrganization_latestIncome" = "organisation"."latest_income",
                 "recipientOrganization_latestIncomeDate" = "organisation"."latest_income_date",
                 "recipientOrganization_registrationDate" = "organisation"."date_registered",
-                "recipientOrganization_ageAtGrant" = ("awardDate" - "recipientOrganization_registrationDate"),
+                "recipientOrganization_ageAtGrant" = ("awardDate" - "organisation"."date_registered"),
                 "recipientOrganization_postalCode" = coalesce("grant"."recipientOrganization_postalCode", "organisation"."postcode"),
                 "recipientOrganization_organisationType" = "organisation"."org_type"
             from "organisation"
@@ -459,6 +464,8 @@ def cli_update_grants():
                 "geoImd" = "postcode"."imd",
                 "geoRu11ind" = "postcode"."ru11ind",
                 "geoOac11" = "postcode"."oac11",
+                "geoOa11" = "postcode"."oa11",
+                "geoLsoa11" = "postcode"."lsoa11",
                 "geoLat" = "postcode"."lat",
                 "geoLong" = "postcode"."long"
             from "postcode"
@@ -508,7 +515,15 @@ def cli_update_grants():
             where "grant"."dataset" = :dataset'''
     }
 
+    cache.clear()
+
     for k, query in queries.items():
+        if stage and k not in stage:
+            continue
         logging.info(f"SQL {k}")
-        db.session.execute(text(query), dataset=dataset)
+        query_start_time = default_timer()
+        db.session.execute(text(query), dict(dataset=dataset))
+        db.session.commit()
+        logging.info('SQL took {:,.4f} seconds'.format(
+            (default_timer() - query_start_time)))
 

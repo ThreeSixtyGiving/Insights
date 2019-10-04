@@ -9,7 +9,9 @@ from .blueprints import home, fetch, job, data, cache, api
 from .commands import registry, worker, datafile, dataimport
 from .data.cache import get_cache, thiscache
 from .data.utils import CustomJSONEncoder
-from .db import db, migrate
+from .db import db, migrate, cache as app_cache
+
+one_week_in_seconds = 60*60*24*7
 
 def create_app(test_config=None):
     # create and configure the app
@@ -51,6 +53,11 @@ def create_app(test_config=None):
         # database variables
         SQLALCHEMY_TRACK_MODIFICATIONS=False,
         SQLALCHEMY_DATABASE_URI=os.environ.get("DATABASE_URL"),
+
+        # Flask-Caching related configs
+        CACHE_TYPE="redis",
+        CACHE_DEFAULT_TIMEOUT=int(os.environ.get(
+            "CACHE_DEFAULT_TIMEOUT", one_week_in_seconds)),
     )
 
     if test_config is None:
@@ -65,6 +72,7 @@ def create_app(test_config=None):
         app.config["REDIS_ENV_VAR"],
         app.config["REDIS_DEFAULT_URL"]
     )
+    app.config["CACHE_REDIS_URL"] = app.config["REDIS_URL"]
 
     # ensure the instance folder exists
     try:
@@ -103,7 +111,6 @@ def create_app(test_config=None):
     # add caching
     with app.app_context():
         if app.config["REQUESTS_CACHE_ON"]:
-            one_week_in_seconds = 60*60*24*7
             requests_cache.install_cache(
                 backend='sqlite',
                 cache_name=os.path.join(app.config["UPLOADS_FOLDER"], "http_cache"),
