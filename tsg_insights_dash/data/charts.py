@@ -68,12 +68,13 @@ def chart_wrapper(chart, title, subtitle=None, description=None, children=[]):
         chart
     ] + children)
 
-def chart_n(count, label='grant'):
+def chart_n(count, label='grant', additional=''):
     return html.Div(
         className='results-page__body__section-note',
-        children='Based on {:,.0f} {}.'.format(
+        children='Based on {:,.0f} {}. {}'.format(
             count,
-            pluralize(label, count)
+            pluralize(label, count),
+            additional
         )
     )
 
@@ -378,8 +379,10 @@ def region_and_country_chart(df):
     data = chart['get_results'](df)
 
     if data:
+        unknown_count = sum(
+            [v[1] for v in data if v[0] == ("Unknown", "Unknown")])
         count_without_unknown = sum(
-            [v[1] for v in data if v[0] != ("Unknown", "Unknown")])
+            [v[1] for v in data]) - unknown_count
     else:
         count_without_unknown = 0
 
@@ -389,13 +392,23 @@ def region_and_country_chart(df):
             chart.get("missing"),
             error=True
         )
+    elif unknown_count > 0:
+        children = [chart_n(
+            count_without_unknown,
+            'grant',
+            f'Region is not available for {unknown_count:,.0f} {pluralize("grant", unknown_count)}'
+        )]
+        data = [v for v in data if v[1] == ("Unknown", "Unknown")]
+    else:
+        children = [chart_n(
+            count_without_unknown,
+            'grant'
+        )]
 
     layout = copy.deepcopy(DEFAULT_LAYOUT)
     layout['yaxis']['visible'] = True
     layout['yaxis']['automargin'] = True
     layout['xaxis']['visible'] = False
-
-    count_without_unknown = sum([v[1] for v in data if v[0]!=("Unknown", "Unknown")])
 
     return chart_wrapper(
         dcc.Graph(
@@ -409,7 +422,7 @@ def region_and_country_chart(df):
         chart['title'], 
         subtitle=chart.get("units"),
         description=chart.get("desc"),
-        children=[chart_n(count_without_unknown, 'grant')],
+        children=children,
     )
 
 
@@ -421,13 +434,20 @@ def organisation_type_chart(df):
     description = html.P('''Organisation type is based on official organisation identifiers,
                             such as registered charity or company numbers, found in the data.''',
                             className='results-page__body__section-note')
-    children = [chart_n(sum([i[1] for i in data]), 'grant'), description]
-    if "Identifier not recognised" in [i[1] for i in data]:
-        children.append(html.P('''
-            "Identifier not recognised" means either that the organisation does not have an official
-            identifier, for example because it is an unregistered community group, or the publisher
-            has not included official identifiers in the data.
+    no_identifier = sum([i[1] for i in data if i[0]=="Identifier not recognised"])
+    children = [
+        chart_n(sum([i[1] for i in data]) - no_identifier, 'grant'), 
+        description
+    ]
+    if no_identifier > 0:
+        children.append(html.P(f'''
+            For {no_identifier:,.0f} {pluralize('organisation', no_identifier)} the type of organisation could not be determined.
+            This is either because the organisation is not registered (for example a small 
+            community group), or because the data publisher
+            has not included official identifiers in the data which can help identify the type
+            of organisation.
             ''', className='results-page__body__section-note'))
+        data = [i for i in data if i[0] != "Identifier not recognised"]
 
     if len(data) > 4:
         layout = copy.deepcopy(DEFAULT_LAYOUT)

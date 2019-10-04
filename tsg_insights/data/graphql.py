@@ -89,7 +89,6 @@ class Query(graphene.ObjectType):
         query = Grant.get_query(info)
         return query.filter(GrantModel.id == id).first()
 
-    @thiscache.memoize()
     def resolve_grants(self, info, dataset, **kwargs):
 
         # query = Grant.get_query(info)
