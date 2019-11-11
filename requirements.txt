@@ -50,7 +50,7 @@ requests-cache==0.4.13
 requests-mock==1.5.2
 retrying==1.3.3
 rq==0.12.0
--e git+https://github.com/michaelbrooks/rq-win.git@2040c4c86237108173fd018af530f167fb00345e#egg=rq_win
+-e git+https://github.com/michaelbrooks/rq-win.git#egg=rq_win
 schema==0.6.8
 six==1.11.0
 -e git+https://github.com/drkane/threesixty-parser.git@0bce04c4b9d36575e3d2c2b326c445b665e5447d#egg=threesixtygiving
