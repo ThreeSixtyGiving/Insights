@@ -577,8 +577,8 @@ def location_map(df, mapbox_access_token=None, mapbox_style=None):
             lon=geo["__geo_long"].values,
             mode='markers',
             marker=dict(
-                size=9,
-                color=THREESIXTY_COLOURS[0]
+                size=12,
+                color=THREESIXTY_COLOURS[0],
             ),
             hoverinfo='text',
             text=geo.apply(
