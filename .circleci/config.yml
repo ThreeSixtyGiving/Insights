@@ -45,7 +45,7 @@ jobs:
       - run:
           name: run tests
           environment:
-            UPLOADS_FOLDER=/tmp/uploads
+            UPLOADS_FOLDER: /tmp/uploads
           command: |
             . venv/bin/activate
             mkdir -p /tmp/uploads
