@@ -1,3 +1,5 @@
+[![CircleCI](https://circleci.com/gh/ThreeSixtyGiving/Insights.svg?style=svg)](https://circleci.com/gh/ThreeSixtyGiving/Insights)
+
 ## Install Dash
 This repo uses Dash. See [Dash installation documentation](https://dash.plot.ly/installation)
 
