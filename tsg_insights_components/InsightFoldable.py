@@ -8,7 +8,6 @@ class InsightFoldable(Component):
 An element that can be hidden by clicking on the `title`
 element. The `value` text is shown when hidden, otherwise
 `children` are displayed.
-
 Keyword arguments:
 - children (a list of or a singular dash component, string or number; optional): The children of this component
 - id (string; optional)
@@ -42,12 +41,14 @@ Those keys have the following types:
   - style (dict; optional): The style applied"""
     @_explicitize_args
     def __init__(self, children=None, id=Component.UNDEFINED, container=Component.UNDEFINED, title=Component.UNDEFINED, value=Component.UNDEFINED, child=Component.UNDEFINED, **kwargs):
-        self._prop_names = ['children', 'id', 'container', 'title', 'value', 'child']
+        self._prop_names = ['children', 'id',
+                            'container', 'title', 'value', 'child']
         self._type = 'InsightFoldable'
         self._namespace = 'tsg_insights_components'
-        self._valid_wildcard_attributes =            []
-        self.available_properties = ['children', 'id', 'container', 'title', 'value', 'child']
-        self.available_wildcard_properties =            []
+        self._valid_wildcard_attributes = []
+        self.available_properties = [
+            'children', 'id', 'container', 'title', 'value', 'child']
+        self.available_wildcard_properties = []
 
         _explicit_args = kwargs.pop('_explicit_args')
         _locals = locals()

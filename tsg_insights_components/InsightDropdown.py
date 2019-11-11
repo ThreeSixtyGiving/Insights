@@ -6,7 +6,6 @@ from dash.development.base_component import Component, _explicitize_args
 class InsightDropdown(Component):
     """A InsightDropdown component.
 Dropdown list of options
-
 Keyword arguments:
 - id (string; optional)
 - options (optional): An array of options. options has the following type: list of dict containing keys 'label', 'value', 'disabled'.
@@ -24,12 +23,14 @@ corresponds to the items specified in the
 - multi (boolean; optional): Whether it's a multi select or not"""
     @_explicitize_args
     def __init__(self, id=Component.UNDEFINED, options=Component.UNDEFINED, value=Component.UNDEFINED, className=Component.UNDEFINED, style=Component.UNDEFINED, selectStyle=Component.UNDEFINED, selectClassName=Component.UNDEFINED, multi=Component.UNDEFINED, **kwargs):
-        self._prop_names = ['id', 'options', 'value', 'className', 'style', 'selectStyle', 'selectClassName', 'multi']
+        self._prop_names = ['id', 'options', 'value', 'className',
+                            'style', 'selectStyle', 'selectClassName', 'multi']
         self._type = 'InsightDropdown'
         self._namespace = 'tsg_insights_components'
-        self._valid_wildcard_attributes =            []
-        self.available_properties = ['id', 'options', 'value', 'className', 'style', 'selectStyle', 'selectClassName', 'multi']
-        self.available_wildcard_properties =            []
+        self._valid_wildcard_attributes = []
+        self.available_properties = [
+            'id', 'options', 'value', 'className', 'style', 'selectStyle', 'selectClassName', 'multi']
+        self.available_wildcard_properties = []
 
         _explicit_args = kwargs.pop('_explicit_args')
         _locals = locals()

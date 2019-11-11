@@ -14,9 +14,11 @@ from .data.charts import *
 from .data.filters import FILTERS, get_filtered_df
 from tsg_insights_components import InsightChecklist, InsightDropdown, InsightFoldable
 
+
 def footer(server):
     with server.app_context():
         return InnerHTML(render_template('footer.html.j2', footer_class="light"))
+
 
 def filter_html(filter_id, filter_def):
     if filter_def.get("type") == 'rangeslider':
@@ -28,7 +30,7 @@ def filter_html(filter_id, filter_def):
             min=min_,
             max=max_,
             step=step_,
-            value=[min_,max_],
+            value=[min_, max_],
             marks={str(min_): str(min_), str(max_): str(max_)}
         )
 
@@ -73,7 +75,8 @@ layout = html.Div(id="dashboard-container", className='results-page', children=[
                     " Select another dataset",
                 ]
             ),
-            html.H3(className='results-page__menu__section-title', children='Filters'),
+            html.H3(className='results-page__menu__section-title',
+                    children='Filters'),
             html.Form(id='filters-form', children=[
                 # @TODO: turn these into new filters
                 html.Div(className="cf", children=[
@@ -99,7 +102,8 @@ layout = html.Div(id="dashboard-container", className='results-page', children=[
                                 foldedClassName='js-foldable-foldTarget',
                             ),
                             children=[
-                                filter_html('df-change-{}'.format(filter_id), filter_def),
+                                filter_html(
+                                    'df-change-{}'.format(filter_id), filter_def),
                             ]
                         ) for filter_id, filter_def in FILTERS.items()
                     ] + [
@@ -117,7 +121,8 @@ layout = html.Div(id="dashboard-container", className='results-page', children=[
                         ])
                     ]),
                 ]),
-                dcc.Store(id='award-dates', data={f: FILTERS[f]["defaults"] for f in FILTERS}),
+                dcc.Store(id='award-dates',
+                          data={f: FILTERS[f]["defaults"] for f in FILTERS}),
             ]),
         ]),
 
@@ -134,12 +139,13 @@ layout = html.Div(id="dashboard-container", className='results-page', children=[
     ]),
 ])
 
+
 @app.callback([Output('dashboard-output', 'children'),
-               Output('whats-next', 'children'),],
+               Output('whats-next', 'children'), ],
               [Input('output-data-id', 'data')] + [
                   Input('df-change-{}'.format(f), 'value')
                   for f in FILTERS
-              ])
+])
 def dashboard_output(fileid, *args):
     filter_args = dict(zip(FILTERS.keys(), args))
     df = get_filtered_df(fileid, **filter_args)
@@ -152,14 +158,15 @@ def dashboard_output(fileid, *args):
             [
                 html.H1(
                     html.Span("Dataset not found",
-                            className="results-page__body__content__date"),
-                        className="results-page__body__content__header"),
+                              className="results-page__body__content__date"),
+                    className="results-page__body__content__header"),
                 html.P(([
-                    html.A("Try to fetch this file", href="/?fetch={}".format(fileid)),
+                    html.A("Try to fetch this file",
+                           href="/?fetch={}".format(fileid)),
                     " or "
                 ] if fileid else []) + [
                     html.A("Go to homepage",
-                        href="/"),
+                           href="/"),
                 ], className="results-page__body__section-description"),
             ],
             None
@@ -171,13 +178,13 @@ def dashboard_output(fileid, *args):
         return (html.Div('No grants meet criteria'), whatsnext)
 
     outputs = []
-    
+
     outputs.extend(get_funder_output(df, filter_args.get("grant_programmes")))
     outputs.append(get_statistics_output(df))
     # outputs.extend(get_file_output(metadata)) # @TODO: add something here
 
     charts = []
-    
+
     charts.append(funder_chart(df))
     charts.append(amount_awarded_chart(df))
     charts.append(grant_programme_chart(df))
@@ -210,10 +217,9 @@ def what_next_missing_fields(df, fileid):
                         "https://postcodes.findthatcharity.uk/"])
 
     org_type = CHARTS['org_type']['get_results'](df)
-    if "Identifier not recognised" in [i[0] for i in org_type] and len(org_type)==1:
+    if "Identifier not recognised" in org_type.index and len(org_type.index) == 1:
         missing.append(["external organisation identifiers, like charity numbers",
                         'http://standard.threesixtygiving.org/en/latest/identifiers/#id2'])
-
 
     if not missing:
         missing = [
@@ -237,7 +243,7 @@ def what_next_missing_fields(df, fileid):
                 '''Grants data is at its most powerful when it is linked to other datasets
                     There were some pieces missing from the data you selected which meant we couldn't
                     make the most of it. For linkable data, we suggest adding, wherever possible:''',
-                ]),
+            ]),
             html.Ul([
                 html.Li([
                     html.A(m[0], href=m[1])
@@ -351,6 +357,7 @@ def dropdown_filter(filter_id, filter_def):
         )
     return dropdown_filter_func
 
+
 def slider_filter(filter_id, filter_def):
     def slider_filter_func(value, n_clicks, existing_value, existing_style):
         value = value if value else {filter_id: filter_def["defaults"]}
@@ -379,9 +386,10 @@ def slider_filter(filter_id, filter_def):
 
     return slider_filter_func
 
+
 def set_dropdown_value(filter_id, filter_def):
     def set_dropdown_value_fund(value, options, existingvaluedef):
-        if filter_def.get("type")=="rangeslider":
+        if filter_def.get("type") == "rangeslider":
             if value[0] == value[1]:
                 existingvaluedef['value'] = str(value[0])
             else:
@@ -403,13 +411,14 @@ def set_dropdown_value(filter_id, filter_def):
         return existingvaluedef
     return set_dropdown_value_fund
 
+
 # Add callbacks for all the filters
 for filter_id, filter_def in FILTERS.items():
 
     # callback to update the text showing filtered options next to the filter
     app.callback(Output('df-change-{}-wrapper'.format(filter_id), 'value'),
-                    [Input('df-change-{}'.format(filter_id), 'value')],
-                    [State('df-change-{}'.format(filter_id), 'options'),
+                 [Input('df-change-{}'.format(filter_id), 'value')],
+                 [State('df-change-{}'.format(filter_id), 'options'),
                      State('df-change-{}-wrapper'.format(filter_id), 'value')])(
         set_dropdown_value(filter_id, filter_def)
     )
@@ -419,7 +428,7 @@ for filter_id, filter_def in FILTERS.items():
         # filter callback
         app.callback(
             [Output('df-change-{}'.format(filter_id), 'options'),
-             Output('df-change-{}'.format(filter_id), 'value'), 
+             Output('df-change-{}'.format(filter_id), 'value'),
              Output('df-change-{}-wrapper'.format(filter_id), 'container'), ],
             [Input('award-dates', 'data'),
              Input('df-reset-filters', 'n_clicks')],
