@@ -44,8 +44,11 @@ jobs:
       # run tests!
       - run:
           name: run tests
+          environment:
+            UPLOADS_FOLDER=/tmp/uploads
           command: |
             . venv/bin/activate
+            mkdir -p /tmp/uploads
             python -m pytest
 
       - store_artifacts:
