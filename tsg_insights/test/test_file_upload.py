@@ -35,6 +35,10 @@ def m():
          'https://storage.googleapis.com/datagetter-360giving-output/branch/master/status.json'),
         ("sample_external_apis/ftc/GB-CHC-225922.json",
          re.compile('https://findthatcharity.uk/orgid/')),
+        ("sample_external_apis/ch/04325234.json",
+         re.compile('http://data.companieshouse.gov.uk/')),
+        ("sample_external_apis/pc/SE1 1AA.json",
+         re.compile('https://postcodes.findthatcharity.uk/')),
     ]
 
     m = requests_mock.Mocker()
