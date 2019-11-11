@@ -87,7 +87,7 @@ def message_box(title, contents, error=False):
     return html.Div(className='', children=[
         html.H2(className='results-page__body__section-title',
                 children=title),
-        html.Div(className='', children=contents_div),
+        html.Div(className='results-page__body__section-note', children=contents_div),
     ])
 
 def get_bar_data(values, name="Grants", chart_type='bar', colour=0):
