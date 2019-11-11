@@ -392,16 +392,22 @@ const get_data = function(){
           byAmountAwarded {
               ...bucket
           }
+          byGrantProgramme {
+              ...bucket
+          }
           byAwardDate {
               ...bucket
           }
           byOrgType {
               ...bucket
           }
+          byCountryRegion {
+              ...bucket
+          }
           byOrgAge {
               ...bucket
           }
-          byCountryRegion {
+          byOrgSize {
               ...bucket
           }
         }
