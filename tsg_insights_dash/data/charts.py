@@ -570,7 +570,7 @@ def location_map(df, mapbox_access_token=None, mapbox_style=None):
             '''Map cannot be shown. No location data is available.''',
             error=True
         )
-        
+
     data = [
         go.Scattermapbox(
             lat=geo["__geo_lat"].values,
@@ -580,6 +580,7 @@ def location_map(df, mapbox_access_token=None, mapbox_style=None):
                 size=9,
                 color=THREESIXTY_COLOURS[0]
             ),
+            hoverinfo='text',
             text=geo.apply(
                 lambda row: "{} ({} grants)".format(row[popup_col], row['grants']) if row["grants"] > 1 else row[popup_col],
                 axis=1
@@ -600,7 +601,7 @@ def location_map(df, mapbox_access_token=None, mapbox_style=None):
             ),
             pitch=0,
             zoom=5,
-            style=mapbox_style
+            style=mapbox_style,
         ),
         margin=go.layout.Margin(
             l=0,
@@ -615,7 +616,13 @@ def location_map(df, mapbox_access_token=None, mapbox_style=None):
         dcc.Graph(
             id='grant_location_chart',
             figure={"data": data, "layout": layout},
-            config=DEFAULT_CONFIG
+            config={
+                'displayModeBar': 'hover',
+                'modeBarButtons': [[
+                    'toImage', 'sendDataToCloud'
+                ]],
+                'scrollZoom': 'mapbox',
+            }
         ),
         'Location of UK grant recipients',
         description='''Showing the location of **{:,.0f}** grants out of {:,.0f}
