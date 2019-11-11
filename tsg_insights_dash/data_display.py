@@ -14,9 +14,11 @@ from .data.charts import *
 from .data.filters import FILTERS, get_filtered_df
 from tsg_insights_components import InsightChecklist, InsightDropdown, InsightFoldable
 
+
 def footer(server):
     with server.app_context():
         return InnerHTML(render_template('footer.html.j2', footer_class="light"))
+
 
 def filter_html(filter_id, filter_def):
     if filter_def.get("type") == 'rangeslider':
@@ -28,7 +30,7 @@ def filter_html(filter_id, filter_def):
             min=min_,
             max=max_,
             step=step_,
-            value=[min_,max_],
+            value=[min_, max_],
             marks={str(min_): str(min_), str(max_): str(max_)}
         )
 
@@ -73,7 +75,8 @@ layout = html.Div(id="dashboard-container", className='results-page', children=[
                     " Select another dataset",
                 ]
             ),
-            html.H3(className='results-page__menu__section-title', children='Filters'),
+            html.H3(className='results-page__menu__section-title',
+                    children='Filters'),
             html.Form(id='filters-form', children=[
                 # @TODO: turn these into new filters
                 html.Div(className="cf", children=[
@@ -99,7 +102,8 @@ layout = html.Div(id="dashboard-container", className='results-page', children=[
                                 foldedClassName='js-foldable-foldTarget',
                             ),
                             children=[
-                                filter_html('df-change-{}'.format(filter_id), filter_def),
+                                filter_html(
+                                    'df-change-{}'.format(filter_id), filter_def),
                             ]
                         ) for filter_id, filter_def in FILTERS.items()
                     ] + [
@@ -117,7 +121,8 @@ layout = html.Div(id="dashboard-container", className='results-page', children=[
                         ])
                     ]),
                 ]),
-                dcc.Store(id='award-dates', data={f: FILTERS[f]["defaults"] for f in FILTERS}),
+                dcc.Store(id='award-dates',
+                          data={f: FILTERS[f]["defaults"] for f in FILTERS}),
             ]),
         ]),
 
@@ -134,11 +139,13 @@ layout = html.Div(id="dashboard-container", className='results-page', children=[
     ]),
 ])
 
-@app.callback(Output('dashboard-output', 'children'),
+
+@app.callback([Output('dashboard-output', 'children'),
+               Output('whats-next', 'children'), ],
               [Input('output-data-id', 'data')] + [
                   Input('df-change-{}'.format(f), 'value')
                   for f in FILTERS
-              ])
+])
 def dashboard_output(fileid, *args):
     filter_args = dict(zip(FILTERS.keys(), args))
     df = get_filtered_df(fileid, **filter_args)
@@ -147,31 +154,37 @@ def dashboard_output(fileid, *args):
     metadata = get_metadata_from_cache(fileid)
 
     if df is None:
-        return [
-            html.H1(
-                html.Span("Dataset not found",
-                          className="results-page__body__content__date"),
+        return (
+            [
+                html.H1(
+                    html.Span("Dataset not found",
+                              className="results-page__body__content__date"),
                     className="results-page__body__content__header"),
-            html.P(([
-                html.A("Try to fetch this file", href="/?fetch={}".format(fileid)),
-                " or "
-            ] if fileid else []) + [
-                html.A("Go to homepage",
-                       href="/"),
-            ], className="results-page__body__section-description"),
-        ]
+                html.P(([
+                    html.A("Try to fetch this file",
+                           href="/?fetch={}".format(fileid)),
+                    " or "
+                ] if fileid else []) + [
+                    html.A("Go to homepage",
+                           href="/"),
+                ], className="results-page__body__section-description"),
+            ],
+            None
+        )
+
+    whatsnext = what_next_missing_fields(df, fileid)
 
     if len(df) == 0:
-        return html.Div('No grants meet criteria')
+        return (html.Div('No grants meet criteria'), whatsnext)
 
     outputs = []
-    
+
     outputs.extend(get_funder_output(df, filter_args.get("grant_programmes")))
     outputs.append(get_statistics_output(df))
     outputs.extend(get_file_output(metadata))
 
     charts = []
-    
+
     charts.append(funder_chart(df))
     charts.append(amount_awarded_chart(df))
     charts.append(grant_programme_chart(df))
@@ -190,24 +203,10 @@ def dashboard_output(fileid, *args):
 
     outputs.extend(charts)
 
-    return outputs
-
-@app.callback(Output('file-download-csv', 'href'),
-              [Input('output-data-id', 'data')])
-def file_download_csv_href(fileid):
-    return url_for('data.download_file', fileid=fileid, format='csv')
-
-@app.callback(Output('file-download-excel', 'href'),
-              [Input('output-data-id', 'data')])
-def file_download_excel_href(fileid):
-    return url_for('data.download_file', fileid=fileid, format='xlsx')
+    return (outputs, whatsnext)
 
 
-@app.callback(Output('whats-next', 'children'),
-              [Input('dashboard-output', 'children')],
-              [State('output-data-id', 'data')])
-def what_next_missing_fields(_, fileid):
-    df = get_filtered_df(fileid)
+def what_next_missing_fields(df, fileid):
 
     if df is None:
         return []
@@ -218,10 +217,9 @@ def what_next_missing_fields(_, fileid):
                         "https://postcodes.findthatcharity.uk/"])
 
     org_type = CHARTS['org_type']['get_results'](df)
-    if "Identifier not recognised" in org_type.index and len(org_type.index)==1:
+    if "Identifier not recognised" in org_type.index and len(org_type.index) == 1:
         missing.append(["external organisation identifiers, like charity numbers",
                         'http://standard.threesixtygiving.org/en/latest/identifiers/#id2'])
-
 
     if not missing:
         missing = [
@@ -245,7 +243,7 @@ def what_next_missing_fields(_, fileid):
                 '''Grants data is at its most powerful when it is linked to other datasets
                     There were some pieces missing from the data you selected which meant we couldn't
                     make the most of it. For linkable data, we suggest adding, wherever possible:''',
-                ]),
+            ]),
             html.Ul([
                 html.Li([
                     html.A(m[0], href=m[1])
@@ -272,9 +270,9 @@ def what_next_missing_fields(_, fileid):
                             like charity data or geo data from the postcodes.''',
             ]),
             html.Ul([
-                html.Li(html.A(href='#', target="_blank",
+                html.Li(html.A(href=url_for('data.download_file', fileid=fileid, format='csv'), target="_blank",
                                children='CSV Download', id='file-download-csv')),
-                html.Li(html.A(href='#', target="_blank",
+                html.Li(html.A(href=url_for('data.download_file', fileid=fileid, format='xlsx'), target="_blank",
                                children='Excel Download', id='file-download-excel')),
             ]),
         ]),
@@ -333,78 +331,61 @@ def award_dates_change(fileid):
 
 
 def dropdown_filter(filter_id, filter_def):
-    def dropdown_filter_func(value):
-        logging.debug("dropdown", filter_id, filter_def, value)
+    def dropdown_filter_func(value, n_clicks, existing_value, container):
+        logging.debug("dropdown", filter_id, filter_def, value,
+                      n_clicks, existing_value, container)
         value = value if value else {filter_id: filter_def["defaults"]}
-        return value[filter_id]
-    return dropdown_filter_func
 
-def dropdown_filter_value(filter_id, filter_def):
-    def dropdown_filter_set_default_value(value, n_clicks, existing_value):
-        logging.debug("dropdown", n_clicks)
-        if n_clicks:
-            return ['__all']
-        return existing_value
-    return dropdown_filter_set_default_value
-
-def filter_dropdown_hide(filter_id, filter_def):
-    def filter_dropdown_hide_func(value, container):
+        # container style
         if 'style' not in container:
             container['style'] = {}
         value = value if value else {filter_id: filter_def["defaults"]}
-        if len(value[filter_id])>1:
+        if len(value[filter_id]) > 1:
             if "display" in container['style']:
                 del container['style']["display"]
         else:
             container['style']["display"] = 'none'
-        return container
-    return filter_dropdown_hide_func
-    
-def slider_select_min(filter_id, filter_def):
-    def slider_select_min_func(value):
-        logging.debug("year_select_min", value)
-        value = value if value else {filter_id: filter_def["defaults"]}
-        return value[filter_id]["min"]
-    return slider_select_min_func
-        
-def slider_select_max(filter_id, filter_def):
-    def slider_select_max_func(value):
-        logging.debug("year_select_max", value)
-        value = value if value else {filter_id: filter_def["defaults"]}
-        return value[filter_id]["max"]
-    return slider_select_max_func
 
-def slider_select_marks(filter_id, filter_def):
-    def slider_select_marks_func(value):
-        logging.debug("year_select_marks", value)
-        value = value if value else {filter_id: filter_def["defaults"]}
-        step = 3 if (value[filter_id]["max"] - value[filter_id]["min"]) > 6 else 1
-        min_max = range(value[filter_id]["min"], value[filter_id]["max"] + 1, step)
-        return {str(i): str(i) for i in min_max}
-    return slider_select_marks_func
-        
-def slider_select_value(filter_id, filter_def):
-    def slider_select_value_func(value, n_clicks, existing_value):
-        logging.debug("year_select_value", value)
-        value = value if value else {filter_id: filter_def["defaults"]}
-        return [value[filter_id]["min"], value[filter_id]["max"]]
-    return slider_select_value_func
+        return (
+            value[filter_id],
+            (['__all'] if n_clicks else existing_value),
+            container,
+        )
+    return dropdown_filter_func
 
-def slider_hide(filter_id, filter_def):
-    def slider_hide_func(value, existing_style):
+
+def slider_filter(filter_id, filter_def):
+    def slider_filter_func(value, n_clicks, existing_value, existing_style):
+        value = value if value else {filter_id: filter_def["defaults"]}
+
+        # work out the marks
+        step = 3 if (value[filter_id]["max"] -
+                     value[filter_id]["min"]) > 6 else 1
+        min_max = range(value[filter_id]["min"],
+                        value[filter_id]["max"] + 1, step)
+
+        # hiding the box
         existing_style = {} if existing_style is None else existing_style
-        value = value if value else {filter_id: filter_def["defaults"]}
         if value[filter_id]["min"] != value[filter_id]["max"]:
             if "display" in existing_style:
                 del existing_style["display"]
         else:
             existing_style["display"] = 'none'
-        return existing_style
-    return slider_hide_func
+
+        return (
+            value[filter_id]["min"],
+            value[filter_id]["max"],
+            {str(i): str(i) for i in min_max},
+            [value[filter_id]["min"], value[filter_id]["max"]],
+            existing_style
+        )
+
+    return slider_filter_func
+
 
 def set_dropdown_value(filter_id, filter_def):
     def set_dropdown_value_fund(value, options, existingvaluedef):
-        if filter_def.get("type")=="rangeslider":
+        if filter_def.get("type") == "rangeslider":
             if value[0] == value[1]:
                 existingvaluedef['value'] = str(value[0])
             else:
@@ -426,73 +407,46 @@ def set_dropdown_value(filter_id, filter_def):
         return existingvaluedef
     return set_dropdown_value_fund
 
+
 # Add callbacks for all the filters
 for filter_id, filter_def in FILTERS.items():
 
     # callback to update the text showing filtered options next to the filter
     app.callback(Output('df-change-{}-wrapper'.format(filter_id), 'value'),
-                    [Input('df-change-{}'.format(filter_id), 'value')],
-                    [State('df-change-{}'.format(filter_id), 'options'),
+                 [Input('df-change-{}'.format(filter_id), 'value')],
+                 [State('df-change-{}'.format(filter_id), 'options'),
                      State('df-change-{}-wrapper'.format(filter_id), 'value')])(
         set_dropdown_value(filter_id, filter_def)
     )
 
     if filter_def.get("type") in ['dropdown', 'multidropdown']:
 
-        # callback adding the filter itself
+        # filter callback
         app.callback(
-            Output('df-change-{}'.format(filter_id), 'options'),
-            [Input('award-dates', 'data')])(
-                dropdown_filter(filter_id, filter_def)
-            )
-
-        # callback setting the default value of the filter (nothing selected)
-        app.callback(
-            Output('df-change-{}'.format(filter_id), 'value'),
+            [Output('df-change-{}'.format(filter_id), 'options'),
+             Output('df-change-{}'.format(filter_id), 'value'),
+             Output('df-change-{}-wrapper'.format(filter_id), 'container'), ],
             [Input('award-dates', 'data'),
              Input('df-reset-filters', 'n_clicks')],
-            [State('df-change-{}'.format(filter_id), 'value')])(
-                dropdown_filter_value(filter_id, filter_def)
-            )
-
-        # callback which hides the filter if there's only 1 or 0 options available
-        app.callback(Output('df-change-{}-wrapper'.format(filter_id), 'container'),
-                    [Input('award-dates', 'data')],
-                     [State('df-change-{}-wrapper'.format(filter_id), 'container')])(
-                filter_dropdown_hide(filter_id, filter_def)
-            )
+            [State('df-change-{}'.format(filter_id), 'value'),
+             State('df-change-{}-wrapper'.format(filter_id), 'container')]
+        )(
+            dropdown_filter(filter_id, filter_def)
+        )
 
     elif filter_def.get("type") in ['rangeslider']:
 
         # callback setting the minimum value of a slider
-        app.callback(Output('df-change-{}'.format(filter_id), 'min'),
-                    [Input('award-dates', 'data')])(
-                        slider_select_min(filter_id, filter_def)
-                    )
-            
-        # callback setting the maximum value of a slider
-        app.callback(Output('df-change-{}'.format(filter_id), 'max'),
-                    [Input('award-dates', 'data')])(
-                        slider_select_max(filter_id, filter_def)
-                    )
-            
-        # callback setting the marks shown on a slider
-        app.callback(Output('df-change-{}'.format(filter_id), 'marks'),
-                    [Input('award-dates', 'data')])(
-                        slider_select_marks(filter_id, filter_def)
-                    )
-
-        # callback for setting the initial value of a slider
-        app.callback(Output('df-change-{}'.format(filter_id), 'value'),
-                     [Input('award-dates', 'data'),
-                      Input('df-reset-filters', 'n_clicks')],
-                     [State('df-change-{}'.format(filter_id), 'value')])(
-                        slider_select_value(filter_id, filter_def)
-                    )
-
-        # callback which hides the filter if there's only 1 or 0 options available
-        app.callback(Output('df-change-{}-wrapper'.format(filter_id), 'style'),
-                    [Input('award-dates', 'data')],
-                    [State('df-change-{}-wrapper'.format(filter_id), 'style')])(
-                        slider_hide(filter_id, filter_def)
-                    )
+        app.callback(
+            [Output('df-change-{}'.format(filter_id), 'min'),
+             Output('df-change-{}'.format(filter_id), 'max'),
+             Output('df-change-{}'.format(filter_id), 'marks'),
+             Output('df-change-{}'.format(filter_id), 'value'),
+             Output('df-change-{}-wrapper'.format(filter_id), 'style'), ],
+            [Input('award-dates', 'data'),
+             Input('df-reset-filters', 'n_clicks')],
+            [State('df-change-{}'.format(filter_id), 'value'),
+             State('df-change-{}-wrapper'.format(filter_id), 'style')]
+        )(
+            slider_filter(filter_id, filter_def)
+        )

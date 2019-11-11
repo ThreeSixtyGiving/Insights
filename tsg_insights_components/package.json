@@ -1,6 +1,6 @@
 {
   "name": "tsg_insights_components",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Dash Components for the [360Giving Insights Tool](https://github.com/ThreeSixtyGiving/Insights)",
   "main": "build/index.js",
   "scripts": {
