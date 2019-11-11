@@ -8,7 +8,6 @@ from flask import Flask
 from flask.cli import AppGroup, with_appcontext
 
 from rq import Worker, Queue, Connection
-from rq_win import WindowsWorker
 
 from ..data.cache import get_cache
 
@@ -26,5 +25,6 @@ def cli_start_worker():
         if hasattr(os, 'fork'):
             worker = Worker(map(Queue, listen))
         else:
+            from rq_win import WindowsWorker
             worker = WindowsWorker(map(Queue, listen))
         worker.work()
