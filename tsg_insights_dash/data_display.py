@@ -149,7 +149,6 @@ layout = html.Div(id="dashboard-container", className='results-page', children=[
 def dashboard_output(fileid, *args):
     filter_args = dict(zip(FILTERS.keys(), args))
     df = get_filtered_df(fileid, **filter_args)
-    logging.debug("dashboard_output", fileid, df is None)
 
     metadata = get_metadata_from_cache(fileid)
 
@@ -316,7 +315,6 @@ def what_next_missing_fields(df, fileid):
               [Input('output-data-id', 'data')])
 def award_dates_change(fileid):
     df = get_from_cache(fileid)
-    logging.debug("award_dates_change", fileid, df is None)
     if df is None:
         return {f: FILTERS[f]["defaults"] for f in FILTERS}
 
@@ -332,8 +330,6 @@ def award_dates_change(fileid):
 
 def dropdown_filter(filter_id, filter_def):
     def dropdown_filter_func(value, n_clicks, existing_value, container):
-        logging.debug("dropdown", filter_id, filter_def, value,
-                      n_clicks, existing_value, container)
         value = value if value else {filter_id: filter_def["defaults"]}
 
         # container style
