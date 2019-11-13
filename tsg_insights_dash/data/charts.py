@@ -650,48 +650,80 @@ charity or company registers. Mapping is UK only.'''.format(
 def get_statistics_output(df):
     stats = get_statistics(df)
 
-    return html.Div(
-        className='results-page__body__content__spheres',
-        children=[
-            html.Div(
-                className='results-page__body__content__sphere',
-                style={'backgroundColor': THREESIXTY_COLOURS[0]},
-                children=[
-                    html.P(className='', children="{:,.0f}".format(stats["grants"])),
-                    html.H4(className='', children=pluralize("grant", stats["grants"]))
-                ]
-            ),
-            html.Div(
-                className='results-page__body__content__sphere',
-                style={'backgroundColor': THREESIXTY_COLOURS[1]},
-                children=[
-                    html.P(className='', children="{:,.0f}".format(stats["recipients"])),
-                    html.H4(className='', children=pluralize("recipient", stats["recipients"]))
-                ]
-            ),
-        ] + [
-            html.Div(
-                className='results-page__body__content__sphere',
-                style={'backgroundColor': THREESIXTY_COLOURS[3]},
-                children=[
-                    html.P(className='', children=i[0]),
-                    html.H4(className='', children=i[1]),
-                    html.H4(className='', children="Total"),
-                ]
-            ) for i in stats["amount_awarded"]
-        ] + [
-            html.Div(
-                className='results-page__body__content__sphere',
-                style={
-                    'backgroundColor': THREESIXTY_COLOURS[2], 'color': '#0b2833'},
-                children=[
-                    html.P(className='', children=i[0]),
-                    html.H4(className='', children=i[1]),
-                    html.H4(className='', children="(Average grant)"),
-                ]
-            ) for i in stats["median_grant"]
-        ]
-    )
+    c = list(stats["currencies"].items())
+    main_currency = c[0][1]
+    other_currencies = {v[0]: v[1] for v in c[1:]}
+
+    others = None
+
+    if other_currencies:
+        others = html.Div(
+            className='results-page__body__section-attribution',
+            children=[
+                html.P('These results include grants in multiple currencies. The amounts above refer to {} grants in {}. There are also:'.format(
+                    main_currency['grants'],
+                    c[0][0]
+                )),
+                html.Ul([
+                    html.Li(
+                        className='',
+                        children='{} in {} grants ({})'.format(
+                            " ".join(v['total_f']),
+                            v["grants"],
+                            k
+                        ),
+                    )
+                    for k, v in other_currencies.items()
+                ])
+            ]
+        )
+
+    return [
+        html.Div(
+            className='results-page__body__content__spheres',
+            children=[
+                html.Div(
+                    className='results-page__body__content__sphere',
+                    style={'backgroundColor': THREESIXTY_COLOURS[0]},
+                    children=[
+                        html.P(className='', children="{:,.0f}".format(stats["grants"])),
+                        html.H4(className='', children=pluralize("grant", stats["grants"]))
+                    ]
+                ),
+                html.Div(
+                    className='results-page__body__content__sphere',
+                    style={'backgroundColor': THREESIXTY_COLOURS[1]},
+                    children=[
+                        html.P(className='', children="{:,.0f}".format(stats["recipients"])),
+                        html.H4(className='', children=pluralize("recipient", stats["recipients"]))
+                    ]
+                ),
+            ] + [
+                html.Div(
+                    className='results-page__body__content__sphere',
+                    style={'backgroundColor': THREESIXTY_COLOURS[3]},
+                    children=[
+                        html.P(className='', children=main_currency["total_f"][0]),
+                        html.H4(className='',
+                                children=main_currency["total_f"][1]),
+                        html.H4(className='', children="Total"),
+                    ]
+                )
+            ] + [
+                html.Div(
+                    className='results-page__body__content__sphere',
+                    style={
+                        'backgroundColor': THREESIXTY_COLOURS[2], 'color': '#0b2833'},
+                    children=[
+                        html.P(className='', children=main_currency["median_f"][0]),
+                        html.H4(className='', children=main_currency["median_f"][1]),
+                        html.H4(className='', children="(Average grant)"),
+                    ]
+                )
+            ]
+        ),
+        others
+    ]
 
 def get_funder_output(df, grant_programme=[]):
     
