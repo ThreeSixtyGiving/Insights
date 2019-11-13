@@ -226,6 +226,8 @@ def amount_awarded_chart(df):
     # if("USD" in data.columns):
     #     data.loc[:, "GBP"] = data["USD"]
     units = chart.get("units", "")
+
+    data = data.reindex(data.sum().sort_values(ascending=False).index, axis=1)
     
     # replace £ signs if there's more than one currency
     if (len(data.columns) > 1) or (data.columns[0] not in ["GBP", "EUR", "USD"]):
@@ -244,15 +246,35 @@ def amount_awarded_chart(df):
         "EUR": 2,
     }
 
+    def bar_data_with_visibility(values, visibility=None, **kwargs):
+        bar = get_bar_data(values, **kwargs)
+        if visibility:
+            bar["visible"] = visibility
+        return bar
+
+    if len(data.columns) > 1:
+        bars = [bar_data_with_visibility(
+            series[1],
+            visibility=None if k == 0 else 'legendonly',
+            name="{} ({}{})".format(
+                series[0],
+                series[1].sum(),
+                " grants" if k == 0 else "",
+            ),
+            colour=colours.get(series[0], k+3),
+        ) for k, series in enumerate(data.iteritems())]
+    else:
+        bars = [get_bar_data(
+            series[1],
+            name="{} ({} grants)".format(series[0], series[1].sum()),
+            colour=colours.get(series[0], k+3),
+        ) for k, series in enumerate(data.iteritems())]
+
     return chart_wrapper(
         dcc.Graph(
             id="amount_awarded_chart",
             figure={
-                'data': [get_bar_data(
-                    series[1],
-                    name=series[0],
-                    colour=colours.get(series[0], k+3),
-                ) for k, series in enumerate(data.iteritems())],
+                'data': bars,
                 'layout': DEFAULT_LAYOUT
             },
             config=DEFAULT_CONFIG
