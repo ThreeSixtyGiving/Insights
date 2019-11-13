@@ -571,22 +571,34 @@ def location_map(df, mapbox_access_token=None, mapbox_style=None):
             error=True
         )
 
-    data = [
-        go.Scattermapbox(
-            lat=geo["__geo_lat"].values,
-            lon=geo["__geo_long"].values,
-            mode='markers',
-            marker=dict(
-                size=12,
-                color=THREESIXTY_COLOURS[0],
-            ),
-            hoverinfo='text',
-            text=geo.apply(
-                lambda row: "{} ({} grants)".format(row[popup_col], row['grants']) if row["grants"] > 1 else row[popup_col],
-                axis=1
-            ).values,
+    data = []
+    if len(geo) > 1000:
+        data.append(
+            go.Densitymapbox(
+                lat=geo["__geo_lat"].values,
+                lon=geo["__geo_long"].values,
+                z=geo["grants"].values,
+                showscale=False,
+                hoverinfo=None,
+            )
         )
-    ]
+    else:
+        data.append(
+            go.Scattermapbox(
+                lat=geo["__geo_lat"].values,
+                lon=geo["__geo_long"].values,
+                mode='markers',
+                marker=dict(
+                    size=8,
+                    color=THREESIXTY_COLOURS[0],
+                ),
+                hoverinfo='text',
+                text=geo.apply(
+                    lambda row: "{} ({} grants)".format(row[popup_col], row['grants']) if row["grants"] > 1 else row[popup_col],
+                    axis=1
+                ).values,
+            )
+        )
 
     layout = go.Layout(
         autosize=True,
