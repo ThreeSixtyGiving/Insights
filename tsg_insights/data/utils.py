@@ -84,6 +84,10 @@ def format_currency(amount, currency='GBP', humanize_=True, int_format="{:,.0f}"
     )
 
 
+def get_currency_name(currency, count=2, locale='en_UK'):
+    return babel.numbers.get_currency_name(currency, count, locale)
+
+
 def get_fileid(contents, filename, date=None):
     hash_str = str(contents) + str(filename) + str(date)
     hash_obj = hashlib.md5(hash_str.encode())

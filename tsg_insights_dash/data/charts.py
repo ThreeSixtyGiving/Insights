@@ -6,7 +6,7 @@ import dash_html_components as html
 import plotly.graph_objs as go
 import pandas as pd
 
-from tsg_insights.data.utils import list_to_string, pluralize, get_unique_list, format_currency
+from tsg_insights.data.utils import list_to_string, pluralize, get_unique_list, format_currency, get_currency_name
 from .results import CHARTS, get_statistics
 
 DEFAULT_TABLE_FIELDS = ["Title", "Description", "Amount Awarded", 
@@ -230,15 +230,18 @@ def amount_awarded_chart(df):
     data = data.reindex(data.sum().sort_values(ascending=False).index, axis=1)
     
     # replace £ signs if there's more than one currency
+    currencies = list_to_string([
+        get_currency_name(c) for c in data.columns.tolist()
+    ])
     if (len(data.columns) > 1) or (data.columns[0] not in ["GBP", "EUR", "USD"]):
         data.index = data.index.astype(str).str.replace("£", "")
-        units += ' Currencies: {}'.format(list_to_string(data.columns.tolist()))
+        units += ' Currencies: {}'.format(currencies)
     elif "USD" in data.columns:
         data.index = data.index.astype(str).str.replace("£", "$")
-        units += ' Currency: {}'.format(list_to_string(data.columns.tolist()))
+        units += ' Currency: {}'.format(currencies)
     elif "EUR" in data.columns:
         data.index = data.index.astype(str).str.replace("£", "€")
-        units += ' Currency: {}'.format(list_to_string(data.columns.tolist()))
+        units += ' Currency: {}'.format(currencies)
     
     colours = {
         "GBP": 0,
@@ -257,7 +260,7 @@ def amount_awarded_chart(df):
             series[1],
             visibility=None if k == 0 else 'legendonly',
             name="{} ({}{})".format(
-                series[0],
+                get_currency_name(series[0]),
                 series[1].sum(),
                 " grants" if k == 0 else "",
             ),
@@ -266,7 +269,10 @@ def amount_awarded_chart(df):
     else:
         bars = [get_bar_data(
             series[1],
-            name="{} ({} grants)".format(series[0], series[1].sum()),
+            name="{} ({} grants)".format(
+                get_currency_name(series[0]),
+                series[1].sum()
+            ),
             colour=colours.get(series[0], k+3),
         ) for k, series in enumerate(data.iteritems())]
 
@@ -676,29 +682,38 @@ def get_statistics_output(df):
     main_currency = c[0][1]
     other_currencies = {v[0]: v[1] for v in c[1:]}
 
-    others = None
+    others = [
+        html.P('*median'),
+    ]
 
     if other_currencies:
-        others = html.Div(
-            className='results-page__body__section-attribution',
-            children=[
-                html.P('These results include grants in multiple currencies. The amounts above refer to {} grants in {}. There are also:'.format(
+        others.extend([
+            html.P([
+                'These results include grants in {} currencies. '.format(len(c)),
+                'The amounts above refer to {} grants in {}. '.format(
                     main_currency['grants'],
-                    c[0][0]
-                )),
-                html.Ul([
-                    html.Li(
-                        className='',
-                        children='{} in {} grants ({})'.format(
-                            " ".join(v['total_f']),
-                            v["grants"],
-                            k
-                        ),
-                    )
-                    for k, v in other_currencies.items()
-                ])
-            ]
-        )
+                    get_currency_name(c[0][0])
+                ),
+                html.Br(),
+                'There is also ',
+                list_to_string([
+                    '{} in {} {} ({})'.format(
+                        " ".join(v['total_f']),
+                        v["grants"],
+                        pluralize("grant", v["grants"]),
+                        get_currency_name(k)
+                    ) for k, v in other_currencies.items()
+                ]),
+            ]),
+        ])
+    elif c[0][0] != "GBP":
+        others.extend([
+            html.P([
+                'These results show grants made in {}.'.format(
+                    get_currency_name(c[0][0])
+                ),
+            ])
+        ])
 
     return [
         html.Div(
@@ -739,12 +754,15 @@ def get_statistics_output(df):
                     children=[
                         html.P(className='', children=main_currency["median_f"][0]),
                         html.H4(className='', children=main_currency["median_f"][1]),
-                        html.H4(className='', children="(Average grant)"),
+                        html.H4(className='', children="(Average* grant)"),
                     ]
                 )
             ]
         ),
-        others
+        html.Div(
+            className='results-page__body__section-attribution',
+            children=others
+        ),
     ]
 
 def get_funder_output(df, grant_programme=[]):
