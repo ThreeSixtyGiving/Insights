@@ -366,6 +366,7 @@ class LookupCompanyDetails(DataPreparationStage):
 
     name = 'Look up company data'
     ch_url = CH_URL
+    company_limit = 100
 
     def _get_company(self, orgid):
         if self.cache.hexists("company", orgid):
@@ -382,6 +383,10 @@ class LookupCompanyDetails(DataPreparationStage):
             (self.df["Recipient Org:0:Identifier:Scheme"] == "GB-COH"),
             "Recipient Org:0:Identifier:Clean"
         ].unique()
+        if len(company_orgids) > self.company_limit:
+            print("Skipping company data lookup as there are too many companies ({:,.0f})".format(len(company_orgids)))
+            return self.df
+
         print("Finding details for {} companies".format(len(company_orgids)))
         for k, orgid in tqdm.tqdm(enumerate(company_orgids)):
             self._progress_job(k+1, len(company_orgids))
@@ -417,8 +422,8 @@ class MergeCompanyAndCharityDetails(DataPreparationStage):
         orgids = self.df["Recipient Org:0:Identifier:Clean"].unique()
         charity_rows = []
         for k, c in self.cache.hscan_iter("charity"):
-            c = json.loads(c)
             if k.decode("utf8") in orgids:
+                c = json.loads(c)
                 charity_rows.append({
                     "orgid": k.decode("utf8"),
                     "charity_number": c.get('id'),
@@ -448,8 +453,8 @@ class MergeCompanyAndCharityDetails(DataPreparationStage):
 
         company_rows = []
         for k, c in self.cache.hscan_iter("company"):
-            c = json.loads(c)
             if k.decode("utf8") in orgids:
+                c = json.loads(c)
                 company = c.get("primaryTopic", {})
                 company = {} if company is None else company
                 address = c.get("primaryTopic", {}).get("RegAddress", {})
