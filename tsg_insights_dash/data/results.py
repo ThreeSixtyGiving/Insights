@@ -92,10 +92,10 @@ def get_imd_data(df):
 def get_statistics(df):
     curr_gb = df.groupby("Currency")
     currencies = pd.DataFrame({
-        "total": curr_gb.sum()["Amount Awarded"],
-        "median": curr_gb.median()["Amount Awarded"],
+        "total": curr_gb["Amount Awarded"].sum(),
+        "median": curr_gb["Amount Awarded"].median(),
         "grants": curr_gb.size(),
-        "recipients": curr_gb.nunique()["Recipient Org:0:Identifier"],
+        "recipients": curr_gb["Recipient Org:0:Identifier"].nunique(),
     })
     currencies = currencies.sort_values("grants", ascending=False).to_dict('index')
     for c in currencies:
