@@ -133,7 +133,7 @@ def series_to_list(data):
                     children=i,
                 ),
                 " (",
-                html.Span(children=count),
+                html.Span(children="{:,.0f}".format(count)),
                 ") ",
             ]
         )
@@ -150,7 +150,10 @@ def funder_chart(df):
         return
     elif len(data) > 14:
         return chart_wrapper(
-            series_to_list(data),
+            html.Div(className='results-page__body__section-note', children=[
+                "{:,.0f} funders included in results. Top 10 funders: ".format(len(data)),
+                series_to_list(data[:10]),
+            ]),
             chart['title'],
             subtitle=chart.get("units"),
             description=chart.get("desc"),
@@ -191,7 +194,11 @@ def grant_programme_chart(df):
         return
     elif len(data) > 14:
         return chart_wrapper(
-            series_to_list(data),
+            html.Div(className='results-page__body__section-note', children=[
+                "{:,.0f} grant programmes included in results. 10 biggest grant programmes: ".format(
+                    len(data)),
+                series_to_list(data[:10]),
+            ]),
             chart['title'],
             subtitle=chart.get("units"),
             description=chart.get("desc"),
@@ -427,7 +434,7 @@ def region_and_country_chart(df):
 
 def organisation_type_chart(df):
     chart = CHARTS['org_type']
-    data = chart['get_results'](df)
+    data = chart['get_results'](df).sort_values(ascending=False)
     title = chart["title"]
     subtitle = chart.get("units")
     description = html.P('''Organisation type is based on official organisation identifiers,
@@ -441,6 +448,15 @@ def organisation_type_chart(df):
             has not included official identifiers in the data.
             ''', className='results-page__body__section-note'))
 
+    if len(data) > 10:
+        others = data.iloc[10:]
+        children = [
+            html.P('The following types are also found in the data:',
+                   className='results-page__body__section-note'),
+            series_to_list(others),
+        ] + children
+        data = data.head(10)
+
     if len(data) > 4:
         layout = copy.deepcopy(DEFAULT_LAYOUT)
         layout['yaxis']['visible'] = True
@@ -450,7 +466,7 @@ def organisation_type_chart(df):
             dcc.Graph(
                 id="organisation_type_chart",
                 figure={
-                    'data': [get_bar_data(data.sort_values(), chart_type='column')],
+                    'data': [get_bar_data(data.iloc[::-1], chart_type='column')],
                     'layout': layout
                 },
                 config=DEFAULT_CONFIG
@@ -599,34 +615,37 @@ def location_map(df, mapbox_access_token=None, mapbox_style=None):
             error=True
         )
 
+    include_density = len(geo) > 1000
+
     data = []
-    if len(geo) > 1000:
+    if include_density:
         data.append(
             go.Densitymapbox(
                 lat=geo["__geo_lat"].values,
                 lon=geo["__geo_long"].values,
                 z=geo["grants"].values,
                 showscale=False,
-                hoverinfo=None,
+                hoverinfo="none",
+                colorscale=[[0, 'rgb(0,0,0)'], [1, THREESIXTY_COLOURS[0]]]
             )
         )
-    else:
-        data.append(
-            go.Scattermapbox(
-                lat=geo["__geo_lat"].values,
-                lon=geo["__geo_long"].values,
-                mode='markers',
-                marker=dict(
-                    size=8,
-                    color=THREESIXTY_COLOURS[0],
-                ),
-                hoverinfo='text',
-                text=geo.apply(
-                    lambda row: "{} ({} grants)".format(row[popup_col], row['grants']) if row["grants"] > 1 else row[popup_col],
-                    axis=1
-                ).values,
-            )
+
+    data.append(
+        go.Scattermapbox(
+            lat=geo["__geo_lat"].values,
+            lon=geo["__geo_long"].values,
+            mode='markers',
+            marker=dict(
+                size=2 if include_density else 8,
+                color=THREESIXTY_COLOURS[0],
+            ),
+            hoverinfo='text',
+            text=geo.apply(
+                lambda row: "{} ({} grants)".format(row[popup_col], row['grants']) if row["grants"] > 1 else row[popup_col],
+                axis=1
+            ).values,
         )
+    )
 
     layout = go.Layout(
         autosize=True,
@@ -690,14 +709,14 @@ def get_statistics_output(df):
         others.extend([
             html.P([
                 'These results include grants in {} currencies. '.format(len(c)),
-                'The amounts above refer to {} grants in {}. '.format(
+                'The amounts above refer to {:,.0f} grants in {}. '.format(
                     main_currency['grants'],
                     get_currency_name(c[0][0])
                 ),
                 html.Br(),
                 'There is also ',
                 list_to_string([
-                    '{} in {} {} ({})'.format(
+                    '{} in {:,.0f} {} ({})'.format(
                         " ".join(v['total_f']),
                         v["grants"],
                         pluralize("grant", v["grants"]),
