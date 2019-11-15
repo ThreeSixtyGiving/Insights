@@ -13,7 +13,7 @@ bp = Blueprint('data', __name__)
 @bp.route('/map/<fileid>')
 def create_grants_map(fileid):
 
-    df = get_filtered_df(fileid, **request.form.get("filters", {}))
+    df = get_filtered_df(fileid, **request.args)
 
     if df is None:
         abort(404)

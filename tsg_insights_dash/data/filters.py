@@ -66,8 +66,8 @@ def apply_date_range_filter(df, filter_args, filter_def):
         return
 
     return df[
-        (df[filter_def["field"]].dt.year >= filter_args[0]) &
-        (df[filter_def["field"]].dt.year <= filter_args[1])
+        (df[filter_def["field"]].dt.year >= int(filter_args[0])) &
+        (df[filter_def["field"]].dt.year <= int(filter_args[1]))
     ]
 
 def apply_range_filter(df, filter_args, filter_def):

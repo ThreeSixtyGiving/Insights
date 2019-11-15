@@ -191,11 +191,12 @@ def dashboard_output(fileid, *args):
     charts.append(organisation_type_chart(df))
     # charts.append(org_identifier_chart(df))
     charts.append(region_and_country_chart(df))
-    charts.append(location_map(
-        df,
-        app.server.config.get("MAPBOX_ACCESS_TOKEN"),
-        app.server.config.get("MAPBOX_STYLE")
-    ))
+    charts.append(location_map_iframe(fileid, filter_args))
+    # charts.append(location_map(
+    #     df,
+    #     app.server.config.get("MAPBOX_ACCESS_TOKEN"),
+    #     app.server.config.get("MAPBOX_STYLE")
+    # ))
     charts.append(organisation_age_chart(df))
     charts.append(organisation_income_chart(df))
     # charts.append(imd_chart(df))
