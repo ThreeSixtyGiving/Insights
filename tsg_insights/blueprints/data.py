@@ -1,4 +1,5 @@
 import io
+import datetime
 
 from flask import Blueprint, jsonify, request, Response, abort, render_template, current_app as app
 import pandas as pd
@@ -34,7 +35,8 @@ def create_grants_map(fileid):
         'map.html.j2',
         geo=geo,
         mapbox_access_token=app.config.get("MAPBOX_ACCESS_TOKEN"),
-        mapbox_style=app.config.get("MAPBOX_STYLE")
+        mapbox_style=app.config.get("MAPBOX_STYLE"),
+        current_year=datetime.datetime.now().year,
     )
 
 

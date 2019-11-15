@@ -41,9 +41,13 @@
         map.on('focus', function() { map.scrollWheelZoom.enable(); });
         map.on('blur', function() { map.scrollWheelZoom.disable(); });
 
+        var attribution = '<br><strong>Boundary Data</strong> Source: Office for National Statistics licensed under the Open Government Licence v.3.0.<br>' + 
+                          'Contains OS data © Crown copyright and database right {{ current_year }}';
+
         var boundary_options = function(color){
             return {
-                style: {fillOpacity: 0.05, color: color, opacity: 0.6, weight: 2}
+                style: {fillOpacity: 0.05, color: color, opacity: 0.6, weight: 2},
+                attribution: attribution,
             }
         }
         var boundary_name_field = function(layer){
