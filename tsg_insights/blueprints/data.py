@@ -1,12 +1,41 @@
 import io
 
-from flask import Blueprint, jsonify, request, Response, abort
+from flask import Blueprint, jsonify, request, Response, abort, render_template, current_app as app
 import pandas as pd
 
 from tsg_insights_dash.data.filters import get_filtered_df
 from tsg_insights_dash.data.results import get_statistics, CHARTS
+from ..data.utils import format_currency
 
 bp = Blueprint('data', __name__)
+
+
+@bp.route('/map/<fileid>')
+def create_grants_map(fileid):
+
+    df = get_filtered_df(fileid, **request.form.get("filters", {}))
+
+    if df is None:
+        abort(404)
+
+    df.dropna(subset=["__geo_lat", "__geo_long"])
+    df.loc[:, "__geo_lat"] = df["__geo_lat"].astype(float)
+    df.loc[:, "__geo_long"] = df["__geo_long"].astype(float)
+    df.loc[:, "Amount String"] = df.apply(
+        lambda x: format_currency(x["Amount Awarded"], x["Currency"], humanize_=False)[0], axis=1)
+    df.loc[:, "Award Date"] = df["Award Date"].dt.strftime('%d %B %Y')
+
+    geo = df[[
+        "__geo_lat", "__geo_long", 'Recipient Org:0:Name',  "Funding Org:0:Name",
+        "Amount Awarded", "Currency", "Amount String", "Award Date"
+    ]].dropna().to_dict('index')
+
+    return render_template(
+        'map.html.j2',
+        geo=geo,
+        mapbox_access_token=app.config.get("MAPBOX_ACCESS_TOKEN"),
+        mapbox_style=app.config.get("MAPBOX_STYLE")
+    )
 
 
 @bp.route('/<fileid>.geojson')

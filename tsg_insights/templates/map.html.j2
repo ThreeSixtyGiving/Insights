@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Grants Map</title>
+    <meta charset="utf-8" />
+    <link href='https://api.mapbox.com/mapbox.js/v3.2.1/mapbox.css' rel='stylesheet' />
+    {# <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.css" 
+          integrity="sha256-SHMGCYmST46SoyGgo4YR/9AlK1vf3ff84Aq9yK4hdqM=" crossorigin="anonymous" /> #}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.4.1/MarkerCluster.css" 
+          integrity="sha256-+bdWuWOXMFkX0v9Cvr3OWClPiYefDQz9GGZP/7xZxdc=" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.4.1/MarkerCluster.Default.css" 
+          integrity="sha256-LWhzWaQGZRsWFrrJxg+6Zn8TT84k0/trtiHBc6qcGpY=" crossorigin="anonymous" />
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+        }
+        html, body, #map {
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+
+    <script src='https://api.mapbox.com/mapbox.js/v3.2.1/mapbox.js'></script>
+    {# <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.js" 
+            integrity="sha256-EErZamuLefUnbMBQbsEqu1USa+btR2oIlCpBJbyD4/g=" crossorigin="anonymous"></script> #}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.4.1/leaflet.markercluster.js" 
+            integrity="sha256-WL6HHfYfbFEkZOFdsJQeY7lJG/E5airjvqbznghUzRw=" crossorigin="anonymous"></script>
+
+    <script>
+        L.mapbox.accessToken = {{mapbox_access_token|tojson}};
+        var map = L.mapbox.map('map').setView([-41.2858, 174.78682], 14);
+
+        var boundary_options = {
+            style: {fillOpacity: 0.05, color: '#888', weight: 2}
+        }
+
+        L.control.layers({
+            'Mapbox Light': L.mapbox.styleLayer('mapbox://styles/mapbox/light-v10').addTo(map),
+        }, {
+            'Deprivation (England - IMD2019)': L.mapbox.styleLayer('mapbox://styles/davidkane/ck2umusu24ivh1cpcj3los5z9'),
+        }, {
+            collapsed: false,
+            hideSingleBase: true,
+        }).addTo(map);
+        L.control.layers({}, {
+            'Local Authorities (Upper Tier)': L.mapbox.featureLayer(null, boundary_options)
+                .loadURL('https://opendata.arcgis.com/datasets/c6e8170231034aaa92f4bc21ebf77aec_0.geojson')
+                .bindPopup(function (layer) {
+                    return layer.feature.properties.ctyua19nm;
+                }),
+            'Local Authorities (Lower Tier)': L.mapbox.featureLayer(null, boundary_options)
+                .loadURL('https://opendata.arcgis.com/datasets/bbb0e58b0be64cc1a1460aa69e33678f_0.geojson')
+                .bindPopup(function (layer) {
+                    return layer.feature.properties.lad19nm;
+                }),
+            'Parliamentary Constituencies': L.mapbox.featureLayer(null, boundary_options)
+                .loadURL('https://opendata.arcgis.com/datasets/47e59e1e38ee4db0af18d57821bb4709_0.geojson')
+                .bindPopup(function (layer) {
+                    return layer.feature.properties.pcon18nm;
+                }),
+        }, {
+            collapsed: false,
+            hideSingleBase: true,
+        }).addTo(map);
+
+        map.addControl(L.mapbox.legendControl());
+
+        var markers = L.markerClusterGroup({
+            singleMarkerMode: true,
+        });
+
+        {% for g in geo.values() -%}
+            markers.addLayer(
+                L.marker([{{g.__geo_lat|tojson}}, {{g.__geo_long|tojson}}])
+                 .bindPopup(
+                    '<strong>From</strong> ' + {{g["Funding Org:0:Name"]|tojson}} + '<br>' +
+                    '<strong>To</strong> ' + {{g["Recipient Org:0:Name"]|tojson}} + '<br>' +
+                    '<strong>Amount</strong> ' + {{g["Amount String"]|tojson}} + '<br>' +
+                    '<strong>Awarded</strong> ' + {{g["Award Date"]|tojson}}
+                )
+            );
+        {% endfor %}
+        map.addLayer(markers);
+        map.fitBounds(markers.getBounds());
+
+    </script>
+</body>
+</html>
