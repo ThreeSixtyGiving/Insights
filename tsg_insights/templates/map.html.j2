@@ -51,9 +51,9 @@
             return layer.feature.properties[name_field];
         }
         var overlays = {
-            "Deprivation (England - IMD2019 ranks)": { 
+            "Overlay data": { 
                 "No overlay": L.mapbox.featureLayer(null).addTo(map),
-                'Overall deprivation': L.mapbox.styleLayer('mapbox://styles/davidkane/ck309ufnq0rrx1csftj9515ze'),
+                'Deprivation (England - IMD2019 ranks)': L.mapbox.styleLayer('mapbox://styles/davidkane/ck309ufnq0rrx1csftj9515ze'),
                 '- Income': L.mapbox.styleLayer('mapbox://styles/davidkane/ck30aacb008pv1ckcfwxau2nk'),
                 '- Employment': L.mapbox.styleLayer('mapbox://styles/davidkane/ck30abu8r0b511cqjl7gnb835'),
                 '- Education': L.mapbox.styleLayer('mapbox://styles/davidkane/ck30acrnp0s621coaemmp19rm'),
@@ -86,7 +86,7 @@
         };
 
         L.control.groupedLayers({}, overlays, {
-            exclusiveGroups: ["Deprivation", "Boundaries"],
+            exclusiveGroups: Object.keys(overlays),
             collapsed: false,
             hideSingleBase: true,
         }).addTo(map);
@@ -109,7 +109,7 @@
             );
         {% endfor %}
         map.addLayer(markers);
-        map.fitBounds(markers.getBounds());
+        map.fitBounds(markers.getBounds(), {maxZoom: 9});
 
     </script>
 </body>
