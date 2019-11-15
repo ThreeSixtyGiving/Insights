@@ -10,6 +10,7 @@
           integrity="sha256-+bdWuWOXMFkX0v9Cvr3OWClPiYefDQz9GGZP/7xZxdc=" crossorigin="anonymous" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.4.1/MarkerCluster.Default.css" 
           integrity="sha256-LWhzWaQGZRsWFrrJxg+6Zn8TT84k0/trtiHBc6qcGpY=" crossorigin="anonymous" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/leaflet.groupedlayercontrol.css')}}" />
     <style>
         body {
             padding: 0;
@@ -29,40 +30,63 @@
             integrity="sha256-EErZamuLefUnbMBQbsEqu1USa+btR2oIlCpBJbyD4/g=" crossorigin="anonymous"></script> #}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.4.1/leaflet.markercluster.js" 
             integrity="sha256-WL6HHfYfbFEkZOFdsJQeY7lJG/E5airjvqbznghUzRw=" crossorigin="anonymous"></script>
+    <script src="{{ url_for('static', filename='js/leaflet.groupedlayercontrol.js') }}"></script>
 
     <script>
         L.mapbox.accessToken = {{mapbox_access_token|tojson}};
         var map = L.mapbox.map('map').setView([-41.2858, 174.78682], 14);
+        L.mapbox.styleLayer('mapbox://styles/mapbox/light-v10').addTo(map)
 
-        var boundary_options = {
-            style: {fillOpacity: 0.05, color: '#888', weight: 2}
+        map.scrollWheelZoom.disable();
+        map.on('focus', function() { map.scrollWheelZoom.enable(); });
+        map.on('blur', function() { map.scrollWheelZoom.disable(); });
+
+        var boundary_options = function(color){
+            return {
+                style: {fillOpacity: 0.05, color: color, opacity: 0.6, weight: 2}
+            }
         }
+        var boundary_name_field = function(layer){
+            var name_field = Object.keys(layer.feature.properties).find(el => el.endsWith("nm"));
+            return layer.feature.properties[name_field];
+        }
+        var overlays = {
+            "Deprivation (England - IMD2019 ranks)": { 
+                "No overlay": L.mapbox.featureLayer(null).addTo(map),
+                'Overall deprivation': L.mapbox.styleLayer('mapbox://styles/davidkane/ck309ufnq0rrx1csftj9515ze'),
+                '- Income': L.mapbox.styleLayer('mapbox://styles/davidkane/ck30aacb008pv1ckcfwxau2nk'),
+                '- Employment': L.mapbox.styleLayer('mapbox://styles/davidkane/ck30abu8r0b511cqjl7gnb835'),
+                '- Education': L.mapbox.styleLayer('mapbox://styles/davidkane/ck30acrnp0s621coaemmp19rm'),
+                '- Health': L.mapbox.styleLayer('mapbox://styles/davidkane/ck30afwq40s4p1claktbbm3gk'),
+                '- Crime': L.mapbox.styleLayer('mapbox://styles/davidkane/ck30a3zhs0ay81cqjcvxdeqbs'),
+                '- Barriers to Housing & Services': L.mapbox.styleLayer('mapbox://styles/davidkane/ck30agq740bah1co9csdf1yu5'),
+                '- Living Environment': L.mapbox.styleLayer('mapbox://styles/davidkane/ck30ahvkn0be01dmu0r75ryvj'),
+            },
+            "Boundaries": { 
+                "No boundaries": L.mapbox.featureLayer(null).addTo(map),
+                'Country and Region': L.mapbox.featureLayer(null, boundary_options('#888'))
+                    .loadURL('https://opendata.arcgis.com/datasets/01fd6b2d7600446d8af768005992f76a_3.geojson')
+                    .bindPopup(boundary_name_field),
+                'Local Authorities (Upper Tier)': L.mapbox.featureLayer(null, boundary_options('red'))
+                    .loadURL('https://opendata.arcgis.com/datasets/c6e8170231034aaa92f4bc21ebf77aec_0.geojson')
+                    .bindPopup(boundary_name_field),
+                'Local Authorities (Lower Tier)': L.mapbox.featureLayer(null, boundary_options('pink'))
+                    .loadURL('https://opendata.arcgis.com/datasets/bbb0e58b0be64cc1a1460aa69e33678f_0.geojson')
+                    .bindPopup(boundary_name_field),
+                'Parliamentary Constituencies': L.mapbox.featureLayer(null, boundary_options('green'))
+                    .loadURL('https://opendata.arcgis.com/datasets/47e59e1e38ee4db0af18d57821bb4709_0.geojson')
+                    .bindPopup(boundary_name_field),
+                'Clinical Commissioning Groups (England)': L.mapbox.featureLayer(null, boundary_options('blue'))
+                    .loadURL('https://opendata.arcgis.com/datasets/c3398f0560844f74b76ca4b4136eb6a3_3.geojson')
+                    .bindPopup(boundary_name_field),
+                'Local Enterprise Partnerships (England)': L.mapbox.featureLayer(null, boundary_options('blue'))
+                    .loadURL('https://opendata.arcgis.com/datasets/d4d519d1d1a1455a9b82331228f77489_3.geojson')
+                    .bindPopup(boundary_name_field),
+            }
+        };
 
-        L.control.layers({
-            'Mapbox Light': L.mapbox.styleLayer('mapbox://styles/mapbox/light-v10').addTo(map),
-        }, {
-            'Deprivation (England - IMD2019)': L.mapbox.styleLayer('mapbox://styles/davidkane/ck2umusu24ivh1cpcj3los5z9'),
-        }, {
-            collapsed: false,
-            hideSingleBase: true,
-        }).addTo(map);
-        L.control.layers({}, {
-            'Local Authorities (Upper Tier)': L.mapbox.featureLayer(null, boundary_options)
-                .loadURL('https://opendata.arcgis.com/datasets/c6e8170231034aaa92f4bc21ebf77aec_0.geojson')
-                .bindPopup(function (layer) {
-                    return layer.feature.properties.ctyua19nm;
-                }),
-            'Local Authorities (Lower Tier)': L.mapbox.featureLayer(null, boundary_options)
-                .loadURL('https://opendata.arcgis.com/datasets/bbb0e58b0be64cc1a1460aa69e33678f_0.geojson')
-                .bindPopup(function (layer) {
-                    return layer.feature.properties.lad19nm;
-                }),
-            'Parliamentary Constituencies': L.mapbox.featureLayer(null, boundary_options)
-                .loadURL('https://opendata.arcgis.com/datasets/47e59e1e38ee4db0af18d57821bb4709_0.geojson')
-                .bindPopup(function (layer) {
-                    return layer.feature.properties.pcon18nm;
-                }),
-        }, {
+        L.control.groupedLayers({}, overlays, {
+            exclusiveGroups: ["Deprivation", "Boundaries"],
             collapsed: false,
             hideSingleBase: true,
         }).addTo(map);
