@@ -44,7 +44,7 @@ def create_grants_map(fileid):
 def fetch_file_geojson(fileid):
 
     # @TODO: fetch filters
-    df = get_filtered_df(fileid, **request.form.get("filters", {}))
+    df = get_filtered_df(fileid, **request.args)
 
     popup_col = 'Recipient Org:0:Name'
     if popup_col not in df.columns and 'Recipient Org:0:Identifier' in df.columns:
@@ -55,22 +55,21 @@ def fetch_file_geojson(fileid):
                       ).size().rename("grants").reset_index()
 
     return jsonify({
-        "FeatureCollection": {
-            "features": [
-                {
-                    "type": "Feature",
-                    "geometry": {
-                        "type": "Point",
-                        "coordinates": [g["__geo_lat"], g["__geo_long"]]
-                    },
-                    "properties": {
-                        "name": g[popup_col],
-                        "grants": g['grants'],
-                    }
+        "type": "FeatureCollection",
+        "features": [
+            {
+                "type": "Feature",
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [g["__geo_lat"], g["__geo_long"]]
+                },
+                "properties": {
+                    "name": g[popup_col],
+                    "grants": g['grants'],
                 }
-                for k, g in geo.iterrows()
-            ]
-        }
+            }
+            for k, g in geo.iterrows()
+        ]
     })
 
             
