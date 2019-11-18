@@ -556,9 +556,9 @@ def organisation_age_chart(df):
 
 def imd_chart(df):
     # @TODO: expand to include non-English IMD too
-    chart = CHARTS["org_age"]
+    chart = CHARTS["imd"]
     data = chart['get_results'](df)
-    if not data:
+    if data is None:
         return message_box(
             chart["title"],
             chart.get("missing"),
