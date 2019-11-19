@@ -34,20 +34,30 @@
 
     <script>
         L.mapbox.accessToken = {{mapbox_access_token|tojson}};
-        var map = L.mapbox.map('map').setView([-41.2858, 174.78682], 14);
-        L.mapbox.styleLayer('mapbox://styles/mapbox/light-v10').addTo(map)
+        var map = L.mapbox.map('map', null, {
+            attributionControl: {compact: true},
+        }).setView([-41.2858, 174.78682], 14);
+        {# L.mapbox.styleLayer('mapbox://styles/mapbox/dark-v10').addTo(map) #}
+        L.mapbox.styleLayer('mapbox://styles/davidkane/cjvnt2h0007hm1clrbd20bbug').addTo(map)
 
         map.scrollWheelZoom.disable();
         map.on('focus', function() { map.scrollWheelZoom.enable(); });
         map.on('blur', function() { map.scrollWheelZoom.disable(); });
 
-        var attribution = '<br><strong>Boundary Data</strong> Source: Office for National Statistics licensed under the Open Government Licence v.3.0.<br>' + 
+        var deprivation_options = {
+            opacity: 0.8,
+            attribution: '<strong>Deprivation</strong>: <a href="https://www.gov.uk/government/statistics/english-indices-of-deprivation-2019" target="_blank">English Indices of Deprivation</a> (<a href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/">OGL</a>)<br>'
+        }
+        map.attributionControl.addAttribution(deprivation_options['attribution']);
+        map.addControl(L.mapbox.legendControl());
+
+        var boundary_attribution = '<br><strong>Boundaries</strong>: <a href="http://geoportal.statistics.gov.uk/" target="_blank">Office for National Statistics</a>  (<a href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/">OGL</a>)<br>' + 
                           'Contains OS data © Crown copyright and database right {{ current_year }}';
 
         var boundary_options = function(color){
             return {
                 style: {fillOpacity: 0.05, color: color, opacity: 0.6, weight: 2},
-                attribution: attribution,
+                attribution: boundary_attribution,
             }
         }
         var boundary_name_field = function(layer){
@@ -57,21 +67,34 @@
         var overlays = {
             "Overlay data": { 
                 "No overlay": L.mapbox.featureLayer(null).addTo(map),
-                'Deprivation (England - IMD2019 ranks)': L.mapbox.styleLayer('mapbox://styles/davidkane/ck309ufnq0rrx1csftj9515ze'),
-                '- Income': L.mapbox.styleLayer('mapbox://styles/davidkane/ck30aacb008pv1ckcfwxau2nk'),
-                '- Employment': L.mapbox.styleLayer('mapbox://styles/davidkane/ck30abu8r0b511cqjl7gnb835'),
-                '- Education': L.mapbox.styleLayer('mapbox://styles/davidkane/ck30acrnp0s621coaemmp19rm'),
-                '- Health': L.mapbox.styleLayer('mapbox://styles/davidkane/ck30afwq40s4p1claktbbm3gk'),
-                '- Crime': L.mapbox.styleLayer('mapbox://styles/davidkane/ck30a3zhs0ay81cqjcvxdeqbs'),
-                '- Barriers to Housing & Services': L.mapbox.styleLayer('mapbox://styles/davidkane/ck30agq740bah1co9csdf1yu5'),
-                '- Living Environment': L.mapbox.styleLayer('mapbox://styles/davidkane/ck30ahvkn0be01dmu0r75ryvj'),
-                '- Most deprived 20%': L.mapbox.styleLayer('mapbox://styles/davidkane/ck30nnfoj0mj61cpnxh7ijw06'),
+                'Deprivation (England - IMD2019 ranks)': L.mapbox.styleLayer('mapbox://styles/davidkane/ck309ufnq0rrx1csftj9515ze', deprivation_options),
+                '- Income': L.mapbox.styleLayer('mapbox://styles/davidkane/ck35t6us210271cmlswr7ic2m', deprivation_options),
+                '- Employment': L.mapbox.styleLayer('mapbox://styles/davidkane/ck30abu8r0b511cqjl7gnb835', deprivation_options),
+                '- Education': L.mapbox.styleLayer('mapbox://styles/davidkane/ck30acrnp0s621coaemmp19rm', deprivation_options),
+                '- Health': L.mapbox.styleLayer('mapbox://styles/davidkane/ck30afwq40s4p1claktbbm3gk', deprivation_options),
+                '- Crime': L.mapbox.styleLayer('mapbox://styles/davidkane/ck35t8f1z03zg1cpiltsec9ep', deprivation_options),
+                '- Barriers to Housing & Services': L.mapbox.styleLayer('mapbox://styles/davidkane/ck30agq740bah1co9csdf1yu5', deprivation_options),
+                '- Living Environment': L.mapbox.styleLayer('mapbox://styles/davidkane/ck30ahvkn0be01dmu0r75ryvj', deprivation_options),
+                '- Most deprived 20%': L.mapbox.styleLayer('mapbox://styles/davidkane/ck30nnfoj0mj61cpnxh7ijw06', deprivation_options),
             },
             "Boundaries": { 
                 "No boundaries": L.mapbox.featureLayer(null).addTo(map),
                 'Country and Region': L.mapbox.featureLayer(null, boundary_options('#888'))
                     .loadURL('https://opendata.arcgis.com/datasets/01fd6b2d7600446d8af768005992f76a_3.geojson')
                     .bindPopup(boundary_name_field),
+                'Local Authorities': L.layerGroup([
+                    L.mapbox.featureLayer(null, {
+                            style: {fillOpacity: 0.05, color: 'grey', opacity: 0.6, weight: 1},
+                            attribution: boundary_attribution,
+                        })
+                        .loadURL('https://opendata.arcgis.com/datasets/bbb0e58b0be64cc1a1460aa69e33678f_0.geojson')
+                        .bindPopup(boundary_name_field),
+                    L.mapbox.featureLayer(null, {
+                            style: {fill: false, clickable: false, color: 'white', opacity: 0.6, weight: 1.5},
+                            attribution: boundary_attribution,
+                        })
+                        .loadURL('https://opendata.arcgis.com/datasets/c6e8170231034aaa92f4bc21ebf77aec_0.geojson'),
+                ]).bindPopup(boundary_name_field),
                 'Local Authorities (Upper Tier)': L.mapbox.featureLayer(null, boundary_options('red'))
                     .loadURL('https://opendata.arcgis.com/datasets/c6e8170231034aaa92f4bc21ebf77aec_0.geojson')
                     .bindPopup(boundary_name_field),
