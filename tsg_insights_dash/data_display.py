@@ -145,7 +145,8 @@ layout = html.Div(id="dashboard-container", className='results-page', children=[
 
 
 @app.callback([Output('dashboard-output', 'children'),
-               Output('whats-next', 'children'), ],
+               Output('whats-next', 'children'), 
+               Output('dashboard-output', 'className'), ],
               [Input('output-data-id', 'data'),
                Input('tabs', 'value')] + [
                   Input('df-change-{}'.format(f), 'value')
@@ -156,6 +157,7 @@ def dashboard_output(fileid, tabid, *args):
     df = get_filtered_df(fileid, **filter_args)
 
     metadata = get_metadata_from_cache(fileid)
+    className = 'results-page__body__content'
 
     if df is None:
         return (
@@ -173,13 +175,14 @@ def dashboard_output(fileid, tabid, *args):
                            href="/"),
                 ], className="results-page__body__section-description"),
             ],
-            None
+            None,
+            className
         )
 
     whatsnext = what_next_missing_fields(df, fileid)
 
     if len(df) == 0:
-        return (html.Div('No grants meet criteria'), whatsnext)
+        return (html.Div('No grants meet criteria'), whatsnext, className)
 
     if tabid == 'giving-map':
         return [
@@ -188,6 +191,7 @@ def dashboard_output(fileid, tabid, *args):
                 # imd_chart(df),
             ],
             None,
+            className + ' giving-map'
         ]
 
     outputs = []
@@ -217,7 +221,7 @@ def dashboard_output(fileid, tabid, *args):
 
     outputs.extend(charts)
 
-    return (outputs, whatsnext)
+    return (outputs, whatsnext, className)
 
 
 def what_next_missing_fields(df, fileid):

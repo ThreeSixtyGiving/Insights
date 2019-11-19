@@ -586,9 +586,11 @@ def imd_chart(df):
 
 def location_map_iframe(fileid, filter_args):
 
+    map_url = url_for('data.create_grants_map', fileid=fileid, **filter_args)
+
     return chart_wrapper(
         html.Iframe(
-            src=url_for('data.create_grants_map', fileid=fileid, **filter_args),
+            src=map_url,
             style={
                 "border": 0,
                 "width": '100%',
@@ -599,7 +601,12 @@ def location_map_iframe(fileid, filter_args):
         description='''
 This map is based on postcodes found in the grants data.
 If postcodes aren’t present, they are sourced from UK
-charity or company registers. Mapping is UK only.'''
+charity or company registers. Mapping is UK only.''',
+        children=[
+            html.Div(className='results-page__body__section-note', children=[
+                html.A(href=map_url, target="_blank", children='Link to this map')
+            ])
+        ]
     )
 
 
