@@ -127,10 +127,10 @@ layout = html.Div(id="dashboard-container", className='results-page', children=[
         ]),
 
         html.Div(className="results-page__body", children=[
-            dcc.Tabs(id="tabs", value='dashboard', children=[
-                dcc.Tab(label='Dashboard', value='dashboard'),
-                dcc.Tab(label='Giving map', value='giving-map'),
-            ]),
+            # dcc.Tabs(id="tabs", value='dashboard', children=[
+            #     dcc.Tab(label='Dashboard', value='dashboard'),
+            #     dcc.Tab(label='Giving map', value='giving-map'),
+            # ]),
             html.Section(className='results-page__body__content',
                          id="dashboard-output"),
             html.Section(
@@ -148,11 +148,12 @@ layout = html.Div(id="dashboard-container", className='results-page', children=[
                Output('whats-next', 'children'), 
                Output('dashboard-output', 'className'), ],
               [Input('output-data-id', 'data'),
-               Input('tabs', 'value')] + [
+            #    Input('tabs', 'value'),
+               ] + [
                   Input('df-change-{}'.format(f), 'value')
                   for f in FILTERS
 ])
-def dashboard_output(fileid, tabid, *args):
+def dashboard_output(fileid, *args):
     filter_args = dict(zip(FILTERS.keys(), args))
     df = get_filtered_df(fileid, **filter_args)
 
@@ -184,15 +185,15 @@ def dashboard_output(fileid, tabid, *args):
     if len(df) == 0:
         return (html.Div('No grants meet criteria'), whatsnext, className)
 
-    if tabid == 'giving-map':
-        return [
-            get_funder_output(df, filter_args.get("grant_programmes")) + [
-                location_map_iframe(fileid, filter_args),
-                # imd_chart(df),
-            ],
-            None,
-            className + ' giving-map'
-        ]
+    # if tabid == 'giving-map':
+    #     return [
+    #         get_funder_output(df, filter_args.get("grant_programmes")) + [
+    #             location_map_iframe(fileid, filter_args),
+    #             # imd_chart(df),
+    #         ],
+    #         None,
+    #         className + ' giving-map'
+    #     ]
 
     outputs = []
 
@@ -209,7 +210,7 @@ def dashboard_output(fileid, tabid, *args):
     charts.append(organisation_type_chart(df))
     # charts.append(org_identifier_chart(df))
     charts.append(region_and_country_chart(df))
-    # charts.append(location_map_iframe(fileid, filter_args))
+    charts.append(location_map_iframe(fileid, filter_args))
     # charts.append(location_map(
     #     df,
     #     app.server.config.get("MAPBOX_ACCESS_TOKEN"),

@@ -3,6 +3,7 @@
 <head>
     <title>Grants Map</title>
     <meta charset="utf-8" />
+    <link rel="stylesheet" href="https://use.typekit.net/nri0jbb.css">
     <link href='https://api.mapbox.com/mapbox.js/v3.2.1/mapbox.css' rel='stylesheet' />
     {# <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.css" 
           integrity="sha256-SHMGCYmST46SoyGgo4YR/9AlK1vf3ff84Aq9yK4hdqM=" crossorigin="anonymous" /> #}
@@ -19,7 +20,33 @@
         html, body, #map {
             height: 100%;
             width: 100%;
+            font-family: neusa-next-std-compact, sans-serif;
         }
+
+        /* use the right font */
+        #map * {
+            font-family: neusa-next-std-compact, sans-serif;
+        }
+        .marker-cluster div span {
+            font-size: 1.2em;
+            line-height: 32px;
+        }
+        .leaflet-control-layers-group {
+            margin-bottom: 1em;
+        }
+        .leaflet-control-layers-group-name {
+            font-size: 1.4em;
+            font-weight: 300;
+            letter-spacing: 0.38px;
+            line-height: 16px;
+            text-transform: uppercase;
+        }
+        .leaflet-control-layers-group label {
+            font-size: 1.2em;
+            font-weight: 300;
+            letter-spacing: 0.38px;
+        }
+        
 
         /* markercluster groups */
         .marker-cluster-small,
@@ -113,14 +140,17 @@
             );
         });
 
+        // add the markers to the map
+        markers.addTo(map);
+
         // fit the map to the bounds of the marker
         map.fitBounds(markers.getBounds(), {maxZoom: 9});
 
         // layers that will be displayed in the data
         var overlays = {
             "Grants data": {
-                "Grants": markers.addTo(map),
-                'All charities (England and Wales)': L.mapbox.styleLayer('mapbox://styles/davidkane/ck36gljmp1tj11cmujpokrea1'),
+                "Grants": markers,
+                'All charities': L.mapbox.styleLayer('mapbox://styles/davidkane/ck36gljmp1tj11cmujpokrea1'),
             },
             "Overlay data": { 
                 "No overlay": L.mapbox.featureLayer(null).addTo(map),
@@ -172,11 +202,11 @@
         };
 
         // add the layer control
-        L.control.groupedLayers({}, overlays, {
+        {# L.control.groupedLayers({}, overlays, {
             exclusiveGroups: ["Overlay data", "Boundaries"],
             collapsed: true,
             hideSingleBase: true,
-        }).addTo(map);
+        }).addTo(map); #}
 
     </script>
 </body>
