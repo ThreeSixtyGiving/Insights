@@ -1,6 +1,7 @@
 import os
 import copy
 
+from flask import url_for
 import dash_core_components as dcc
 import dash_html_components as html
 import plotly.graph_objs as go
@@ -555,9 +556,9 @@ def organisation_age_chart(df):
 
 def imd_chart(df):
     # @TODO: expand to include non-English IMD too
-    chart = CHARTS["org_age"]
+    chart = CHARTS["imd"]
     data = chart['get_results'](df)
-    if not data:
+    if data is None:
         return message_box(
             chart["title"],
             chart.get("missing"),
@@ -581,6 +582,33 @@ def imd_chart(df):
         description=chart.get("desc"),
         children=[chart_n(data.sum(), 'grant')],
     )
+
+
+def location_map_iframe(fileid, filter_args):
+
+    map_url = url_for('data.create_grants_map', fileid=fileid, **filter_args)
+
+    return chart_wrapper(
+        html.Iframe(
+            src=map_url,
+            style={
+                "border": 0,
+                "width": '100%',
+                "height": '650px',
+            }
+        ),
+        'Location of UK grant recipients',
+        description='''
+This map is based on postcodes found in the grants data.
+If postcodes aren’t present, they are sourced from UK
+charity or company registers. Mapping is UK only.''',
+        children=[
+            html.Div(className='results-page__body__section-note', children=[
+                html.A(href=map_url, target="_blank", children='Link to this map')
+            ])
+        ]
+    )
+
 
 def location_map(df, mapbox_access_token=None, mapbox_style=None):
 

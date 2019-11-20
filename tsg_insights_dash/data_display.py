@@ -127,6 +127,10 @@ layout = html.Div(id="dashboard-container", className='results-page', children=[
         ]),
 
         html.Div(className="results-page__body", children=[
+            # dcc.Tabs(id="tabs", value='dashboard', children=[
+            #     dcc.Tab(label='Dashboard', value='dashboard'),
+            #     dcc.Tab(label='Giving map', value='giving-map'),
+            # ]),
             html.Section(className='results-page__body__content',
                          id="dashboard-output"),
             html.Section(
@@ -141,8 +145,11 @@ layout = html.Div(id="dashboard-container", className='results-page', children=[
 
 
 @app.callback([Output('dashboard-output', 'children'),
-               Output('whats-next', 'children'), ],
-              [Input('output-data-id', 'data')] + [
+               Output('whats-next', 'children'), 
+               Output('dashboard-output', 'className'), ],
+              [Input('output-data-id', 'data'),
+            #    Input('tabs', 'value'),
+               ] + [
                   Input('df-change-{}'.format(f), 'value')
                   for f in FILTERS
 ])
@@ -151,6 +158,7 @@ def dashboard_output(fileid, *args):
     df = get_filtered_df(fileid, **filter_args)
 
     metadata = get_metadata_from_cache(fileid)
+    className = 'results-page__body__content'
 
     if df is None:
         return (
@@ -168,13 +176,24 @@ def dashboard_output(fileid, *args):
                            href="/"),
                 ], className="results-page__body__section-description"),
             ],
-            None
+            None,
+            className
         )
 
     whatsnext = what_next_missing_fields(df, fileid)
 
     if len(df) == 0:
-        return (html.Div('No grants meet criteria'), whatsnext)
+        return (html.Div('No grants meet criteria'), whatsnext, className)
+
+    # if tabid == 'giving-map':
+    #     return [
+    #         get_funder_output(df, filter_args.get("grant_programmes")) + [
+    #             location_map_iframe(fileid, filter_args),
+    #             # imd_chart(df),
+    #         ],
+    #         None,
+    #         className + ' giving-map'
+    #     ]
 
     outputs = []
 
@@ -191,18 +210,19 @@ def dashboard_output(fileid, *args):
     charts.append(organisation_type_chart(df))
     # charts.append(org_identifier_chart(df))
     charts.append(region_and_country_chart(df))
-    charts.append(location_map(
-        df,
-        app.server.config.get("MAPBOX_ACCESS_TOKEN"),
-        app.server.config.get("MAPBOX_STYLE")
-    ))
+    charts.append(location_map_iframe(fileid, filter_args))
+    # charts.append(location_map(
+    #     df,
+    #     app.server.config.get("MAPBOX_ACCESS_TOKEN"),
+    #     app.server.config.get("MAPBOX_STYLE")
+    # ))
     charts.append(organisation_age_chart(df))
     charts.append(organisation_income_chart(df))
     # charts.append(imd_chart(df))
 
     outputs.extend(charts)
 
-    return (outputs, whatsnext)
+    return (outputs, whatsnext, className)
 
 
 def what_next_missing_fields(df, fileid):
