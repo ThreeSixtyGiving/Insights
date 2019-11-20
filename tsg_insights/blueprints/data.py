@@ -14,7 +14,7 @@ bp = Blueprint('data', __name__)
 @bp.route('/map/<fileid>')
 def create_grants_map(fileid):
 
-    df = get_filtered_df(fileid, **request.args)
+    df = get_filtered_df(fileid, **dict(request.args.lists()))
 
     if df is None:
         abort(404)
@@ -44,7 +44,7 @@ def create_grants_map(fileid):
 def fetch_file_geojson(fileid):
 
     # @TODO: fetch filters
-    df = get_filtered_df(fileid, **request.args)
+    df = get_filtered_df(fileid, **dict(request.args.lists()))
 
     popup_col = 'Recipient Org:0:Name'
     if popup_col not in df.columns and 'Recipient Org:0:Identifier' in df.columns:
