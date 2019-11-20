@@ -20,6 +20,22 @@
             height: 100%;
             width: 100%;
         }
+
+        /* markercluster groups */
+        .marker-cluster-small,
+        .marker-cluster-small div {
+            background-color: #cddc2b;
+        }
+        .marker-cluster-medium,
+        .marker-cluster-medium div {
+            background-color: #f48320;
+            color: #fff;
+        }
+        .marker-cluster-large,
+        .marker-cluster-large div {
+            background-color: #9c2061;
+            color: #fff;
+        }
     </style>
 </head>
 <body>
@@ -33,38 +49,79 @@
     <script src="{{ url_for('static', filename='js/leaflet.groupedlayercontrol.js') }}"></script>
 
     <script>
+        // Set up mapbox map
         L.mapbox.accessToken = {{mapbox_access_token|tojson}};
         var map = L.mapbox.map('map', null, {
             attributionControl: {compact: true},
         }).setView([-41.2858, 174.78682], 14);
-        {# L.mapbox.styleLayer('mapbox://styles/mapbox/dark-v10').addTo(map) #}
         L.mapbox.styleLayer('mapbox://styles/davidkane/cjvnt2h0007hm1clrbd20bbug').addTo(map)
 
+        // disable scroll when map isn't focused
         map.scrollWheelZoom.disable();
         map.on('focus', function() { map.scrollWheelZoom.enable(); });
         map.on('blur', function() { map.scrollWheelZoom.disable(); });
 
+        // set up attribution for deprivation layer
         var deprivation_options = {
             opacity: 0.8,
             attribution: '<strong>Deprivation</strong>: <a href="https://www.gov.uk/government/statistics/english-indices-of-deprivation-2019" target="_blank">English Indices of Deprivation</a> (<a href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/">OGL</a>)<br>'
         }
         map.attributionControl.addAttribution(deprivation_options['attribution']);
-        map.addControl(L.mapbox.legendControl());
 
+        // ensure mapbox logo is shown (for attribution)
+        document.querySelector('.mapbox-logo').classList.add('mapbox-logo-true');
+
+        // set up attribution for boundary layer
         var boundary_attribution = '<br><strong>Boundaries</strong>: <a href="http://geoportal.statistics.gov.uk/" target="_blank">Office for National Statistics</a>  (<a href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/">OGL</a>)<br>' + 
                           'Contains OS data © Crown copyright and database right {{ current_year }}';
 
-        var boundary_options = function(color){
+        // function for determining style of boundaries
+        var boundary_options = function(style){
+            var defaultStyle = {fillOpacity: 0.05, color: '#53aadd', opacity: 0.6, weight: 1};
             return {
-                style: {fillOpacity: 0.05, color: color, opacity: 0.6, weight: 2},
+                style: Object.assign({}, defaultStyle, style),
                 attribution: boundary_attribution,
             }
         }
+        // function for showing the name of an area
         var boundary_name_field = function(layer){
             var name_field = Object.keys(layer.feature.properties).find(el => el.endsWith("nm"));
             return layer.feature.properties[name_field];
         }
+
+        // create the marker cluster object that will hold the markers
+        var markers = L.markerClusterGroup({
+            singleMarkerMode: true,
+            polygonOptions: {
+                color: '#53aadd'
+            }
+        });
+
+        // dump the data to be used in the markers
+        var geopoints = {{geo.values()|list|tojson}};
+
+        // add each of the markers
+        geopoints.forEach(function(g, index){
+            markers.addLayer(
+                L.marker([g.__geo_lat, g.__geo_long])
+                 .bindPopup(`
+                    <strong>From</strong> ${L.mapbox.sanitize(g["Funding Org:0:Name"])}<br>
+                    <strong>To</strong> ${L.mapbox.sanitize(g["Recipient Org:0:Name"])}<br>
+                    <strong>Amount</strong> ${L.mapbox.sanitize(g["Amount String"])}<br>
+                    <strong>Awarded</strong> ${L.mapbox.sanitize(g["Award Date"])}
+                `)
+            );
+        });
+
+        // fit the map to the bounds of the marker
+        map.fitBounds(markers.getBounds(), {maxZoom: 9});
+
+        // layers that will be displayed in the data
         var overlays = {
+            "Grants data": {
+                "Grants": markers.addTo(map),
+                'All charities (England and Wales)': L.mapbox.styleLayer('mapbox://styles/davidkane/ck36gljmp1tj11cmujpokrea1'),
+            },
             "Overlay data": { 
                 "No overlay": L.mapbox.featureLayer(null).addTo(map),
                 'Deprivation (England - IMD2019 ranks)': L.mapbox.styleLayer('mapbox://styles/davidkane/ck309ufnq0rrx1csftj9515ze', deprivation_options),
@@ -79,65 +136,47 @@
             },
             "Boundaries": { 
                 "No boundaries": L.mapbox.featureLayer(null).addTo(map),
-                'Country and Region': L.mapbox.featureLayer(null, boundary_options('#888'))
+                'Country and Region': L.mapbox.featureLayer(null, boundary_options({weight: 2}))
                     .loadURL('https://opendata.arcgis.com/datasets/01fd6b2d7600446d8af768005992f76a_3.geojson')
                     .bindPopup(boundary_name_field),
                 'Local Authorities': L.layerGroup([
-                    L.mapbox.featureLayer(null, {
-                            style: {fillOpacity: 0.05, color: 'grey', opacity: 0.6, weight: 1},
-                            attribution: boundary_attribution,
-                        })
+                    // Local Authority (lower tier)
+                    L.mapbox.featureLayer(null, boundary_options({
+                            fillOpacity: 0.05,
+                            opacity: 0.3,
+                            weight: 1
+                        }))
                         .loadURL('https://opendata.arcgis.com/datasets/bbb0e58b0be64cc1a1460aa69e33678f_0.geojson')
                         .bindPopup(boundary_name_field),
-                    L.mapbox.featureLayer(null, {
-                            style: {fill: false, clickable: false, color: 'white', opacity: 0.6, weight: 1.5},
-                            attribution: boundary_attribution,
-                        })
+                    // Local Authority (upper tier)
+                    L.mapbox.featureLayer(null, boundary_options({
+                            fill: false,
+                            clickable: false,
+                            opacity: 1,
+                            weight: 1.5
+                        }))
                         .loadURL('https://opendata.arcgis.com/datasets/c6e8170231034aaa92f4bc21ebf77aec_0.geojson'),
                 ]).bindPopup(boundary_name_field),
-                'Local Authorities (Upper Tier)': L.mapbox.featureLayer(null, boundary_options('red'))
-                    .loadURL('https://opendata.arcgis.com/datasets/c6e8170231034aaa92f4bc21ebf77aec_0.geojson')
-                    .bindPopup(boundary_name_field),
-                'Local Authorities (Lower Tier)': L.mapbox.featureLayer(null, boundary_options('pink'))
-                    .loadURL('https://opendata.arcgis.com/datasets/bbb0e58b0be64cc1a1460aa69e33678f_0.geojson')
-                    .bindPopup(boundary_name_field),
-                'Parliamentary Constituencies': L.mapbox.featureLayer(null, boundary_options('green'))
+                'Parliamentary Constituencies': L.mapbox.featureLayer(null, boundary_options())
                     .loadURL('https://opendata.arcgis.com/datasets/47e59e1e38ee4db0af18d57821bb4709_0.geojson')
                     .bindPopup(boundary_name_field),
-                'Clinical Commissioning Groups (England)': L.mapbox.featureLayer(null, boundary_options('blue'))
+                'Clinical Commissioning Groups (England)': L.mapbox.featureLayer(null, boundary_options())
                     .loadURL('https://opendata.arcgis.com/datasets/c3398f0560844f74b76ca4b4136eb6a3_3.geojson')
                     .bindPopup(boundary_name_field),
-                'Local Enterprise Partnerships (England)': L.mapbox.featureLayer(null, boundary_options('blue'))
+                'Local Enterprise Partnerships (England)': L.mapbox.featureLayer(null, boundary_options({
+                        fillOpacity: 0.3
+                    }))
                     .loadURL('https://opendata.arcgis.com/datasets/d4d519d1d1a1455a9b82331228f77489_3.geojson')
                     .bindPopup(boundary_name_field),
             }
         };
 
+        // add the layer control
         L.control.groupedLayers({}, overlays, {
-            exclusiveGroups: Object.keys(overlays),
+            exclusiveGroups: ["Overlay data", "Boundaries"],
             collapsed: true,
             hideSingleBase: true,
         }).addTo(map);
-
-        map.addControl(L.mapbox.legendControl());
-
-        var markers = L.markerClusterGroup({
-            singleMarkerMode: true,
-        });
-
-        {% for g in geo.values() -%}
-            markers.addLayer(
-                L.marker([{{g.__geo_lat|tojson}}, {{g.__geo_long|tojson}}])
-                 .bindPopup(
-                    '<strong>From</strong> ' + {{g["Funding Org:0:Name"]|tojson}} + '<br>' +
-                    '<strong>To</strong> ' + {{g["Recipient Org:0:Name"]|tojson}} + '<br>' +
-                    '<strong>Amount</strong> ' + {{g["Amount String"]|tojson}} + '<br>' +
-                    '<strong>Awarded</strong> ' + {{g["Award Date"]|tojson}}
-                )
-            );
-        {% endfor %}
-        map.addLayer(markers);
-        map.fitBounds(markers.getBounds(), {maxZoom: 9});
 
     </script>
 </body>
