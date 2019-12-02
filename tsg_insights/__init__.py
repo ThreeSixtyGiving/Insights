@@ -37,7 +37,7 @@ def create_app(test_config=None):
 
         # Mapbox maps
         MAPBOX_ACCESS_TOKEN=os.environ.get("MAPBOX_ACCESS_TOKEN"),
-        MAPBOX_STYLE=os.environ.get("MAPBOX_STYLE"),
+        MAPBOX_STYLE=os.environ.get("MAPBOX_STYLE", "mapbox.light"),
 
         # limit of file size for the tool
         FILE_SIZE_LIMIT=int(os.environ.get("FILE_SIZE_LIMIT", 50000000)),

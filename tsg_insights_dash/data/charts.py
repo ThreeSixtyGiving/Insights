@@ -2,12 +2,13 @@ import os
 import copy
 import datetime
 
+from flask import url_for
 import dash_core_components as dcc
 import dash_html_components as html
 import plotly.graph_objs as go
 import pandas as pd
 
-from tsg_insights.data.utils import list_to_string, pluralize, get_unique_list, format_currency
+from tsg_insights.data.utils import list_to_string, pluralize, get_unique_list, format_currency, get_currency_name
 from .results import CHARTS, get_statistics
 
 DEFAULT_TABLE_FIELDS = ["Title", "Description", "Amount Awarded", 
@@ -135,7 +136,7 @@ def series_to_list(data):
                     children=i[0],
                 ),
                 " (",
-                html.Span(children=i[1]),
+                html.Span(children="{:,.0f}".format(i[1])),
                 ") ",
             ]
         )
@@ -152,8 +153,8 @@ def funder_chart(df):
         return
     elif len(data) > 14:
         return chart_wrapper(
-            series_to_list(data[0:10]),
-            pluralize("Funder", len(data)),
+            series_to_list(data),
+            chart['title'],
             subtitle=chart.get("units"),
             description="Showing 10 largest funders of {}".format(len(data)) if len(data) > 10 else "",
         )
@@ -196,8 +197,12 @@ def grant_programme_chart(df):
         return
     elif len(data) > 14:
         return chart_wrapper(
-            series_to_list(data[0:10]),
-            pluralize("Grant programme", len(data)),
+            html.Div(className='results-page__body__section-note', children=[
+                "{:,.0f} grant programmes included in results. 10 biggest grant programmes: ".format(
+                    len(data)),
+                series_to_list(data[:10]),
+            ]),
+            chart['title'],
             subtitle=chart.get("units"),
             description="Showing 10 largest grant programmes of {}".format(len(data)) if len(data) > 10 else "",
         )
@@ -234,18 +239,21 @@ def amount_awarded_chart(df):
     #     data.loc[:, "GBP"] = data["USD"]
     units = chart.get("units", "")
 
-    currencies = list(data.keys())
+    data = data.reindex(data.sum().sort_values(ascending=False).index, axis=1)
     
     # replace £ signs if there's more than one currency
-    if (len(currencies) > 1) or (currencies[0] not in ["GBP", "EUR", "USD"]):
-        # data.index = data.index.astype(str).str.replace("£", "")
-        units += ' Currencies: {}'.format(list_to_string(currencies))
-    elif "USD" in data.keys():
-        # data.index = data.index.astype(str).str.replace("£", "$")
-        units += ' Currency: {}'.format(list_to_string(currencies))
-    elif "EUR" in data.keys():
-        # data.index = data.index.astype(str).str.replace("£", "€")
-        units += ' Currency: {}'.format(list_to_string(currencies))
+    currencies = list_to_string([
+        get_currency_name(c) for c in data.columns.tolist()
+    ])
+    if (len(data.columns) > 1) or (data.columns[0] not in ["GBP", "EUR", "USD"]):
+        data.index = data.index.astype(str).str.replace("£", "")
+        units += ' Currencies: {}'.format(currencies)
+    elif "USD" in data.columns:
+        data.index = data.index.astype(str).str.replace("£", "$")
+        units += ' Currency: {}'.format(currencies)
+    elif "EUR" in data.columns:
+        data.index = data.index.astype(str).str.replace("£", "€")
+        units += ' Currency: {}'.format(currencies)
     
     n = sum([sum([j[1] for j in i]) for i in data.values()])
 
@@ -255,15 +263,38 @@ def amount_awarded_chart(df):
         "EUR": 2,
     }
 
+    def bar_data_with_visibility(values, visibility=None, **kwargs):
+        bar = get_bar_data(values, **kwargs)
+        if visibility:
+            bar["visible"] = visibility
+        return bar
+
+    if len(data.columns) > 1:
+        bars = [bar_data_with_visibility(
+            series[1],
+            visibility=None if k == 0 else 'legendonly',
+            name="{} ({}{})".format(
+                get_currency_name(series[0]),
+                series[1].sum(),
+                " grants" if k == 0 else "",
+            ),
+            colour=colours.get(series[0], k+3),
+        ) for k, series in enumerate(data.iteritems())]
+    else:
+        bars = [get_bar_data(
+            series[1],
+            name="{} ({} grants)".format(
+                get_currency_name(series[0]),
+                series[1].sum()
+            ),
+            colour=colours.get(series[0], k+3),
+        ) for k, series in enumerate(data.iteritems())]
+
     return chart_wrapper(
         dcc.Graph(
             id="amount_awarded_chart",
             figure={
-                'data': [get_bar_data(
-                    series[1],
-                    name=series[0],
-                    colour=colours.get(series[0], k+3),
-                ) for k, series in enumerate(data.items())],
+                'data': bars,
                 'layout': DEFAULT_LAYOUT
             },
             config=DEFAULT_CONFIG
@@ -428,7 +459,7 @@ def region_and_country_chart(df):
 
 def organisation_type_chart(df):
     chart = CHARTS['org_type']
-    data = chart['get_results'](df)
+    data = chart['get_results'](df).sort_values(ascending=False)
     title = chart["title"]
     subtitle = chart.get("units")
     description = html.P('''Organisation type is based on official organisation identifiers,
@@ -449,6 +480,15 @@ def organisation_type_chart(df):
             ''', className='results-page__body__section-note'))
         data = [i for i in data if i[0] != "Identifier not recognised"]
 
+    if len(data) > 10:
+        others = data.iloc[10:]
+        children = [
+            html.P('The following types are also found in the data:',
+                   className='results-page__body__section-note'),
+            series_to_list(others),
+        ] + children
+        data = data.head(10)
+
     if len(data) > 4:
         layout = copy.deepcopy(DEFAULT_LAYOUT)
         layout['yaxis']['visible'] = True
@@ -458,7 +498,7 @@ def organisation_type_chart(df):
             dcc.Graph(
                 id="organisation_type_chart",
                 figure={
-                    'data': [get_bar_data(data, chart_type='column')],
+                    'data': [get_bar_data(data.iloc[::-1], chart_type='column')],
                     'layout': layout
                 },
                 config=DEFAULT_CONFIG
@@ -552,9 +592,9 @@ def organisation_age_chart(df):
 
 def imd_chart(df):
     # @TODO: expand to include non-English IMD too
-    chart = CHARTS["org_age"]
+    chart = CHARTS["imd"]
     data = chart['get_results'](df)
-    if not data:
+    if data is None:
         return message_box(
             chart["title"],
             chart.get("missing"),
@@ -578,6 +618,33 @@ def imd_chart(df):
         description=chart.get("desc"),
         children=[chart_n(data.sum(), 'grant')],
     )
+
+
+def location_map_iframe(fileid, filter_args):
+
+    map_url = url_for('data.create_grants_map', fileid=fileid, **filter_args)
+
+    return chart_wrapper(
+        html.Iframe(
+            src=map_url,
+            style={
+                "border": 0,
+                "width": '100%',
+                "height": '650px',
+            }
+        ),
+        'Location of UK grant recipients',
+        description='''
+This map is based on postcodes found in the grants data.
+If postcodes aren’t present, they are sourced from UK
+charity or company registers. Mapping is UK only.''',
+        children=[
+            html.Div(className='results-page__body__section-note', children=[
+                html.A(href=map_url, target="_blank", children='Link to this map')
+            ])
+        ]
+    )
+
 
 def location_map(df, mapbox_access_token=None, mapbox_style=None):
 
@@ -611,22 +678,38 @@ def location_map(df, mapbox_access_token=None, mapbox_style=None):
             '''Map cannot be shown. No location data is available.''',
             error=True
         )
-        
-    data = [
+
+    include_density = len(geo) > 1000
+
+    data = []
+    if include_density:
+        data.append(
+            go.Densitymapbox(
+                lat=geo["__geo_lat"].values,
+                lon=geo["__geo_long"].values,
+                z=geo["grants"].values,
+                showscale=False,
+                hoverinfo="none",
+                colorscale=[[0, 'rgb(0,0,0)'], [1, THREESIXTY_COLOURS[0]]]
+            )
+        )
+
+    data.append(
         go.Scattermapbox(
             lat=geo["__geo_lat"].values,
             lon=geo["__geo_long"].values,
             mode='markers',
             marker=dict(
-                size=9,
-                color=THREESIXTY_COLOURS[0]
+                size=2 if include_density else 8,
+                color=THREESIXTY_COLOURS[0],
             ),
+            hoverinfo='text',
             text=geo.apply(
                 lambda row: "{} ({} grants)".format(row[popup_col], row['grants']) if row["grants"] > 1 else row[popup_col],
                 axis=1
             ).values,
         )
-    ]
+    )
 
     layout = go.Layout(
         autosize=True,
@@ -641,7 +724,7 @@ def location_map(df, mapbox_access_token=None, mapbox_style=None):
             ),
             pitch=0,
             zoom=5,
-            style=mapbox_style
+            style=mapbox_style,
         ),
         margin=go.layout.Margin(
             l=0,
@@ -656,7 +739,13 @@ def location_map(df, mapbox_access_token=None, mapbox_style=None):
         dcc.Graph(
             id='grant_location_chart',
             figure={"data": data, "layout": layout},
-            config=DEFAULT_CONFIG
+            config={
+                'displayModeBar': 'hover',
+                'modeBarButtons': [[
+                    'toImage', 'sendDataToCloud'
+                ]],
+                'scrollZoom': 'mapbox',
+            }
         ),
         'Location of UK grant recipients',
         description='''Showing the location of **{:,.0f}** grants out of {:,.0f}
@@ -672,48 +761,92 @@ charity or company registers. Mapping is UK only.'''.format(
 def get_statistics_output(df):
     stats = get_statistics(df)
 
-    return html.Div(
-        className='results-page__body__content__spheres',
-        children=[
-            html.Div(
-                className='results-page__body__content__sphere',
-                style={'backgroundColor': THREESIXTY_COLOURS[0]},
-                children=[
-                    html.P(className='', children="{:,.0f}".format(stats["grants"])),
-                    html.H4(className='', children=pluralize("grant", stats["grants"]))
-                ]
-            ),
-            html.Div(
-                className='results-page__body__content__sphere',
-                style={'backgroundColor': THREESIXTY_COLOURS[1]},
-                children=[
-                    html.P(className='', children="{:,.0f}".format(stats["recipients"])),
-                    html.H4(className='', children=pluralize("recipient", stats["recipients"]))
-                ]
-            ),
-        ] + [
-            html.Div(
-                className='results-page__body__content__sphere',
-                style={'backgroundColor': THREESIXTY_COLOURS[3]},
-                children=[
-                    html.P(className='', children=i[0]),
-                    html.H4(className='', children=i[1]),
-                    html.H4(className='', children="Total"),
-                ]
-            ) for i in stats["amount_awarded"]
-        ] + [
-            html.Div(
-                className='results-page__body__content__sphere',
-                style={
-                    'backgroundColor': THREESIXTY_COLOURS[2], 'color': '#0b2833'},
-                children=[
-                    html.P(className='', children=i[0]),
-                    html.H4(className='', children=i[1]),
-                    html.H4(className='', children="(Average grant)"),
-                ]
-            ) for i in stats["mean_grant"]
-        ]
-    )
+    c = list(stats["currencies"].items())
+    main_currency = c[0][1]
+    other_currencies = {v[0]: v[1] for v in c[1:]}
+
+    others = [
+        html.P('*median'),
+    ]
+
+    if other_currencies:
+        others.extend([
+            html.P([
+                'These results include grants in {} currencies. '.format(len(c)),
+                'The amounts above refer to {:,.0f} grants in {}. '.format(
+                    main_currency['grants'],
+                    get_currency_name(c[0][0])
+                ),
+                html.Br(),
+                'There is also ',
+                list_to_string([
+                    '{} in {:,.0f} {} ({})'.format(
+                        " ".join(v['total_f']),
+                        v["grants"],
+                        pluralize("grant", v["grants"]),
+                        get_currency_name(k)
+                    ) for k, v in other_currencies.items()
+                ]),
+            ]),
+        ])
+    elif c[0][0] != "GBP":
+        others.extend([
+            html.P([
+                'These results show grants made in {}.'.format(
+                    get_currency_name(c[0][0])
+                ),
+            ])
+        ])
+
+    return [
+        html.Div(
+            className='results-page__body__content__spheres',
+            children=[
+                html.Div(
+                    className='results-page__body__content__sphere',
+                    style={'backgroundColor': THREESIXTY_COLOURS[0]},
+                    children=[
+                        html.P(className='', children="{:,.0f}".format(stats["grants"])),
+                        html.H4(className='', children=pluralize("grant", stats["grants"]))
+                    ]
+                ),
+                html.Div(
+                    className='results-page__body__content__sphere',
+                    style={'backgroundColor': THREESIXTY_COLOURS[1]},
+                    children=[
+                        html.P(className='', children="{:,.0f}".format(stats["recipients"])),
+                        html.H4(className='', children=pluralize("recipient", stats["recipients"]))
+                    ]
+                ),
+            ] + [
+                html.Div(
+                    className='results-page__body__content__sphere',
+                    style={'backgroundColor': THREESIXTY_COLOURS[3]},
+                    children=[
+                        html.P(className='', children=main_currency["total_f"][0]),
+                        html.H4(className='',
+                                children=main_currency["total_f"][1]),
+                        html.H4(className='', children="Total"),
+                    ]
+                )
+            ] + [
+                html.Div(
+                    className='results-page__body__content__sphere',
+                    style={
+                        'backgroundColor': THREESIXTY_COLOURS[2], 'color': '#0b2833'},
+                    children=[
+                        html.P(className='', children=main_currency["median_f"][0]),
+                        html.H4(className='', children=main_currency["median_f"][1]),
+                        html.H4(className='', children="(Average* grant)"),
+                    ]
+                )
+            ]
+        ),
+        html.Div(
+            className='results-page__body__section-attribution',
+            children=others
+        ),
+    ]
 
 def get_funder_output(df, grant_programme=[]):
     

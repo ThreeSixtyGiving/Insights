@@ -127,6 +127,10 @@ layout = html.Div(id="dashboard-container", className='results-page', children=[
         ]),
 
         html.Div(className="results-page__body", children=[
+            # dcc.Tabs(id="tabs", value='dashboard', children=[
+            #     dcc.Tab(label='Dashboard', value='dashboard'),
+            #     dcc.Tab(label='Giving map', value='giving-map'),
+            # ]),
             html.Section(className='results-page__body__content',
                          id="dashboard-output"),
             html.Section(
@@ -141,17 +145,20 @@ layout = html.Div(id="dashboard-container", className='results-page', children=[
 
 
 @app.callback([Output('dashboard-output', 'children'),
-               Output('whats-next', 'children'), ],
-              [Input('output-data-id', 'data')] + [
+               Output('whats-next', 'children'), 
+               Output('dashboard-output', 'className'), ],
+              [Input('output-data-id', 'data'),
+            #    Input('tabs', 'value'),
+               ] + [
                   Input('df-change-{}'.format(f), 'value')
                   for f in FILTERS
 ])
 def dashboard_output(fileid, *args):
     filter_args = dict(zip(FILTERS.keys(), args))
     df = get_filtered_df(fileid, **filter_args)
-    logging.debug("dashboard_output", fileid, df is None)
 
     metadata = get_metadata_from_cache(fileid)
+    className = 'results-page__body__content'
 
     if df is None:
         return (
@@ -169,13 +176,24 @@ def dashboard_output(fileid, *args):
                            href="/"),
                 ], className="results-page__body__section-description"),
             ],
-            None
+            None,
+            className
         )
 
     whatsnext = what_next_missing_fields(df, fileid)
 
     if len(df) == 0:
-        return (html.Div('No grants meet criteria'), whatsnext)
+        return (html.Div('No grants meet criteria'), whatsnext, className)
+
+    # if tabid == 'giving-map':
+    #     return [
+    #         get_funder_output(df, filter_args.get("grant_programmes")) + [
+    #             location_map_iframe(fileid, filter_args),
+    #             # imd_chart(df),
+    #         ],
+    #         None,
+    #         className + ' giving-map'
+    #     ]
 
     outputs = []
 
@@ -192,6 +210,7 @@ def dashboard_output(fileid, *args):
     charts.append(organisation_type_chart(df))
     # charts.append(org_identifier_chart(df))
     charts.append(region_and_country_chart(df))
+    charts.append(location_map_iframe(fileid, filter_args))
     # charts.append(location_map(
     #     df,
     #     app.server.config.get("MAPBOX_ACCESS_TOKEN"),
@@ -203,7 +222,7 @@ def dashboard_output(fileid, *args):
 
     outputs.extend(charts)
 
-    return (outputs, whatsnext)
+    return (outputs, whatsnext, className)
 
 
 def what_next_missing_fields(df, fileid):
@@ -315,8 +334,7 @@ def what_next_missing_fields(df, fileid):
 @app.callback(Output('award-dates', 'data'),
               [Input('output-data-id', 'data')])
 def award_dates_change(fileid):
-    df = get_filtered_df(fileid)
-    logging.debug("award_dates_change", fileid, df is None)
+    df = get_from_cache(fileid)
     if df is None:
         return {f: FILTERS[f]["defaults"] for f in FILTERS}
 
@@ -336,8 +354,6 @@ def award_dates_change(fileid):
 
 def dropdown_filter(filter_id, filter_def):
     def dropdown_filter_func(value, n_clicks, existing_value, container):
-        logging.debug("dropdown", filter_id, filter_def, value,
-                      n_clicks, existing_value, container)
         value = value if value else {filter_id: filter_def["defaults"]}
 
         # container style

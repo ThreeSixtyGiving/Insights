@@ -23,8 +23,14 @@ def cli_start_worker():
 
     with Connection(conn):
         if hasattr(os, 'fork'):
-            worker = Worker(map(Queue, listen))
+            worker = Worker(
+                map(Queue, listen),
+                log_job_description=False
+            )
         else:
             from rq_win import WindowsWorker
-            worker = WindowsWorker(map(Queue, listen))
+            worker = WindowsWorker(
+                map(Queue, listen),
+                log_job_description=False
+            )
         worker.work()

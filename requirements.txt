@@ -57,7 +57,7 @@ openpyxl==2.5.8
 packaging==19.1
 pandas==0.23.3
 percy==2.0.2
-plotly==4.1.0
+plotly==4.3.0
 pluggy==0.8.1
 promise==2.2.1
 psycopg2==2.8.3

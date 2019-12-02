@@ -100,14 +100,22 @@ def get_imd_data(df):
 
 
 def get_statistics(df):
+    curr_gb = df.groupby("Currency")
+    currencies = pd.DataFrame({
+        "total": curr_gb["Amount Awarded"].sum(),
+        "median": curr_gb["Amount Awarded"].median(),
+        "grants": curr_gb.size(),
+        "recipients": curr_gb["Recipient Org:0:Identifier"].nunique(),
+    })
+    currencies = currencies.sort_values("grants", ascending=False).to_dict('index')
+    for c in currencies:
+        currencies[c]["total_f"] = format_currency(currencies[c]["total"], c)
+        currencies[c]["median_f"] = format_currency(currencies[c]["median"], c)
 
     return {
-        "grants": df["summary"][0]["grants"],
-        "recipients": df["summary"][0]["recipients"],
-        "amount_awarded": [format_currency(v['value'], v['currency'])
-                           for v in df["summary"][0]["grantAmount"]],
-        "mean_grant": [format_currency(v['value'], v['currency'])
-                       for v in df["summary"][0]["meanGrant"]],
+        "grants": len(df),
+        "recipients": df["Recipient Org:0:Identifier"].unique().size,
+        "currencies": currencies,
         "award_years": {
             "min": df["summary"][0]["minDate"][0:4],
             "max": df["summary"][0]["maxDate"][0:4],
