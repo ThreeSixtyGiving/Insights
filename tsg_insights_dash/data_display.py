@@ -152,7 +152,7 @@ layout = html.Div(id="dashboard-container", className='results-page', children=[
                ] + [
                   Input('df-change-{}'.format(f), 'value')
                   for f in FILTERS
-])
+               ])
 def dashboard_output(fileid, *args):
     filter_args = dict(zip(FILTERS.keys(), args))
     df = get_filtered_df(fileid, **filter_args)

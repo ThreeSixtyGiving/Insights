@@ -108,6 +108,13 @@ def cli_fetch_companies():
             db.session.execute(upsert_statement, objects)
             db.session.commit()
 
+@cli.command('clearcache')
+@with_appcontext
+def cli_clear_cache():
+    cache.clear()
+    logging.info("Cache cleared")
+
+
 @cli.command('charities')
 @with_appcontext
 def cli_fetch_charities():
@@ -316,6 +323,7 @@ def cli_fetch_grants(dataset, infile=None, datastore_url=None):
 
     if infile:
         logging.info("Loading grants from file: {}".format(infile))
+
         # open the grants file
         data_source = open(infile, mode='r', encoding='utf-8')
 
@@ -471,6 +479,7 @@ def cli_update_grants(dataset, stage):
                     when "fundingOrganization_id" ilike 'GB-LAN-%' then 'Local Authority'
                     when "fundingOrganization_id" ilike 'GB-LAS-%' then 'Local Authority'
                     when "fundingOrganization_id" ilike 'GB-PLA-%' then 'Local Authority'
+                    when "fundingOrganization_name" ilike '%Community Foundation%' then 'Community Foundation'
                     else 'Charitable Funder' end
             where "grant"."dataset" = :dataset''',
         "Produce ID scheme": '''update "grant"
