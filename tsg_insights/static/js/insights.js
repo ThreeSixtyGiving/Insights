@@ -1,6 +1,39 @@
 const selectedFilters = {};
 const THREESIXTY_COLOURS = ['#9c2061', '#f48320', '#cddc2b', '#53aadd'];
 
+const sections = {
+    byFunderType: function (itemData) {
+        var data = itemData.filter(x => x.bucketId); // only include grants where the label is present
+        data.sort((a, b) => b.grants - a.grants); // sort by the largest values
+        var values = data.map(x => x.grants); // get the values
+        var labels = data.map(x => x.bucketId); // label to use for the funder
+        var totalValues = values.reduce((a, b) => a + b, 0); // get the total N for the data
+
+        var chart = render_figure(
+            "Funder types",
+            "(Number of grants)",
+            `Based on ${format_number(totalValues).join("")} grants.`,
+        );
+        render_chart(chart, values, labels);
+        return chart
+    },
+    byFunder: function (itemData) {
+        var data = itemData.filter(x => x.bucketId); // only include grants where the label is present
+        data.sort((a, b) => b.grants - a.grants); // sort by the largest values
+        var values = data.map(x => x.grants); // get the values
+        var labels = data.map(x => x.bucket2Id); // label to use for the funder
+        var totalValues = values.reduce((a, b) => a + b, 0); // get the total N for the data
+
+        var chart = render_figure(
+            "Funders",
+            "(Number of grants)",
+            `Based on ${format_number(totalValues).join("")} grants.`,
+        );
+        render_chart(chart, values, labels);
+        return chart
+    },
+};
+
 const render_filters = function(data) {
     var filterForm = document.getElementById("dashboard-filter-items");
     filterForm.innerHTML = '';
@@ -148,7 +181,7 @@ query fetchFilters($dataset: String!) {
 
 const format_number = function(value, currency, suffixType){
 
-    var suffix = null;
+    var suffix = '';
     var dp = 0;
     if (suffixType!==false){
         if(value > 1000000000){
@@ -224,40 +257,49 @@ const render_summary = function(data){
     });
 }
 
-const render_chart = function (title, data, container) {
-    // funder type chart
-    var chartTemplate = document.getElementById("chart-wrapper-template");
-    var funderTypeChart = document.importNode(chartTemplate.content, true);
-
-    data = data.filter(x => x.bucketId); // only include grants where the label is present
-    data.sort((a, b) => b.grants - a.grants); // sort by the largest values
-    var values = data.map(x => x.grants); // get the values
-    // create the labels
-    if(title=='byFunder'){
-        var labels = data.map(x => x.bucket2Id);
-    } else {
-        var labels = data.map(x => x.bucketId);
+const render_figure = function (title, subtitle, note, child) {
+    var figureTemplate = document.getElementById("chart-wrapper-template");
+    var figure = document.importNode(figureTemplate.content, true);
+    figure.querySelector(".results-page__body__section-title").innerText = title;
+    figure.querySelector(".results-page__body__section-subtitle").innerText = subtitle;
+    figure.querySelector(".results-page__body__section-note").innerText = note;
+    if(child){
+        figure.querySelector(".figure-contents").append(child);
     }
-    var totalValues = values.reduce((a, b) => a + b, 0); // get the total N for the data
-    funderTypeChart.querySelector('.figure-n').innerText = format_number(totalValues).join("");
-    funderTypeChart.querySelector(".results-page__body__section-title").innerText = title; // set the page title
+    return figure
+}
 
-    if(values.length > 15){
-        var placeholder = document.createElement("p");
-        placeholder.innerText = `${format_number(values.length)} values`;
-        funderTypeChart.appendChild(placeholder);
-        container.appendChild(funderTypeChart);
-        return;
-    } else if (values.length == 1) {
-        var placeholder = document.createElement("p");
-        placeholder.innerText = `${labels[0]} (${values[0]})`;
-        funderTypeChart.appendChild(placeholder);
-        container.appendChild(funderTypeChart);
-        return;
-    }
+const render_chart = function (chart, values, labels) {
+    console.log(values);
+    console.log(labels);
 
-    console.log(data);
-    Plotly.plot(funderTypeChart.querySelector(".js-plotly-plot"), [{
+    // data = data.filter(x => x.bucketId); // only include grants where the label is present
+    // data.sort((a, b) => b.grants - a.grants); // sort by the largest values
+    // var values = data.map(x => x.grants); // get the values
+    // // create the labels
+    // if(title=='byFunder'){
+    //     var labels = data.map(x => x.bucket2Id);
+    // } else {
+    //     var labels = data.map(x => x.bucketId);
+    // }
+    // var totalValues = values.reduce((a, b) => a + b, 0); // get the total N for the data
+
+    // note = `Based on ${format_number(totalValues).join("")} grants.`;
+    // subtitle = '(Number of grants)'
+
+    // if(values.length > 15){
+    //     var placeholder = document.createElement("p");
+    //     placeholder.innerText = `${format_number(values.length).join("")} values`;
+    //     return render_figure(title, subtitle, note, placeholder);
+    // } else if (values.length == 1) {
+    //     var placeholder = document.createElement("p");
+    //     placeholder.innerText = `${labels[0]} (${values[0]})`;
+    //     return render_figure(title, subtitle, note, placeholder);
+    // }
+
+    // var chart = render_figure(title, subtitle, note);
+    // console.log(data);
+    Plotly.plot(chart.querySelector(".figure-contents"), [{
         x: labels,
         y: values,
         text: values.map(x => format_number(x).join("")),
@@ -270,7 +312,7 @@ const render_chart = function (title, data, container) {
         },
         hoverinfo: 'text+x',
         type: 'bar',
-        name: title,
+        // name: title,
         marker: {
             color: THREESIXTY_COLOURS[0]
         },
@@ -315,7 +357,7 @@ const render_chart = function (title, data, container) {
         scrollZoom: 'gl3d',
     });
 
-    container.appendChild(funderTypeChart);
+    return chart;
 }
 
 const render_data = function (data) {
@@ -324,13 +366,15 @@ const render_data = function (data) {
     for(const [title, itemData] of Object.entries(data.data.grants)){
         if(title=='summary'){
             render_summary(data.data.grants);
-        } else if(title=='byAmountAwarded') {
-            var newItemData = itemData.filter(d => d.bucketId == 'GBP').map(d => Object.assign(d, {
-                bucketId: d.bucket2Id
-            }))
-            render_chart(title, newItemData, dashboardOutput);
-        } else {
-            render_chart(title, itemData, dashboardOutput);
+        } else if(title in sections){
+            dashboardOutput.append(sections[title](itemData))
+        // } else if(title=='byAmountAwarded') {
+        //     var newItemData = itemData.filter(d => d.bucketId == 'GBP').map(d => Object.assign(d, {
+        //         bucketId: d.bucket2Id
+        //     }))
+        //     dashboardOutput.append(render_chart(title, newItemData));
+        // } else {
+        //     dashboardOutput.append(render_chart(title, itemData));
         }
     }
 }

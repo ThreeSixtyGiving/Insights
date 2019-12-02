@@ -30,7 +30,7 @@
             <h2 class="results-page__body__section-title">Amount awarded</h2>
             <p class="results-page__body__section-subtitle">(number of grants)</p>
         </figcaption>
-        <div id="" class="js-plotly-plot"></div>
+        <div id="" class="figure-contents"></div>
         <div class="results-page__body__section-note">Based on <span class="figure-n"></span> grants.</div>
     </figure>
 </template>
@@ -48,10 +48,8 @@
             <h3 class="results-page__menu__section-title">Filters</h3>
             <form id="filters-form">
                 <div class="cf">
-                    <form id="dashboard-filter" class="">
-                        <div id="dashboard-filter-items"></div>
-                    </form>
-                </div><!-- react-empty: 111 -->
+                    <div id="dashboard-filter-items"></div>
+                </div>
             </form>
         </aside>
         <div class="results-page__body">
@@ -84,7 +82,7 @@
                         <h4 class="">(Average grant)</h4>
                     </div>
                 </div>
-                <p class="results-page__body__section-attribution">
+                <div class="results-page__body__section-attribution">
                     <p><strong>From the 360Giving data registry</strong></p>
                     <p>
                         Published by
@@ -98,7 +96,7 @@
                     <p><a href="http://www.essexcommunityfoundation.org.uk/images/uploads/ECF_Grants_Awarded.xlsx"
                             target="_blank">Download original file</a>(xlsx)
                     </p>
-                </p>
+                </div>
             </section>
             <section id="dashboard-output" class="results-page__body__content"></section>
             <section id="whats-next" class="results-page__body__whats-next">
