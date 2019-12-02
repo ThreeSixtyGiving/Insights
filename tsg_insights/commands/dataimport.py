@@ -7,6 +7,7 @@ import codecs
 from datetime import datetime
 from io import TextIOWrapper
 from timeit import default_timer
+import os
 
 import click
 from flask import Flask, url_for, current_app
@@ -14,6 +15,7 @@ from flask.cli import AppGroup, with_appcontext
 import requests
 import requests_cache
 from tqdm import tqdm
+import sqlalchemy
 from sqlalchemy.sql import text
 
 from ..db import db, cache
@@ -306,25 +308,58 @@ def cli_fetch_postcodes():
 
 @cli.command('grants')
 @click.argument('dataset')
-@click.argument('infile')
+@click.option('--infile', default=None)
+@click.option('--datastore-url', default=None, envvar='DATASTORE_URL')
 @with_appcontext
-def cli_fetch_grants(dataset, infile):
+def cli_fetch_grants(dataset, infile=None, datastore_url=None):
     logging.info("Starting to import grants")
+
+    if infile:
+        logging.info("Loading grants from file: {}".format(infile))
+        # open the grants file
+        data_source = open(infile, mode='r', encoding='utf-8')
+
+        # open the file
+        result = csv.DictReader(data_source)
+
+    else:
+
+        logging.info("Loading grants from datastore")
+        datastore_engine = sqlalchemy.create_engine(datastore_url)
+        data_source = datastore_engine.connect()
+        result = data_source.execute('''
+    select data->>'id' as "id",
+        data->>'title' as title,
+        data->>'description' as description,
+        data->>'currency' as currency,
+        (data->>'amountAwarded')::float as "amountAwarded",
+        to_date(data->>'awardDate', 'YYYY-MM-DD') as "awardDate",
+        to_date(data->'plannedDates'->0->>'startDate', 'YYYY-MM-DD') as "plannedDates.0.startDate",
+        to_date(data->'plannedDates'->0->>'endDate', 'YYYY-MM-DD') as "plannedDates.0.endDate",
+        data->'plannedDates'->0->>'duration' as "plannedDates.0.duration",
+        data->'recipientOrganization'->0->>'id' as "recipientOrganization.0.id",
+        data->'recipientOrganization'->0->>'name' as "recipientOrganization.0.name",
+        data->'recipientOrganization'->0->>'charityNumber' as "recipientOrganization.0.charityNumber",
+        data->'recipientOrganization'->0->>'companyNumber' as "recipientOrganization.0.companyNumber",
+        data->'recipientOrganization'->0->>'postalCode' as "recipientOrganization.0.postalCode",
+        data->'fundingOrganization'->0->>'id' as "fundingOrganization.0.id",
+        data->'fundingOrganization'->0->>'name' as "fundingOrganization.0.name",
+        data->'fundingOrganization'->0->>'department' as "fundingOrganization.0.department",
+        data->'grantProgramme'->0->>'title' as "grantProgramme.0.title"
+    from view_latest_grant
+            ''')
 
     # @TODO: remove existing grants first
 
     # get the update statements
     upsert_statement = Grant.upsert_statement()
 
-    # open the grants file
-    data_csv = open(infile, mode='r', encoding='utf-8')
-
-    # open the file
-    reader = csv.DictReader(data_csv)
     row_count = 0
     objects = []
 
     def parse_date(value, dformat='%Y-%m-%d'):
+        if not isinstance(value, str):
+            return value
         if not value:
             return None
         return datetime.strptime(value, dformat)
@@ -334,7 +369,11 @@ def cli_fetch_grants(dataset, infile):
             return "360G"
         return "-".join(value.split("-")[:2])
 
-    for i, row in tqdm(enumerate(reader)):
+    for i, row in tqdm(enumerate(result)):
+
+        if isinstance(row, sqlalchemy.engine.result.RowProxy):
+            row = dict(row)
+
         grant = Grant(
             dataset= dataset,
             id= row.get('id'),
@@ -366,6 +405,7 @@ def cli_fetch_grants(dataset, infile):
                     'grantProgramme.0.title') else None,
         )
         objects.append(grant.__dict__)
+        row_count += 1
 
         if len(objects) == 1000:
             db.session.execute(upsert_statement, objects)
@@ -376,7 +416,8 @@ def cli_fetch_grants(dataset, infile):
     db.session.commit()
     objects = []
 
-    data_csv.close()
+    data_source.close()
+    logging.info("Inserted {:,.0f} grants into database".format(row_count))
 
     # afterwards need to:
     #  - clean company number
