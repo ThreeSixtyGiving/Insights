@@ -118,7 +118,7 @@ def get_bar_data(values, name="Grants", chart_type='bar', colour=0):
     if chart_type=='column':
         bar_data['type'] = 'bar'
         bar_data['orientation'] = 'h'
-        bar_data['hoverinfo'] = 'text',
+        bar_data['hoverinfo'] = 'text'
         x = bar_data['x']
         bar_data['x'] = bar_data['y']
         bar_data['y'] = x

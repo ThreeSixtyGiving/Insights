@@ -3,7 +3,7 @@ import { FunderNames } from './Results/FunderNames.jsx'
 import { SummaryList } from './Results/SummaryList.jsx'
 
 export const DashboardHeader = function(props) {
-    return <section id="dashboard-header" className="results-page__body__content">
+    return <React.Fragment>
         <FunderNames summary={props.summary} byFunder={props.byFunder} />
         <SummaryList summary={props.summary} />
         <div className="results-page__body__section-attribution">
@@ -21,5 +21,5 @@ export const DashboardHeader = function(props) {
                 target="_blank">Download original file</a>(xlsx)
                         </p>
         </div>
-    </section>
+    </React.Fragment>
 }

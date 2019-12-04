@@ -14,8 +14,8 @@ export const Dashboard = function(props) {
         query={fetchGrants}
         variables={{
             dataset: "main",
-            // area: ["E92000001"],
-            funders: ["GB-CHC-210037", "GB-CHC-251988"], // different currencies
+            area: ["E92000001"],
+            // funders: ["GB-CHC-210037", "GB-CHC-251988"], // different currencies
             // funders: ["360G-ArcadiaFund"] // in USD
         }}>
         {({ loading, error, data }) => {
@@ -26,8 +26,10 @@ export const Dashboard = function(props) {
                 <div className="results-page__app">
                     <Sidebar />
                     <div className="results-page__body">
-                        <DashboardHeader summary={data.grants.summary[0]} byFunder={data.grants.byFunder} />
-                        <DashboardOutput />
+                        <section id="dashboard-output" className="results-page__body__content">
+                            <DashboardHeader summary={data.grants.summary[0]} byFunder={data.grants.byFunder} />
+                            <DashboardOutput data={data.grants} />
+                        </section>
                         <WhatsNext />
                         <DashboardFooter />
                     </div>
