@@ -19,7 +19,17 @@ class Grant(SQLAlchemyObjectType):
 
 class GrantCurrencyBucket(graphene.ObjectType):
     currency = graphene.String()
-    value = graphene.Float()
+    total = graphene.Float()
+    median = graphene.Float()
+    mean = graphene.Float()
+    grants = graphene.Float()
+    recipients = graphene.Float()
+    min_grant = graphene.Float()
+    max_grant = graphene.Float()
+    # "total": curr_gb["Amount Awarded"].sum(),
+    # "median": curr_gb["Amount Awarded"].median(),
+    # "grants": curr_gb.size(),
+    # "recipients": curr_gb["Recipient Org:0:Identifier"].nunique(),
 
 class GrantBucket(graphene.ObjectType):
     bucket_id = graphene.String()
@@ -27,10 +37,7 @@ class GrantBucket(graphene.ObjectType):
     grants = graphene.Int()
     recipients = graphene.Int()
     funders = graphene.Int()
-    grant_amount = graphene.List(GrantCurrencyBucket)
-    mean_grant = graphene.List(GrantCurrencyBucket)
-    max_grant = graphene.List(GrantCurrencyBucket)
-    min_grant = graphene.List(GrantCurrencyBucket)
+    currencies = graphene.List(GrantCurrencyBucket)
     max_date = graphene.Date()
     min_date = graphene.Date()
 
@@ -224,18 +231,24 @@ class Query(graphene.ObjectType):
                 )
             
             money_cols = []
-            if "grant_amount" in operations[k] or "bucket" in operations[k]:
-                money_cols.append(
-                    func.sum(GrantModel.amountAwarded).label("grant_amount"))
-            if "mean_grant" in operations[k] or "bucket" in operations[k]:
-                money_cols.append(
-                    func.avg(GrantModel.amountAwarded).label("mean_grant"))
-            if "max_grant" in operations[k] or "bucket" in operations[k]:
-                money_cols.append(
-                    func.max(GrantModel.amountAwarded).label("max_grant"))
-            if "min_grant" in operations[k] or "bucket" in operations[k]:
-                money_cols.append(
-                    func.min(GrantModel.amountAwarded).label("min_grant"))
+            if "currencies" in operations[k] or "bucket" in operations[k]:
+                money_cols.extend([
+                    func.sum(GrantModel.amountAwarded).label("total"),
+                    func.avg(GrantModel.amountAwarded).label("mean"),
+                    func.max(GrantModel.amountAwarded).label("max_grant"),
+                    func.min(GrantModel.amountAwarded).label("min_grant"),
+                ])
+            #     money_cols.append(
+            #         func.sum(GrantModel.amountAwarded).label("grant_amount"))
+            # if "mean_grant" in operations[k] or "bucket" in operations[k]:
+            #     money_cols.append(
+            #         func.avg(GrantModel.amountAwarded).label("mean_grant"))
+            # if "max_grant" in operations[k] or "bucket" in operations[k]:
+            #     money_cols.append(
+            #         func.max(GrantModel.amountAwarded).label("max_grant"))
+            # if "min_grant" in operations[k] or "bucket" in operations[k]:
+            #     money_cols.append(
+            #         func.min(GrantModel.amountAwarded).label("min_grant"))
 
             currency_col = [GrantModel.currency] if money_cols else []
             
@@ -250,16 +263,17 @@ class Query(graphene.ObjectType):
                     *(new_cols + currency_col + money_cols)).group_by(*(fields + currency_col)).all()
                 for l in return_result[k]:
                     for c in money_cols:
-                        l[c._label] = []
+                        l["currencies"] = []
                     for r in currency_result:
                         r = r._asdict()
                         if l.get("bucket_id") == r.get("bucket_id") and l.get("bucket_2_id") == r.get("bucket_2_id"):
+                            cur = {
+                                "currency": r.get("currency")
+                            }
                             for c in money_cols:
                                 v = r.get(c._label)
-                                l[c._label].append({
-                                    "currency": r.get("currency"),
-                                    "value": float(v) if isinstance(v, Decimal) else v,
-                                })
+                                cur[c._label] = float(v) if isinstance(v, Decimal) else v
+                            l["currencies"].append(cur)
             logging.info('{} query took {:,.4f} seconds'.format(
                 k, (default_timer() - query_start_time)))
 

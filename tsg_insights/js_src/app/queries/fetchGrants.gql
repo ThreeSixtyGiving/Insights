@@ -4,9 +4,10 @@ fragment bucket on GrantBucket {
     grants
     recipients
     funders
-    grantAmount {
+    currencies {
         currency
-        value
+        total
+        mean
     }
 }
 
@@ -36,13 +37,10 @@ query fetchGrants(
             funders
             maxDate
             minDate
-            grantAmount {
+            currencies {
                 currency
-                value
-            }
-            meanGrant {
-                currency
-                value
+                total
+                mean
             }
         }
         byFunder {
