@@ -202,11 +202,13 @@
         };
 
         // add the layer control
-        {# L.control.groupedLayers({}, overlays, {
+        {% if 'giving-map' in request.args %}
+        L.control.groupedLayers({}, overlays, {
             exclusiveGroups: ["Overlay data", "Boundaries"],
             collapsed: true,
             hideSingleBase: true,
-        }).addTo(map); #}
+        }).addTo(map);
+        {% endif %}
 
     </script>
 </body>
