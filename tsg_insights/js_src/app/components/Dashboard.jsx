@@ -1,52 +1,13 @@
 import React from 'react';
 import { Query } from 'react-apollo';
 import gql from 'graphql-tag';
+import { fetchGrants } from '../queries/fetchGrants.gql';
 import { PageHeader } from './PageHeader.jsx';
 import { Sidebar } from './Sidebar.jsx';
 import { DashboardHeader } from './DashboardHeader.jsx';
 import { DashboardOutput } from './DashboardOutput.jsx';
 import { WhatsNext } from './WhatsNext.jsx';
 import { DashboardFooter } from './DashboardFooter.jsx';
-
-const fetchGrants = gql`
-
-    fragment bucket on GrantBucket {
-        bucketId
-        grants
-        recipients
-        funders
-        grantAmount {
-            currency
-            value
-        }
-    }
-
-    query fetchGrants(
-        $dataset: String!, 
-        $funders: [String],
-        $grantProgrammes: [String], 
-        $area: [String], 
-        $orgtype: [String]
-    ){
-        grants(
-            dataset: $dataset,
-            funders: $funders,
-            grantProgrammes: $grantProgrammes,
-            area: $area,
-            orgtype: $orgtype
-        ) {
-            summary {
-                ...bucket
-            }
-            byFunder {
-                ...bucket
-            }
-            byFunderType {
-                ...bucket
-            }
-        }
-    }
-`;
 
 export const Dashboard = function(props) {
     return <Query
