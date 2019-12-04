@@ -41,6 +41,7 @@ query fetchGrants(
                 currency
                 total
                 mean
+                grants
             }
         }
         byFunder {

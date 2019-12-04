@@ -260,7 +260,7 @@ class Query(graphene.ObjectType):
 
             if currency_col:
                 currency_result = query.add_columns(
-                    *(new_cols + currency_col + money_cols)).group_by(*(fields + currency_col)).all()
+                    *(new_cols + currency_col + agg_cols + money_cols)).group_by(*(fields + currency_col)).all()
                 for l in return_result[k]:
                     for c in money_cols:
                         l["currencies"] = []
@@ -270,6 +270,10 @@ class Query(graphene.ObjectType):
                             cur = {
                                 "currency": r.get("currency")
                             }
+                            if "grants" in operations[k] or "bucket" in operations[k]:
+                                cur["grants"] = r.get("grants")
+                            if "recipients" in operations[k] or "bucket" in operations[k]:
+                                cur["recipients"] = r.get("recipients")
                             for c in money_cols:
                                 v = r.get(c._label)
                                 cur[c._label] = float(v) if isinstance(v, Decimal) else v
