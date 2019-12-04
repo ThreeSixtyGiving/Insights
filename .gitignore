@@ -11,3 +11,5 @@ archive/
 
 Thumbs.db
 *.sqlite
+
+node_modules/
