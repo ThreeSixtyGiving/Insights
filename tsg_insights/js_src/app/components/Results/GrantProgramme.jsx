@@ -10,7 +10,7 @@ export const GrantProgramme = function (props) {
     var layout = _.defaultsDeep({}, DEFAULT_LAYOUT);
     var config = _.defaultsDeep({}, DEFAULT_CONFIG);
     var chartType = 'bar';
-    var data = props.data.filter(o => o.bucketId);
+    var data = props.data.filter(o => o.bucketGroup[0].name);
     data.sort((a, b) => (b.grants - a.grants));
 
     if (data.length <= 1) {
@@ -24,7 +24,7 @@ export const GrantProgramme = function (props) {
                     <span style={{ marginRight: '6px' }} key={i}>
                         <span className='results-page__body__content__title'
                             style={{ fontSize: '1.2rem', lineHeight: '12px' }}>
-                            {o.bucketId}
+                            {o.bucketGroup[0].name}
                         </span>
                         {" ("}
                         <span>
@@ -47,7 +47,7 @@ export const GrantProgramme = function (props) {
         <Plot 
             id='grant_programmes'
             data={[getBarData({
-                x: data.map(o => o.bucketId), 
+                x: data.map(o => o.bucketGroup[0].name), 
                 y: data.map(o => o.grants), 
                 text: data.map(o => o.grants.toLocaleString(undefined, { maximumFractionDigits: 0 })),
                 name: 'Grant programmes',

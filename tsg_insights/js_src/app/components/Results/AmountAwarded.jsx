@@ -12,12 +12,13 @@ export const AmountAwarded = function (props) {
     var byCurrency = {};
     var byCurrencyTotal = {};
     for(var i of props.data){
-        if(!Object.keys(byCurrency).includes(i.bucketId)){
-            byCurrency[i.bucketId] = {};
-            byCurrencyTotal[i.bucketId] = 0;
+        var g = i.bucketGroup;
+        if(!Object.keys(byCurrency).includes(g[0].id)){
+            byCurrency[g[0].id] = {};
+            byCurrencyTotal[g[0].id] = 0;
         }
-        byCurrency[i.bucketId][i.bucket2Id] = i.grants;
-        byCurrencyTotal[i.bucketId] += i.grants;
+        byCurrency[g[0].id][g[1].id] = i.grants;
+        byCurrencyTotal[g[0].id] += i.grants;
     }
     var currencySort = Object.keys(byCurrencyTotal).sort((a, b) => (byCurrencyTotal[b] - byCurrencyTotal[a]));
 
@@ -63,7 +64,7 @@ export const AmountAwarded = function (props) {
         })
     });
 
-    return <ChartWrapper title="Amount awarded" subtitle="(number of grants)">
+    return <ChartWrapper title="Amount awarded" subtitle={units}>
         <Plot
             id='amount_awarded'
             data={bars}

@@ -9,7 +9,7 @@ export const AwardDate = function (props) {
     var layout = _.defaultsDeep({}, DEFAULT_LAYOUT);
     var config = _.defaultsDeep({}, DEFAULT_CONFIG);
     var data = props.data.map(o => ({
-        date: new Date(o.bucketId),
+        date: new Date(o.bucketGroup[0].id),
         grants: o.grants
     }));
     var maxDate = new Date(Math.max(...data.map(o => o.date)));
@@ -68,9 +68,7 @@ export const AwardDate = function (props) {
                 method: 'restyle',
             }
         ))
-    }]
-
-    console.log(updatemenus);
+    }];
 
     layout.updatemenus = updatemenus;
     layout.xaxis.type = 'date';

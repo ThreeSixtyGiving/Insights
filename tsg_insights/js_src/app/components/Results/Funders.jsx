@@ -23,7 +23,7 @@ export const Funders = function (props) {
                     <span style={{marginRight: '6px'}} key={i}>
                         <span className='results-page__body__content__title'
                             style={{ fontSize: '1.2rem', lineHeight: '12px' }}>
-                            {o.bucket2Id} 
+                            {o.bucketGroup[0].name} 
                         </span>
                         {" ("}
                         <span>
@@ -46,7 +46,7 @@ export const Funders = function (props) {
         <Plot 
             id='funders'
             data={[getBarData({
-                x: props.data.map(o => o.bucket2Id), 
+                x: props.data.map(o => o.bucketGroup[0].name), 
                 y: props.data.map(o => o.grants), 
                 text: props.data.map(o => o.grants.toLocaleString(undefined, { maximumFractionDigits: 0 })),
                 name: 'Funders',

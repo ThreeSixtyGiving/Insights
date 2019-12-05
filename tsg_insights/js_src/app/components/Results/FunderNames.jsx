@@ -4,9 +4,9 @@ import pluralize from 'pluralize'
 export const FunderNames = function (props) {
 
     var funderClass = '';
-    var funderNames = props.byFunder.filter(x => x.bucket2Id).sort(function (a, b) {
+    var funderNames = props.byFunder.filter(x => x.bucketGroup[0].name).sort(function (a, b) {
         return a.grants - b.grants;
-    }).map(x => x.bucket2Id);
+    }).map(x => x.bucketGroup[0].name);
 
     if (funderNames.length > 5) {
         var funders = <span className={funderClass}>

@@ -26,21 +26,21 @@ class GrantCurrencyBucket(graphene.ObjectType):
     recipients = graphene.Float()
     min_grant = graphene.Float()
     max_grant = graphene.Float()
-    # "total": curr_gb["Amount Awarded"].sum(),
-    # "median": curr_gb["Amount Awarded"].median(),
-    # "grants": curr_gb.size(),
-    # "recipients": curr_gb["Recipient Org:0:Identifier"].nunique(),
+
+
+class GrantBucketGroup(graphene.ObjectType):
+    id = graphene.String()
+    name = graphene.String()
+
 
 class GrantBucket(graphene.ObjectType):
-    bucket_id = graphene.String()
-    bucket_2_id = graphene.String()
+    bucket_group = graphene.List(GrantBucketGroup)
     grants = graphene.Int()
     recipients = graphene.Int()
     funders = graphene.Int()
     currencies = graphene.List(GrantCurrencyBucket)
     max_date = graphene.Date()
     min_date = graphene.Date()
-
 
 
 class GrantAggregate(graphene.ObjectType):
@@ -175,7 +175,7 @@ class Query(graphene.ObjectType):
             )
 
         group_bys = {
-            "by_funder": [GrantModel.fundingOrganization_id, GrantModel.fundingOrganization_name],
+            "by_funder": [[GrantModel.fundingOrganization_id, GrantModel.fundingOrganization_name]],
             "by_funder_type": [GrantModel.fundingOrganization_type],
             "by_grant_programme": [GrantModel.grantProgramme_title],
             "by_award_year": [GrantModel.awardDateYear],
@@ -207,8 +207,18 @@ class Query(graphene.ObjectType):
             if k not in operations:
                 continue
 
-            labels = ['bucket_id', 'bucket_2_id']
-            new_cols = [v.label(labels[k]) for k, v in enumerate(fields)]
+            labels = ['bucket_1_id', 'bucket_2_id']
+            new_cols = []
+            groupbys = []
+            for i, v in enumerate(fields):
+                if isinstance(v, list):
+                    new_cols.append(v[0].label('bucket_{}_id'.format(i+1)))
+                    new_cols.append(v[1].label('bucket_{}_name'.format(i+1)))
+                    groupbys.append('bucket_{}_id'.format(i+1))
+                    groupbys.append('bucket_{}_name'.format(i+1))
+                else:
+                    new_cols.append(v.label('bucket_{}_id'.format(i+1)))
+                    groupbys.append('bucket_{}_id'.format(i+1))
 
             agg_cols = []
             if "grants" in operations[k] or "bucket" in operations[k]:
@@ -238,35 +248,38 @@ class Query(graphene.ObjectType):
                     func.max(GrantModel.amountAwarded).label("max_grant"),
                     func.min(GrantModel.amountAwarded).label("min_grant"),
                 ])
-            #     money_cols.append(
-            #         func.sum(GrantModel.amountAwarded).label("grant_amount"))
-            # if "mean_grant" in operations[k] or "bucket" in operations[k]:
-            #     money_cols.append(
-            #         func.avg(GrantModel.amountAwarded).label("mean_grant"))
-            # if "max_grant" in operations[k] or "bucket" in operations[k]:
-            #     money_cols.append(
-            #         func.max(GrantModel.amountAwarded).label("max_grant"))
-            # if "min_grant" in operations[k] or "bucket" in operations[k]:
-            #     money_cols.append(
-            #         func.min(GrantModel.amountAwarded).label("min_grant"))
 
             currency_col = [GrantModel.currency] if money_cols else []
             
             query_start_time = default_timer()
-            result = query.add_columns(*(new_cols + agg_cols)).group_by(*fields).all()
+            result = query.add_columns(*(new_cols + agg_cols)).group_by(*groupbys).all()
             return_result[k]= [{
                 l: float(v) if isinstance(v, Decimal) else v
                 for l, v in r._asdict().items()} for r in result]
 
+            for r in return_result[k]:
+                r["bucket_group"] = []
+                if "bucket_1_id" in r:
+                    r["bucket_group"].append({
+                        "id": r["bucket_1_id"],
+                        "name": r.get("bucket_1_name", r["bucket_1_id"]),
+                    })
+                if "bucket_2_id" in r:
+                    r["bucket_group"].append({
+                        "id": r["bucket_2_id"],
+                        "name": r.get("bucket_2_name", r["bucket_2_id"]),
+                    })
+
             if currency_col:
                 currency_result = query.add_columns(
-                    *(new_cols + currency_col + agg_cols + money_cols)).group_by(*(fields + currency_col)).all()
+                    *(new_cols + currency_col + agg_cols + money_cols)).group_by(*(groupbys + currency_col)).all()
                 for l in return_result[k]:
                     for c in money_cols:
                         l["currencies"] = []
                     for r in currency_result:
                         r = r._asdict()
-                        if l.get("bucket_id") == r.get("bucket_id") and l.get("bucket_2_id") == r.get("bucket_2_id"):
+                        if l.get("bucket_1_id") == r.get("bucket_1_id") and l.get("bucket_2_id") == r.get("bucket_2_id") and \
+                                l.get("bucket_1_name") == r.get("bucket_1_name") and l.get("bucket_2_name") == r.get("bucket_2_name"):
                             cur = {
                                 "currency": r.get("currency")
                             }

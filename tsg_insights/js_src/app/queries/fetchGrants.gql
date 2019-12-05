@@ -1,6 +1,8 @@
 fragment bucket on GrantBucket {
-    bucketId
-    bucket2Id
+    bucketGroup {
+      id
+      name
+    }
     grants
     recipients
     funders
@@ -30,8 +32,6 @@ query fetchGrants(
         awardDates: $awardDates
     ) {
         summary {
-            bucketId
-            bucket2Id
             grants
             recipients
             funders
@@ -60,7 +60,9 @@ query fetchGrants(
             ...bucket
         }
         byAwardDate {
-            bucketId
+            bucketGroup {
+                id
+            }
             grants
         }
         byOrgType {
