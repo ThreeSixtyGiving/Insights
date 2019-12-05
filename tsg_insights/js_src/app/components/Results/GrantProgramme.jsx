@@ -2,14 +2,16 @@ import React from 'react';
 import Plot from 'react-plotly.js';
 import { ChartWrapper } from './ChartWrapper.jsx';
 import { DEFAULT_LAYOUT, DEFAULT_CONFIG, getBarData } from './ChartUtils.jsx';
+import _ from 'lodash';
 
 
 export const GrantProgramme = function (props) {
 
-    var layout = Object.assign({}, DEFAULT_LAYOUT);
+    var layout = _.defaultsDeep({}, DEFAULT_LAYOUT);
+    var config = _.defaultsDeep({}, DEFAULT_CONFIG);
     var chartType = 'bar';
     var data = props.data.filter(o => o.bucketId);
-    data.sort((a, b) => (a.grants - b.grants));
+    data.sort((a, b) => (b.grants - a.grants));
 
     if (data.length <= 1) {
         return null;
@@ -34,11 +36,11 @@ export const GrantProgramme = function (props) {
             </p>
         </ChartWrapper>
     } else if (data.length > 5) {
-        layout['yaxis']['visible'] = true;
-        layout['yaxis']['automargin'] = true;
-        layout['xaxis']['visible'] = false;
+        layout.yaxis.visible = true;
+        layout.yaxis.automargin = true;
+        layout.xaxis.visible = false;
         chartType = 'column';
-        data.reverse();
+        data = data.reverse();
     }
 
     return <ChartWrapper title="Grant programmes" subtitle="(number of grants)">
@@ -51,8 +53,9 @@ export const GrantProgramme = function (props) {
                 name: 'Grant programmes',
                 type: chartType
             })]}
+            style={{ width: '100%' }}
             layout={layout}
-            config={DEFAULT_CONFIG}
+            config={config}
         />
     </ChartWrapper>
 

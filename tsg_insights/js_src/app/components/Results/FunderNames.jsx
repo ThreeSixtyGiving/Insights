@@ -37,7 +37,8 @@ export const FunderNames = function (props) {
 
     return <React.Fragment>
         <h5 className="results-page__body__content__grants-made-by">
-            {props.summary.grants.toLocaleString(undefined, { maximumFractionDigits: 0 })} {pluralize("grant", props.summary.grants)} made by
+            {/* {props.summary.grants.toLocaleString(undefined, { maximumFractionDigits: 0 })}  */}
+            {pluralize("grant", props.summary.grants)} made by
         </h5>
         <h1 className="results-page__body__content__header">
             <span className="results-page__body__content__title funder-title"

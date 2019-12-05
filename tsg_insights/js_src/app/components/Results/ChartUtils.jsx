@@ -1,3 +1,5 @@
+import _ from 'lodash';
+
 export const THREESIXTY_COLOURS = ['#9c2061', '#f48320', '#cddc2b', '#53aadd'];
 
 export const DEFAULT_LAYOUT = {
@@ -59,7 +61,7 @@ export const getBarData = function(options) {
         fill: 'tozeroy',
     }
 
-    options = Object.assign({}, defaults, options);
+    options = _.defaultsDeep(options, defaults);
 
     if (options['type'] == 'column') {
         options['type'] = 'bar';

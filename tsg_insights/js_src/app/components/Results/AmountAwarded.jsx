@@ -2,10 +2,13 @@ import React from 'react';
 import Plot from 'react-plotly.js';
 import { ChartWrapper } from './ChartWrapper.jsx';
 import { DEFAULT_LAYOUT, DEFAULT_CONFIG, getBarData, THREESIXTY_COLOURS } from './ChartUtils.jsx';
+import _ from 'lodash';
 
 
 export const AmountAwarded = function (props) {
 
+    var layout = _.defaultsDeep({}, DEFAULT_LAYOUT);
+    var config = _.defaultsDeep({}, DEFAULT_CONFIG);
     var byCurrency = {};
     var byCurrencyTotal = {};
     for(var i of props.data){
@@ -51,11 +54,11 @@ export const AmountAwarded = function (props) {
         return getBarData({
             x: awardBands,
             y: awardBands.map(b => vals[b.replace(/[£\$€]/g, '')] ? vals[b.replace(/[£\$€]/g, '')] : 0),
-            text: awardBands,
+            text: awardBands.map(b => vals[b.replace(/[£\$€]/g, '')] ? vals[b.replace(/[£\$€]/g, '')] : 0),
             visible: (i == 0) ? null : 'legendonly',
             name: `${o} (${byCurrencyTotal[o]}${(i==0) ? ' grants' : ''})`,
             marker: {
-                color: THREESIXTY_COLOURS[(colours[o] || i + 3) % THREESIXTY_COLOURS.length]
+                color: THREESIXTY_COLOURS[((colours[o] === undefined) ? i + 3 : colours[o]) % THREESIXTY_COLOURS.length]
             }
         })
     });
@@ -64,8 +67,9 @@ export const AmountAwarded = function (props) {
         <Plot
             id='amount_awarded'
             data={bars}
-            layout={DEFAULT_LAYOUT}
-            config={DEFAULT_CONFIG}
+            style={{ width: '100%' }}
+            layout={layout}
+            config={config}
         />
     </ChartWrapper>
 

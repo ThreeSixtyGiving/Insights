@@ -2,11 +2,13 @@ import React from 'react';
 import Plot from 'react-plotly.js';
 import { ChartWrapper } from './ChartWrapper.jsx';
 import { DEFAULT_LAYOUT, DEFAULT_CONFIG, getBarData } from './ChartUtils.jsx';
+import _ from 'lodash';
 
 
 export const Funders = function (props) {
 
-    var layout = Object.assign({}, DEFAULT_LAYOUT);
+    var layout = _.defaultsDeep({}, DEFAULT_LAYOUT);
+    var config = _.defaultsDeep({}, DEFAULT_CONFIG);
     var chart_type = 'bar';
     props.data.sort((a, b) => (a.grants - b.grants));
 
@@ -50,8 +52,9 @@ export const Funders = function (props) {
                 name: 'Funders',
                 type: chart_type
             })]}
+            style={{width: '100%'}}
             layout={layout}
-            config={DEFAULT_CONFIG}
+            config={config}
         />
     </ChartWrapper>
 

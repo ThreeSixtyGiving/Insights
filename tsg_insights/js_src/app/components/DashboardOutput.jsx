@@ -9,8 +9,8 @@ export const DashboardOutput = function(props) {
     return <React.Fragment>
         <FunderType data={props.data.byFunderType} />
         <Funders data={props.data.byFunder} />
-        <GrantProgramme data={props.data.byGrantProgramme} />
         <AmountAwarded data={props.data.byAmountAwarded} />
+        <GrantProgramme data={props.data.byGrantProgramme} />
         <AwardDate data={props.data.byAwardDate} />
     </React.Fragment>
 }

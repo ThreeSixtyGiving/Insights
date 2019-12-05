@@ -2,11 +2,13 @@ import React from 'react';
 import Plot from 'react-plotly.js';
 import { ChartWrapper } from './ChartWrapper.jsx';
 import { DEFAULT_LAYOUT, DEFAULT_CONFIG, getBarData } from './ChartUtils.jsx';
+import _ from 'lodash';
 
 
 export const FunderType = function (props) {
 
-    var layout = Object.assign({}, DEFAULT_LAYOUT);
+    var layout = _.defaultsDeep({}, DEFAULT_LAYOUT);
+    var config = _.defaultsDeep({}, DEFAULT_CONFIG);
     var chart_type = 'bar';
     props.data.sort((a, b) => (b.grants - a.grants));
 
@@ -36,7 +38,7 @@ export const FunderType = function (props) {
         layout.yaxis.visible = true;
         layout.yaxis.automargin = true;
         layout.xaxis.visible = false;
-        chart_type = 'column';
+        chartType = 'column';
         props.data.reverse();
     }
 
@@ -50,8 +52,9 @@ export const FunderType = function (props) {
                 name: 'Funder types',
                 type: chart_type
             })]}
-            layout={DEFAULT_LAYOUT}
-            config={DEFAULT_CONFIG}
+            style={{ width: '100%' }}
+            layout={layout}
+            config={config}
         />
     </ChartWrapper>
 

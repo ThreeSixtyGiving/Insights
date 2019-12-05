@@ -12,6 +12,7 @@
     "apollo-boost": "^0.4.4",
     "graphql": "^14.5.8",
     "graphql-tag": "^2.10.1",
+    "lodash": "^4.17.15",
     "path": "^0.12.7",
     "plotly.js": "^1.51.2",
     "pluralize": "^8.0.0",

@@ -2,9 +2,12 @@ import React from 'react';
 import Plot from 'react-plotly.js';
 import { ChartWrapper } from './ChartWrapper.jsx';
 import { DEFAULT_LAYOUT, DEFAULT_CONFIG, getBarData, THREESIXTY_COLOURS } from './ChartUtils.jsx';
+import _ from 'lodash';
 
 export const AwardDate = function (props) {
 
+    var layout = _.defaultsDeep({}, DEFAULT_LAYOUT);
+    var config = _.defaultsDeep({}, DEFAULT_CONFIG);
     var data = props.data.map(o => ({
         date: new Date(o.bucketId),
         grants: o.grants
@@ -67,18 +70,20 @@ export const AwardDate = function (props) {
         ))
     }]
 
-    var layout = Object.assign({}, DEFAULT_LAYOUT);
-    layout['updatemenus'] = updatemenus;
-    layout['xaxis']['type'] = 'date';
-    layout['yaxis']['visible'] = true;
-    layout['yaxis']['showline'] = false;
+    console.log(updatemenus);
+
+    layout.updatemenus = updatemenus;
+    layout.xaxis.type = 'date';
+    layout.yaxis.visible = true;
+    layout.yaxis.showline = false;
     
     return <ChartWrapper title="Awards over time" subtitle="(number of grants)">
         <Plot
             id='awards_over_time'
             data={chartData}
+            style={{ width: '100%' }}
             layout={layout}
-            config={DEFAULT_CONFIG}
+            config={config}
         />
     </ChartWrapper>
 ;
