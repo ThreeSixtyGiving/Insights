@@ -12,7 +12,7 @@ export const ChartTitle = function (props) {
 export const ChartWrapper = function (props) {
 
     return <figure className={props.className}>
-        <ChartTitle title={props.title} subtitle={props.subtitle} />
+        <ChartTitle title={props.title} subtitle={props.subtitle}>{props.description}</ChartTitle>
         {props.children}
     </figure>
 }

@@ -4,8 +4,9 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "start": "webpack --watch --mode=development",
-    "build": "webpack"
+    "start": "webpack --watch",
+    "build": "webpack",
+    "start-dev": "webpack --watch --mode=development"
   },
   "dependencies": {
     "apollo-boost": "^0.4.4",

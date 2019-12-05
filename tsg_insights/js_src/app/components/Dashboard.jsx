@@ -14,8 +14,8 @@ export const Dashboard = function(props) {
         query={fetchGrants}
         variables={{
             dataset: "main",
-            area: ["E92000001"],
-            // funders: ["GB-CHC-210037", "GB-CHC-251988"], // different currencies
+            // area: ["E92000001"],
+            funders: ["GB-CHC-210037", "GB-CHC-251988"], // different currencies
             // funders: ["360G-ArcadiaFund"] // in USD
         }}>
         {({ loading, error, data }) => {

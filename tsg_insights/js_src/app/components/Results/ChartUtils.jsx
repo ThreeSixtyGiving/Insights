@@ -62,12 +62,12 @@ export const getBarData = function(options) {
     options = Object.assign({}, defaults, options);
 
     if (options['type'] == 'column') {
-        options['type'] = 'bar'
-        options['orientation'] = 'h'
-        options['hoverinfo'] = 'text'
-        var x = options['x']
-        options['x'] = options['y']
-        options['y'] = x
+        options['type'] = 'bar';
+        options['orientation'] = 'h';
+        options['hoverinfo'] = 'text';
+        var x = options['x'].slice(0);
+        options['x'] = options['y'].slice(0);
+        options['y'] = x.slice(0);
     }
 
     return options;

@@ -9,7 +9,7 @@ export const SummaryList = function (props) {
     var otherCurrencies = currencies.filter(x => (x.currency != mainCurrency.currency));
 
     var others = [
-        <p>*mean</p>
+        <p key='average-explain'>*mean</p>
     ];
 
     if(otherCurrencies.length > 0){
@@ -18,11 +18,10 @@ export const SummaryList = function (props) {
                 These results include grants in {currencies.length} currencies.
                 The amounts above refer to {pluralize('grant', mainCurrency.grants, true)} grants in {mainCurrency.currency}.
                 <br />
-                There is also 
+                There is also {' '}
                 {otherCurrencies.map((c, i) => [
-                    i > 0 && ", ",
-                    <React.Fragment key={i}> {formatCurrency(c.total, {currency: c.currency}).join("")} in {c.grants} {pluralize('grant', c.grants)}</React.Fragment>
-                ])}
+                    formatCurrency(c.total, {currency: c.currency}).join("") + ' in ' + c.grants + ' ' + pluralize('grant', c.grants)
+                ]).join(", ")}
                 .
             </p>
         )
@@ -37,10 +36,18 @@ export const SummaryList = function (props) {
     var total = formatCurrency(mainCurrency.total, { currency: mainCurrency.currency, suffix: 'long' });
     var average = formatCurrency(mainCurrency.mean, { currency: mainCurrency.currency, suffix: 'long' });
 
+    if(props.summary.grants > 99999){
+        var grants_f = (props.summary.grants / 1000).toLocaleString(undefined, { 
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 1 }) + 'k';
+    } else {
+        var grants_f = props.summary.grants.toLocaleString(undefined, { maximumFractionDigits: 0 })
+    }
+
     return <React.Fragment>
         <div className="results-page__body__content__spheres">
             <div className="results-page__body__content__sphere" style={{ backgroundColor: 'rgb(156, 32, 97)' }}>
-                <p className="total-grants">{props.summary.grants.toLocaleString(undefined, { maximumFractionDigits: 0 })}</p>
+                <p className="total-grants">{grants_f}</p>
                 <h4 className="">{pluralize('grants', props.summary.grants)}</h4>
             </div>
             <div className="results-page__body__content__sphere" style={{ backgroundColor: 'rgb(244, 131, 32)' }}>
