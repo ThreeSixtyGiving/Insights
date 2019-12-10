@@ -163,6 +163,18 @@
                 '- Barriers to Housing & Services': L.mapbox.styleLayer('mapbox://styles/davidkane/ck30agq740bah1co9csdf1yu5', deprivation_options),
                 '- Living Environment': L.mapbox.styleLayer('mapbox://styles/davidkane/ck30ahvkn0be01dmu0r75ryvj', deprivation_options),
                 '- Most deprived 20%': L.mapbox.styleLayer('mapbox://styles/davidkane/ck30nnfoj0mj61cpnxh7ijw06', deprivation_options),
+                'Deprivation (Wales - WIMD2019 deciles)': L.mapbox.styleLayer('mapbox://styles/davidkane/ck3ymy7fu0de91cp8grzu8ft7', {
+                    opacity: 0.8,
+                    attribution: '<strong>Deprivation Wales</strong>: <a href="https://statswales.gov.wales/Catalogue/Community-Safety-and-Social-Inclusion/Welsh-Index-of-Multiple-Deprivation/WIMD-2019" target="_blank">WIMD 2019</a> (<a href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/">OGL</a>)<br>'
+                }),
+                'Deprivation (Scotland - WIMD2019 deciles)': L.mapbox.styleLayer('mapbox://styles/davidkane/ck3z2ozhn2ir71cmqdnnpc6ty', {
+                    opacity: 0.8,
+                    attribution: '<strong>Deprivation Wales</strong>: <a href="https://www2.gov.scot/Topics/Statistics/SIMD" target="_blank">SIMD16</a> (<a href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/">OGL</a>)<br>'
+                }),
+                'Deprivation (Northern Ireland - SIMD16 deciles)': L.mapbox.styleLayer('mapbox://styles/davidkane/ck3z3hapk56l11cmwuwswq766', {
+                    opacity: 0.8,
+                    attribution: '<strong>Deprivation Wales</strong>: <a href="https://www.nisra.gov.uk/publications/nimdm17-soa-level-results" target="_blank">NIMDM17</a> (<a href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/">OGL</a>)<br>'
+                }),
             },
             "Boundaries": { 
                 "No boundaries": L.mapbox.featureLayer(null).addTo(map),
