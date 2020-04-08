@@ -3,16 +3,34 @@
 
 <head>
     {% block head %}
-    <meta charset="UTF-8">
+    <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}360Giving Insights{% endblock %}</title>
-    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
-    <link rel="stylesheet" href="https://use.typekit.net/nri0jbb.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <link rel="stylesheet" href="https://unpkg.com/dash-table-experiments@0.6.0/dash_table_experiments/dash_table_experiments.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/sanitize.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="apple-touch-icon" sizes="57x57" href="{{ url_for('static', filename='images/favicon/apple-icon-57x57.png') }}">
+    <link rel="apple-touch-icon" sizes="60x60" href="{{ url_for('static', filename='images/favicon/apple-icon-60x60.png') }}">
+    <link rel="apple-touch-icon" sizes="72x72" href="{{ url_for('static', filename='images/favicon/apple-icon-72x72.png') }}">
+    <link rel="apple-touch-icon" sizes="76x76" href="{{ url_for('static', filename='images/favicon/apple-icon-76x76.png') }}">
+    <link rel="apple-touch-icon" sizes="114x114" href="{{ url_for('static', filename='images/favicon/apple-icon-114x114.png') }}">
+    <link rel="apple-touch-icon" sizes="120x120" href="{{ url_for('static', filename='images/favicon/apple-icon-120x120.png') }}">
+    <link rel="apple-touch-icon" sizes="144x144" href="{{ url_for('static', filename='images/favicon/apple-icon-144x144.png') }}">
+    <link rel="apple-touch-icon" sizes="152x152" href="{{ url_for('static', filename='images/favicon/apple-icon-152x152.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='images/favicon/apple-icon-180x180.png') }}">
+    <link rel="icon" type="image/png" sizes="192x192"  href="{{ url_for('static', filename='images/favicon/android-icon-192x192.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='images/favicon/favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="96x96" href="{{ url_for('static', filename='images/favicon/favicon-96x96.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='images/favicon/favicon-16x16.png') }}">
+    <link rel="manifest" href="{{ url_for('static', filename='images/favicon/manifest.json') }}">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="{{ url_for('static', filename='images/favicon/ms-icon-144x144.png') }}">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon/favicon.ico') }}" type="image/x-icon" />
+
+    <!-- CSS -->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/sanitize.css') }}" />
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i&display=swap" type="text/css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" type="text/css" />
         {% block analytics %}
             {% if config.get("GOOGLE_ANALYTICS_TRACKING_ID") and cookies_consented() %}
             <!-- Global site tag (gtag.js) - Google Analytics -->
@@ -27,13 +45,47 @@
             {% endif %}
         {% endblock %}
     {% endblock %}
+    <style>
+    .hidden {
+      display: none;
+    }
+    </style>
 </head>
 
+  {% set top_bar = dict(
+      pages=[
+        {"url": url_for('.index'), "name": "360Insights"},
+        {"url": url_for('.about'), "name": "About"},
+      ],
+      links=[],
+    ) %}
+  {% set hero = dict(
+      home_link=url_for('.index'),
+      title='360Insights',
+      logo=url_for('static', filename="images/360-logos/360giving-insights.svg"), 
+      colour="orange",
+      subhead="See your grantmaking in new ways" ,
+      blurb="Combine and visualise 360Giving, charity and other data to answer questions about your grantmaking",
+    ) %}
+
 <body>
-    {% block content %}{% endblock %}
-    {% block footer %}
-        {% include 'footer.html.j2' %}
-    {% endblock %}
+    {% include "_parts/top-bar.html" %}
+    <div class="layout layout--single-column">
+      <header class="layout__header">
+        {% include "_parts/hero.html" %}
+      </header> 
+
+      <main class="layout__content">
+        <div class="layout__content-inner">
+          {% block content %}{% endblock %}
+        </div>
+      </main>
+
+      <footer class="layout__footer">
+        {% include "_parts/subscribe.html" %}
+        {% include "_parts/footer.html" %}
+      </footer>
+    </div>
     {% block scripts %}{% endblock %}
     {% include '_cookie_consent.html.j2' %}
 </body>

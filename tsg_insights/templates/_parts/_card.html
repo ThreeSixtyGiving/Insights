@@ -1,0 +1,51 @@
+<article class="card{% if include.state %} card--{{include.state}}{% endif %}{% if include.data.category %}{% for category in include.data.category %} card--{{category | slugify}}{% endfor %}{% endif %}" title="{{ include.data.resource_name }}">
+  <header class="card__header">
+    <h3 class="card__heading">{{ include.data.resource_name }}</h3>
+  </header>
+  
+  <div class="card__content" aria-hidden>
+    <div class="card__row">
+      <section class="card__main-content">
+        {% if include.data.resource_url %}<a class="card__link" href="{{ include.data.resource_url }}" target="_blank" rel="noopener"><i class="material-icons">link</i></a>{% endif %}
+        <p class="card__text" style="white-space: pre;">{% if include.data.what_is_it_good_for? %}{{ include.data.what_is_it_good_for? }}{% endif %}</p>
+      </section>
+      <aside class="card__sidebar tags">
+        {% for category in include.data.category %}
+          {% include _tag.html category=category %}
+        {% endfor %} 
+      </aside>
+    </div>
+
+    <div class="card__row">
+      <section class="card__main-content">
+        {% if include.data.why_would_you_recommend_it? %}
+        <h4 class="card__subheading">Why would you recommend it?</h4>
+        <p class="card__text">{{ include.data.why_would_you_recommend_it? }}</p>
+        {% endif %}
+        <div class="card__image">
+          {% if include.data.resource_image %}
+            {% for resource_image in include.data.resource_image %}
+            <a href="{{ resource_image.url }}" title="{{ resource_image.filename }}" target="_blank" rel="noopener">
+              <img src="{{ resource_image.url }}" alt="{{ resource_image.filename }}">
+            </a>
+            {% endfor %}
+          {% endif %}  
+        </div>
+        
+      </section>
+      {% if include.data.who_is_using_it? %}
+      <aside class="card__sidebar secondary-questions">
+        <h4 class="card__subheading">Who uses it</h4>
+        <p class="card__text">{{ include.data.who_is_using_it? }}</p>  
+      </aside>
+      {% endif %}
+    </div>
+
+    {% if include.data.your_name %}
+    <footer class="card__footer">
+      <p class="card__author">Uploaded by <strong>{{ include.data.your_name }}</strong></p>
+    </footer>
+    {% endif %}
+  </div>
+      
+</article>

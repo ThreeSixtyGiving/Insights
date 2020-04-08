@@ -1,0 +1,24 @@
+<div class="top-bar">
+  <button class="top-bar__menu-trigger"><i class="material-icons">menu</i></button>
+
+  <nav class="top-bar__menu contextual-menu">
+    {% for p in top_bar.pages %}
+    <a href="{{p.url}}" class="contextual-menu__button">{{p.name}}</a>
+    {% endfor %}
+  </nav>
+
+  <div class="off-canvas-menu{% if top_bar.state %} off-canvas-menu--{{ top_bar.state }}{% endif %}" aria-hidden>
+    <button class="off-canvas-menu__trigger"><i class="material-icons">close</i></button>
+
+    <nav>
+      <ul class="off-canvas-menu__list">
+        {% for m in settings360.menus.menu_off_canvas["items"] %}
+        <li class="off-canvas-menu__item">
+            <a href="{{ m.url }}">{{ m.title|safe }}</a>
+            <p>{{ m.description|safe }}</p>
+        </li>
+        {% endfor %}
+      </ul>
+    </nav>
+  </div>
+</div>

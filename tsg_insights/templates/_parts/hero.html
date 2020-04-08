@@ -1,0 +1,23 @@
+<div class="hero-section">
+  <div class="wrapper">
+    <div class="hero {% if hero.colour %}hero--{{hero.colour}}{% endif %}">
+      <!-- .hero--orange, .hero--yellow, .hero--red -->
+      <div class="hero__column hero__logo">
+        <a href="{% if hero.home_link %}{{ hero.home_link }}{% else %}/{% endif %}"><img src="{{hero.logo}}" alt="{{ hero.title }}"></a>
+      </div>
+      <div class="hero__column hero__lead">
+        <h2 class="hero__title">
+          {% if hero.subhead %}
+            {{hero.subhead}}
+          {% endif %}
+        </h2>
+        <p class="hero__blurb">
+          {% if hero.blurb %}
+            {{hero.blurb}}
+          {% endif %}
+        </p>
+        
+      </div>  
+    </div>
+  </div>
+</div>

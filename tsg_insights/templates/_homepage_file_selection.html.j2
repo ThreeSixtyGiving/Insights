@@ -1,15 +1,12 @@
-<div class="homepage__file-selection">
-    <div class="homepage__file-selection__wrapper">
-        <p>
-            Select a 360Giving dataset<br>
-            or upload a file that meets the <a href="http://www.threesixtygiving.org/support/standard/" target="_blank">360Giving Standard</a>.
-        </p>
-        <div class="homepage__file-selection__zone"><button id="file-selection-open"
-                class="js-choose-dataset-btn button">Choose a dataset</button>
-            <div id="upload-dataset-open" class="homepage__file-selection__upload js-upload-dataset-btn">
-                <p class="text">Upload a file</p>
-                <p class="homepage__file-selection__upload-icon">cloud_upload</p>
-            </div>
-        </div>
+<div class="accordion">
+    <div class="intro-section">
+        <h2>Select a 360Giving dataset <br>or upload a file that meets the 360Giving Data Standard.</h2>  
+        
+        <button class="button modal__trigger js-choose-dataset-btn" data-id="file-selection-modal">Choose Dataset</button>
+        <button class="button button--teal modal__trigger" data-id="upload-dataset-modal">Upload a file</button>
+    </div>
+    <div class="accordion__extra" aria-hidden>
+        <ul class="card-list">
+        </ul>
     </div>
 </div>

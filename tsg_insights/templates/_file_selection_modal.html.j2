@@ -1,53 +1,91 @@
-<div id="file-selection-modal" class="homepage__data-selection hidden js-homepage-dataset-selection-window js-modal" data-trigger='file-selection-open'>
-    <div class="homepage__data-selection__window">
-        <div class="homepage__data-selection__highlight">
-            Datasets
-            <div id="file-selection-close" class="close-button js-homepage-dataset-selection-window-close">
+<div id="file-selection-modal" class="modal" aria-hidden>
+    <div class="modal__overlay modal__trigger" data-id="file-selection-modal"></div>
+    <div class="modal__window">
+        <button class="modal__close modal__trigger" data-id="file-selection-modal"></button>
+        <div class="modal__content">
+            <h2>Datasets</h2>
+            <div class="filter-section__search">
+                <input class="search-field <!-- js-search-filter -->" placeholder="Start typing to filter..." id="dataset-filter" />  
             </div>
+            <div class="spacer-2"></div>
+            <ul id="registry-list" class="card-list">
+                {% for publisher in registry.keys()|sort %}
+                <li class="card-list__item">
+                    <article class="insights-card" title="{{ registry[publisher][0]['publisher'] }}">
+                        <div class="insights-card__content">
+                            <h3 class="insights-card__pub-name">{{ registry[publisher][0]['publisher'] }}</h3>
+                            <ul class="insights-card__list">
+                            {% for file in registry[publisher] %}
+                                {% if file.downloads == false %}
+                                <li class="insights-card__item ">
+                                    <table class="grant">
+                                        <tr class="grant__line grant--title-line">
+                                            <td class="grant__title" colspan="3"><strong>[File not available]</strong> {{ file.title }}</td>
+                                        </tr>
+                                        <tr class="grant__line grant--amounts-line">
+                                            <td class="grant__pub-date">{{ file.award_date }}</td>
+
+                                            <td class="grant__records">Records
+                                                <span class="grant__grant-n">{{ "{:,.0f}".format(file.grant_count) }}</span>
+                                            </td>
+                                            {% if file.grant_amount: %}
+                                            <td class="grant__amount">
+                                                <span class="grant__amount-n">{{ file.grant_amount }}</span>
+                                            </td>
+                                            {% endif %}
+                                        </tr>
+                                    </table>
+                                </li>
+                                {% elif file.file_size and file.file_size > config['FILE_SIZE_LIMIT'] %}
+                                <li class="insights-card__item ">
+                                    <table class="grant">
+                                        <tr class="grant__line grant--title-line">
+                                            <td class="grant__title" colspan="3"><strong>[Not available due to large file size]</strong> {{ file.title }}</td>
+                                        </tr>
+                                        <tr class="grant__line grant--amounts-line">
+                                            <td class="grant__pub-date">{{ file.award_date }}</td>
+
+                                            <td class="grant__records">Records
+                                                <span class="grant__grant-n">{{ "{:,.0f}".format(file.grant_count) }}</span>
+                                            </td>
+                                            {% if file.grant_amount: %}
+                                            <td class="grant__amount">
+                                                <span class="grant__amount-n">{{ file.grant_amount }}</span>
+                                            </td>
+                                            {% endif %}
+                                        </tr>
+                                    </table>
+                                </li>
+                                {% else %}
+                                <li class="insights-card__item ">
+                                    <a href="/fetch/registry/{{ file.identifier }}" class="fetch-from-registry" data-identifier="{{ file.identifier }}">
+                                        <table class="grant">
+                                            <tr class="grant__line grant--title-line">
+                                                <td class="grant__title" colspan="3">{{ file.title }}</td>
+                                            </tr>
+                                            <tr class="grant__line grant--amounts-line">
+                                                <td class="grant__pub-date">{{ file.award_date }}</td>
+
+                                                <td class="grant__records">Records
+                                                    <span class="grant__grant-n">{{ "{:,.0f}".format(file.grant_count) }}</span>
+                                                </td>
+                                                {% if file.grant_amount: %}
+                                                <td class="grant__amount">
+                                                    <span class="grant__amount-n">{{ file.grant_amount }}</span>
+                                                </td>
+                                                {% endif %}
+                                            </tr>
+                                        </table>
+                                    </a>
+                                </li>
+                                {% endif %}
+                            {% endfor %}
+                        </ul>
+                        </div>
+                    </article>
+                </li>
+                {% endfor %}
+            </ul>
         </div>
-        <div class="dataset-filter-wrapper form">
-            <input type='text' id='dataset-filter' placeholder='Type a publisher name' value='' />
-        </div>
-        <ul id="registry-list" class="homepage__data-selection__sets">
-            {% for publisher in registry.keys()|sort %}
-            <li class="homepage__data-selection__set">
-                <h4 class="homepage__data-selection__set-name">{{ registry[publisher][0]['publisher'] }}</h4>
-                <ul class="homepage__data-selection__data-list">
-                    {% for file in registry[publisher] %}
-                        {% if file.downloads == false %}
-                        <li class="homepage__data-selection__data-list__item">
-                            <ul>
-                                <li class="homepage__data-selection__data-list__item__data-fixed"><strong>[File not available]</strong> {{ file.title }}</li>
-                                <li class="homepage__data-selection__data-list__item__data-notfixed">{{ "{:,.0f} records".format(file.grant_count) }}</li>
-                                <li class="homepage__data-selection__data-list__item__data-notfixed">{{ file.award_date }}</li>
-                                <li class="homepage__data-selection__data-list__item__data-notfixed">{{ file.grant_amount }}</li>
-                            </ul>
-                        </li>
-                        {% elif file.file_size and file.file_size > config['FILE_SIZE_LIMIT'] %}
-                        <li class="homepage__data-selection__data-list__item">
-                            <ul>
-                                <li class="homepage__data-selection__data-list__item__data-fixed"><strong>[Not available due to large file size]</strong> {{ file.title }}</li>
-                                <li class="homepage__data-selection__data-list__item__data-notfixed">{{ "{:,.0f} records".format(file.grant_count) }}</li>
-                                <li class="homepage__data-selection__data-list__item__data-notfixed">{{ file.award_date }}</li>
-                                <li class="homepage__data-selection__data-list__item__data-notfixed">{{ file.grant_amount }}</li>
-                            </ul>
-                        </li>
-                        {% else %}
-                        <li class="homepage__data-selection__data-list__item">
-                            <a href="/fetch/registry/{{ file.identifier }}" class="fetch-from-registry" data-identifier="{{ file.identifier }}">
-                                <ul>
-                                    <li class="homepage__data-selection__data-list__item__data-fixed">{{ file.title }}</li>
-                                    <li class="homepage__data-selection__data-list__item__data-notfixed">{{ "{:,.0f} records".format(file.grant_count) }}</li>
-                                    <li class="homepage__data-selection__data-list__item__data-notfixed">{{ file.award_date }}</li>
-                                    <li class="homepage__data-selection__data-list__item__data-notfixed">{{ file.grant_amount }}</li>
-                                </ul>
-                            </a>
-                        </li>
-                        {% endif %}
-                    {% endfor %}
-                </ul>
-            </li>
-            {% endfor %}
-        </ul>
     </div>
 </div>

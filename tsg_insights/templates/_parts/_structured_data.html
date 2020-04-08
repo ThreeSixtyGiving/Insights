@@ -1,0 +1,5 @@
+{% if schema %}
+    <script type="application/ld+json">
+    {{ schema|tojson(indent=4) }}
+    </script>
+{% endif %}

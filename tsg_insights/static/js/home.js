@@ -22,22 +22,47 @@ for (const modal of modals) {
     }
 }
 
+
+
+document.querySelectorAll('.modal__trigger').forEach(function (el) {
+    el.onclick = function () {
+        const target = el.getAttribute('data-id');
+        const modal = document.getElementById(target);
+        const body = document.getElementsByTagName('body');
+
+
+        if (modal.hasAttribute('aria-hidden')) {
+
+            modal.removeAttribute('aria-hidden')
+            modal.classList.add('modal--shown');
+            body[0].classList.add('modal--shown');
+
+        } else {
+            modal.setAttribute('aria-hidden', '')
+            modal.classList.remove('modal--shown');
+            body[0].classList.remove('modal--shown');
+        }
+    };
+});
+
 // filter by publisher
 const datasetFilter = document.getElementById('dataset-filter');
 const registryList = document.getElementById('registry-list');
-datasetFilter.addEventListener('keyup', (event) => {
-    event.preventDefault();
-    const search_term = event.target.value.toLowerCase().replace(/[\W_]+/g, " ");
-    for (const publisher of registryList.getElementsByClassName('homepage__data-selection__set')){
-        var publisher_name = publisher.getElementsByClassName('homepage__data-selection__set-name')[0].textContent;
-        publisher_name = publisher_name.toLowerCase().replace(/[\W_]+/g, " ");
-        if (publisher_name.includes(search_term)){
-            publisher.classList.remove("hidden");
-        } else {
-            publisher.classList.add("hidden");
+if(datasetFilter){
+    datasetFilter.addEventListener('keyup', (event) => {
+        event.preventDefault();
+        const search_term = event.target.value.toLowerCase().replace(/[\W_]+/g, " ");
+        for (const publisher of registryList.getElementsByClassName('insights-card')){
+            var publisher_name = publisher.getElementsByClassName('insights-card__pub-name')[0].textContent;
+            publisher_name = publisher_name.toLowerCase().replace(/[\W_]+/g, " ");
+            if (publisher_name.includes(search_term)){
+                publisher.classList.remove("hidden");
+            } else {
+                publisher.classList.add("hidden");
+            }
         }
-    }
-});
+    });
+}
 
 // function to track a job and update the status
 const track_job = function(jobid){
@@ -238,39 +263,43 @@ for (const registryLink of document.getElementsByClassName("fetch-from-registry"
 const dropzone = document.getElementById('file-upload-dropzone');
 const fileInput = document.getElementById('file-upload-input');
 
-dropzone.onclick = function (event) {
-    event.preventDefault();
-    fileInput.click();
-}
+if(dropzone){
+    dropzone.onclick = function (event) {
+        event.preventDefault();
+        fileInput.click();
+    }
 
-dropzone.ondragover = dropzone.ondragenter = function (event) {
-    event.stopPropagation();
-    event.preventDefault();
-    dropzone.classList.add("highlight");
-}
+    dropzone.ondragover = dropzone.ondragenter = function (event) {
+        event.stopPropagation();
+        event.preventDefault();
+        dropzone.classList.add("highlight");
+    }
 
-dropzone.ondragleave = dropzone.ondragend = dropzone.ondragexit = function (event) {
-    event.stopPropagation();
-    event.preventDefault();
-    dropzone.classList.remove("highlight");
-}
+    dropzone.ondragleave = dropzone.ondragend = dropzone.ondragexit = function (event) {
+        event.stopPropagation();
+        event.preventDefault();
+        dropzone.classList.remove("highlight");
+    }
 
-dropzone.ondrop = function (event) {
-    event.stopPropagation();
-    event.preventDefault();
+    dropzone.ondrop = function (event) {
+        event.stopPropagation();
+        event.preventDefault();
 
-    const filesArray = event.dataTransfer.files;
-    for (let i = 0; i < filesArray.length; i++) {
-        sendFile(filesArray[i]);
+        const filesArray = event.dataTransfer.files;
+        for (let i = 0; i < filesArray.length; i++) {
+            sendFile(filesArray[i]);
+        }
     }
 }
 
-fileInput.onchange = function (event) {
-    event.stopPropagation();
-    event.preventDefault();
+if(fileInput){
+    fileInput.onchange = function (event) {
+        event.stopPropagation();
+        event.preventDefault();
 
-    const filesArray = event.target.files;
-    for (let i = 0; i < filesArray.length; i++) {
-        sendFile(filesArray[i]);
+        const filesArray = event.target.files;
+        for (let i = 0; i < filesArray.length; i++) {
+            sendFile(filesArray[i]);
+        }
     }
 }

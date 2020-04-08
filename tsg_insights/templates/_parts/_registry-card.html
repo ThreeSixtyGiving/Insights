@@ -1,0 +1,40 @@
+<article class="registry-card" title="{{ include.data.title }}">
+  <div class="registry-card__pub-logo">
+      <a href="{{include.data.publisher.website }}" target="_blank">
+        {% if include.data.publisher.logo %}<img src="{{ include.data.publisher.logo }}" alt="{{ include.data.publisher.name }}">{% endif %}
+      </a>
+  </div>
+  <div class="registry-card__content">
+    <h3 class="registry-card__pub-name">{{ include.data.publisher.name }}</h3>
+    
+    <ul class="registry-card__list">
+      <li class="registry-card__item ">
+        
+        <table class="registry-grant">
+          <tr class="registry-grant__line">
+            <td class="registry-grant__date-range">Records from Apr ’12 to Dec ‘18</td>
+            <td class="registry-grant__records">Records
+              <span class="registry-grant__grant-n">591</span>
+            </td>
+            <td class="registry-grant__amount">
+              £ <span class="registry-grant__amount-n">21,210,324</span>
+            </td>
+            <td class="registry-grant__download">
+              <a href="#" download><i class="material-icons">cloud_download</i></a>
+            </td>  
+          </tr>
+          <tr class="registry-grant__line">
+            <td class="registry-grant__pub-date">Published in May ‘17</td>
+            <td class="registry-grant__validation validated"></td>
+            <td class="registry-grant__license">
+              <img src="/images/creative-commons.svg" alt="Licensed under Creative Commons">
+              <img src="/images/pddl.svg" alt="Licensed under PDDL">
+            </td>
+            <td class="registry-grant__spacer"></td>
+          </tr>
+        </table>
+      </li>
+    </ul>
+
+  </div>
+</article>

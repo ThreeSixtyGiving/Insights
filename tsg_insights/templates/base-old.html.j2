@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    {% block head %}
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}360Giving Insights{% endblock %}</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="stylesheet" href="https://use.typekit.net/nri0jbb.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://unpkg.com/dash-table-experiments@0.6.0/dash_table_experiments/dash_table_experiments.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/sanitize-old.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles-old.css') }}">
+        {% block analytics %}
+            {% if config.get("GOOGLE_ANALYTICS_TRACKING_ID") and cookies_consented() %}
+            <!-- Global site tag (gtag.js) - Google Analytics -->
+            <script async src="https://www.googletagmanager.com/gtag/js?id={{config.get("GOOGLE_ANALYTICS_TRACKING_ID")}}"></script>
+            <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', '{{config.get("GOOGLE_ANALYTICS_TRACKING_ID")}}');
+            </script>
+            {% endif %}
+        {% endblock %}
+    {% endblock %}
+</head>
+
+<body>
+    {% block content %}{% endblock %}
+    {% block footer %}
+        {% include 'footer.html.j2' %}
+    {% endblock %}
+    {% block scripts %}{% endblock %}
+    {% include '_cookie_consent.html.j2' %}
+</body>
+
+</html>

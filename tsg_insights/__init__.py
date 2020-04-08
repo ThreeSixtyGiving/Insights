@@ -1,5 +1,7 @@
 import requests_cache
 import os
+import json
+from datetime import datetime
 
 from flask import Flask, send_from_directory, request
 import pandas as pd
@@ -115,5 +117,13 @@ def create_app(test_config=None):
         injections.update(cookies_consented=cookies_consented, cookies_asked=cookies_asked)
 
         return injections
+
+    @app.context_processor
+    def inject_footer_menu():
+        with open(os.path.join(os.path.dirname(__file__), 'footer.json')) as a:
+            return dict(
+                settings360=json.load(a),
+                now=datetime.now(),
+            )
 
     return app
