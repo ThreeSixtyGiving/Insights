@@ -105,7 +105,7 @@ def create_app(test_config=None):
         injections = dict()
 
         def cookies_consented():
-            value = request.cookies.get('cookie_consent')
+            value = request.cookies.get('cookie_consent', 'true')
             return value == 'true'
 
         def cookies_asked():

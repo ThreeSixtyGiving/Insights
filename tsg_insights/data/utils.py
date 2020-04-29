@@ -4,6 +4,7 @@ import inflect
 import humanize
 import babel.numbers
 import pandas as pd
+import numpy as np
 from requests.structures import CaseInsensitiveDict
 
 
@@ -108,8 +109,8 @@ def charity_number_to_org_id(regno):
 class CustomJSONEncoder(JSONEncoder):
     def default(self, obj):
         # handling numpy numbers:
-        if isinstance(obj, pd.np.generic):
-            return pd.np.asscalar(obj)
+        if isinstance(obj, np.generic):
+            return np.asscalar(obj)
 
         # handling pandas dataframes:
         elif isinstance(obj, (pd.Series, pd.DataFrame)):

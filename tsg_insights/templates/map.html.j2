@@ -3,7 +3,7 @@
 <head>
     <title>Grants Map</title>
     <meta charset="utf-8" />
-    <link rel="stylesheet" href="https://use.typekit.net/nri0jbb.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i&display=swap" type="text/css" />
     <link href='https://api.mapbox.com/mapbox.js/v3.2.1/mapbox.css' rel='stylesheet' />
     {# <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.css" 
           integrity="sha256-SHMGCYmST46SoyGgo4YR/9AlK1vf3ff84Aq9yK4hdqM=" crossorigin="anonymous" /> #}
@@ -20,12 +20,12 @@
         html, body, #map {
             height: 100%;
             width: 100%;
-            font-family: neusa-next-std-compact, sans-serif;
+            font-family: 'Roboto', sans-serif;
         }
 
         /* use the right font */
         #map * {
-            font-family: neusa-next-std-compact, sans-serif;
+            font-family: 'Roboto', sans-serif;
         }
         .marker-cluster div span {
             font-size: 1.2em;
@@ -51,16 +51,16 @@
         /* markercluster groups */
         .marker-cluster-small,
         .marker-cluster-small div {
-            background-color: #cddc2b;
+            background-color: #EFC329;
         }
         .marker-cluster-medium,
         .marker-cluster-medium div {
-            background-color: #f48320;
+            background-color: #DE6E26;
             color: #fff;
         }
         .marker-cluster-large,
         .marker-cluster-large div {
-            background-color: #9c2061;
+            background-color: #BC2C26;
             color: #fff;
         }
     </style>
@@ -104,7 +104,7 @@
 
         // function for determining style of boundaries
         var boundary_options = function(style){
-            var defaultStyle = {fillOpacity: 0.05, color: '#53aadd', opacity: 0.6, weight: 1};
+            var defaultStyle = {fillOpacity: 0.05, color: '#4DACB6', opacity: 0.6, weight: 1};
             return {
                 style: Object.assign({}, defaultStyle, style),
                 attribution: boundary_attribution,
@@ -120,7 +120,7 @@
         var markers = L.markerClusterGroup({
             singleMarkerMode: true,
             polygonOptions: {
-                color: '#53aadd'
+                color: '#4DACB6'
             }
         });
 
