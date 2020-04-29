@@ -511,7 +511,7 @@ class MergeCompanyAndCharityDetails(DataPreparationStage):
         orgid_df = orgid_df[~orgid_df.index.duplicated(keep='first')]
 
         # create some extra fields
-        orgid_df.loc[:, "age"] = pd.datetime.now() - orgid_df["date_registered"]
+        orgid_df.loc[:, "age"] = datetime.datetime.now() - orgid_df["date_registered"]
         orgid_df.loc[:, "latest_income"] = orgid_df["latest_income"].astype(float)
 
         # merge org details into main dataframe
@@ -519,8 +519,8 @@ class MergeCompanyAndCharityDetails(DataPreparationStage):
                      on="Recipient Org:0:Identifier:Clean", how="left")
 
         # add age based on time of grant
-        self.df.loc[:, self.org_prefix + "age"] = self.df["Award Date"] - \
-            self.df[self.org_prefix + "date_registered"]
+        self.df.loc[:, self.org_prefix + "age"] = self.df["Award Date"].dt.tz_localize(None) - \
+            self.df[self.org_prefix + "date_registered"].dt.tz_localize(None)
 
         return self.df
 

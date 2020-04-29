@@ -13,10 +13,15 @@ from .results import CHARTS, get_statistics
 DEFAULT_TABLE_FIELDS = ["Title", "Description", "Amount Awarded", 
                         "Award Date", "Recipient Org:0:Name", 
                         "Grant Programme:0:Title"]
-THREESIXTY_COLOURS = ['#9c2061', '#f48320', '#cddc2b', '#53aadd']
+THREESIXTY_COLOURS = [
+    '#BC2C26', # '#9c2061', #purple
+    '#DE6E26', # '#f48320', #orange
+    '#EFC329', # '#cddc2b', #yellow/lime green
+    '#4DACB6', # '#53aadd', #blue
+]
 DEFAULT_LAYOUT = {
     'font': {
-        'family': 'neusa-next-std-compact, "Source Sans Pro", sans-serif;',
+        'family': 'Roboto, "Source Sans Pro", sans-serif;',
         'size': 18
     },
     'yaxis': {
@@ -103,7 +108,7 @@ def get_bar_data(values, name="Grants", chart_type='bar', colour=0):
         'constraintext': 'none',
         'textfont': {
             'size': 18,
-            'family': 'neusa-next-std-compact, sans-serif;',
+            'family': 'Roboto, sans-serif;',
         },
         'hoverinfo': 'text+x',
         'type': chart_type, 
@@ -797,11 +802,11 @@ def get_statistics_output(df):
                 html.Div(
                     className='results-page__body__content__sphere',
                     style={
-                        'backgroundColor': THREESIXTY_COLOURS[2], 'color': '#0b2833'},
+                        'backgroundColor': THREESIXTY_COLOURS[2]},
                     children=[
                         html.P(className='', children=main_currency["median_f"][0]),
                         html.H4(className='', children=main_currency["median_f"][1]),
-                        html.H4(className='', children="(Average* grant)"),
+                        html.H4(className='', style={'fontSize': '0.95rem'}, children="(Average* grant)"),
                     ]
                 )
             ]

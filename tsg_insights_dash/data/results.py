@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 from tsg_insights.data.utils import format_currency
 from tsg_insights.data.process import AddExtraFieldsExternal
@@ -81,8 +82,8 @@ def get_imd_data(df):
     imd_total_ni = 890
 
     # work out the IMD decile
-    imd = ((imd / imd_total_eng) * 10).apply(pd.np.ceil).value_counts().sort_index().reindex(
-        pd.np.arange(1, 11)
+    imd = ((imd / imd_total_eng) * 10).apply(np.ceil).value_counts().sort_index().reindex(
+        np.arange(1, 11)
     ).fillna(0)
 
     imd.index = pd.Series(imd_order)
