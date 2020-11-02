@@ -91,10 +91,12 @@ def create_app(test_config=None):
     # add caching
     with app.app_context():
         if app.config["REQUESTS_CACHE_ON"]:
+            cache_dir = os.path.join(app.config["UPLOADS_FOLDER"], "http_cache")
+            os.makedirs(cache_dir, exist_ok=True)
             one_week_in_seconds = 60*60*24*7
             requests_cache.install_cache(
                 backend='sqlite',
-                cache_name=os.path.join(app.config["UPLOADS_FOLDER"], "http_cache"),
+                cache_name=cache_dir,
                 expire_after=one_week_in_seconds,
                 allowable_methods=('GET', 'HEAD',),
             )
