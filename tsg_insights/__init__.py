@@ -46,6 +46,8 @@ def create_app(test_config=None):
         REDIS_DEFAULT_URL='redis://localhost:6379/0', # default URL for redis instance
         REDIS_ENV_VAR='REDIS_URL',                    # name of the environmental variable that will be looked up for the redis url
         CACHE_DEFAULT_PREFIX='file_',                 # name of the prefix for saving a file to redis
+
+        URL_FETCH_ALLOW_LIST=['grantnav.threesixtygiving.org'], # domain names allowed to fetch data from
     )
 
     if test_config is None:

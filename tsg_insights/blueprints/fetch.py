@@ -1,6 +1,7 @@
 import uuid
+from urllib.parse import urlparse
 
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, current_app
 from werkzeug.utils import secure_filename
 from rq import Queue
 
@@ -33,6 +34,9 @@ def get_file_from_url():
     file_url = request.form.get("url")
     if not file_url:
         return jsonify(error=404, text="No url provided"), 404
+
+    if urlparse(file_url).netloc not in current_app.config.get("URL_FETCH_ALLOW_LIST"):
+        return jsonify(error=403, text="Fetching from that URL is not supported"), 403
 
     # a query was submitted, so queue it up and return job_id
     q = Queue(connection=get_cache())
