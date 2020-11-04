@@ -32,7 +32,7 @@ def get_registry_file(fileid):
 def get_file_from_url():
     file_url = request.form.get("url")
     if not file_url:
-        return jsonify(error=404, text="No url provided", fileid=fileid), 404
+        return jsonify(error=404, text="No url provided"), 404
 
     # a query was submitted, so queue it up and return job_id
     q = Queue(connection=get_cache())
