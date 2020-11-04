@@ -17,7 +17,8 @@ from .registry import fetch_reg_file, get_reg_file_from_url
 
 FTC_URL = 'https://findthatcharity.uk/orgid/{}.json'
 CH_URL = 'http://data.companieshouse.gov.uk/doc/company/{}.json'
-PC_URL = 'https://postcodes.findthatcharity.uk/postcodes/{}.json'
+PC_URL = 'https://findthatpostcode.uk/postcodes/{}.json'
+PC_NAMES_URL = 'https://findthatpostcode.uk/areas/names.csv'
 
 # config
 # schemes with data on findthatcharity
@@ -119,8 +120,7 @@ def prepare_lookup_cache(cache=None):
 
 
 def fetch_geocodes():
-    r = requests.get("https://postcodes.findthatcharity.uk/areas/names.csv",
-                     params={"types": ",".join(POSTCODE_FIELDS)})
+    r = requests.get(PC_NAMES_URL, params={"types": ",".join(POSTCODE_FIELDS)})
     pc_names = pd.read_csv(io.StringIO(r.text)).set_index(
         ["type", "code"]).sort_index()
     geocodes = pc_names["name"].to_dict()
