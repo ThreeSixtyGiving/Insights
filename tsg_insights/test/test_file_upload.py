@@ -38,9 +38,9 @@ def m():
         ("sample_external_apis/ch/04325234.json",
          re.compile('http://data.companieshouse.gov.uk/')),
         ('sample_external_apis/pc/SE1 1AA.json',
-         re.compile('https://postcodes.findthatcharity.uk/postcodes/')),
+         re.compile('https://findthatpostcode.uk/postcodes/')),
         ('sample_external_apis/geonames.csv',
-         'https://postcodes.findthatcharity.uk/areas/names.csv?types=ctry,cty,laua,pcon,rgn,imd,ru11ind,oac11,lat,long'),
+         'https://findthatpostcode.uk/areas/names.csv?types=ctry,cty,laua,pcon,rgn,imd,ru11ind,oac11,lat,long'),
     ]
 
     m = requests_mock.Mocker()

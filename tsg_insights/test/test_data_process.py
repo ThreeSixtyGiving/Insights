@@ -24,11 +24,11 @@ def m():
         ('sample_external_apis/ch/09668396.json',
          'http://data.companieshouse.gov.uk/doc/company/09668396.json'),
         ('sample_external_apis/pc/SE1 1AA.json',
-         'https://postcodes.findthatcharity.uk/postcodes/SE1%201AA.json'),
+         'https://findthatpostcode.uk/postcodes/SE1%201AA.json'),
         ('sample_external_apis/pc/L4 0TH.json',
-         'https://postcodes.findthatcharity.uk/postcodes/L4%200TH.json'),
+         'https://findthatpostcode.uk/postcodes/L4%200TH.json'),
         ('sample_external_apis/geonames.csv',
-         'https://postcodes.findthatcharity.uk/areas/names.csv?types=ctry,cty,laua,pcon,rgn,imd,ru11ind,oac11,lat,long'),
+         'https://findthatpostcode.uk/areas/names.csv?types=ctry,cty,laua,pcon,rgn,imd,ru11ind,oac11,lat,long'),
     ]
     m = requests_mock.Mocker()
     thisdir = os.path.dirname(os.path.realpath(__file__))
@@ -37,7 +37,7 @@ def m():
             m.get(i[1], content=f_.read())
 
     missing_urls = [
-        "https://postcodes.findthatcharity.uk/postcodes/M1A%201AM.json"
+        "https://findthatpostcode.uk/postcodes/M1A%201AM.json"
     ]
     for i in missing_urls:
         m.get(i, text="Not found", status_code=404)

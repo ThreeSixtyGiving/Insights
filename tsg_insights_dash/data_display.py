@@ -234,7 +234,7 @@ def what_next_missing_fields(df, fileid):
     missing = []
     if (df["__geo_ctry"].count() + df["__geo_rgn"].count()) == 0:
         missing.append(["postcodes or other geo data",
-                        "https://postcodes.findthatcharity.uk/"])
+                        "https://findthatpostcode.uk/"])
 
     org_type = CHARTS['org_type']['get_results'](df)
     if "Identifier not recognised" in org_type.index and len(org_type.index) == 1:
