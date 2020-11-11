@@ -107,22 +107,20 @@ def get_reg_file_from_url(url):
 
 def fetch_reg_file(url, method='GET'):
     user_agents = {
-        "findthatcharity": 'FindThatCharity.uk',
+        "insights": 'insights.threesixtygiving.org',
         'spoof': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:63.0) Gecko/20100101 Firefox/63.0',
     }
     if method not in ["GET", "HEAD"]:
         raise ValueError("Request method [{}] not recognised".format(method))
-    reg_file = requests.request(
-        method, url, headers={'User-Agent': user_agents['findthatcharity']})
-    try:
-        reg_file.raise_for_status()
-    except:
-        reg_file = requests.request(
-            method, url, headers={'User-Agent': user_agents['spoof']})
-        reg_file.raise_for_status()
-    if method=="HEAD":
-        return reg_file.headers
-    return reg_file.content
+    for u in user_agents.values():
+        reg_file = requests.request(method, url, headers={'User-Agent': u})
+        try:
+            reg_file.raise_for_status()
+            if method=="HEAD":
+                return reg_file.headers
+            return reg_file.content
+        except:
+            continue
 
 
 def get_registry_by_publisher(filters={}, **kwargs):
