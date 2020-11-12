@@ -278,7 +278,7 @@ class CheckColumnTypes(DataPreparationStage):
         "Funding Org:0:Name": lambda x: x.str.strip(),
         "Recipient Org:0:Name": lambda x: x.str.strip(),
         "Recipient Org:0:Identifier": lambda x: x.str.strip(),
-        "Award Date": lambda x: pd.to_datetime(x),
+        "Award Date": lambda x: pd.to_datetime(x, utc=True),
     }
 
     def run(self):
@@ -441,9 +441,9 @@ class MergeCompanyAndCharityDetails(DataPreparationStage):
         orgid_df = pd.DataFrame(charity_rows).set_index("orgid")
 
         orgid_df.loc[:, "date_registered"] = pd.to_datetime(
-            orgid_df.loc[:, "date_registered"])
+            orgid_df.loc[:, "date_registered"], utc=True)
         orgid_df.loc[:, "date_removed"] = pd.to_datetime(
-            orgid_df.loc[:, "date_removed"])
+            orgid_df.loc[:, "date_removed"], utc=True)
 
         return orgid_df
 
@@ -475,9 +475,9 @@ class MergeCompanyAndCharityDetails(DataPreparationStage):
 
         companies_df = pd.DataFrame(company_rows).set_index("orgid")
         companies_df.loc[:, "date_registered"] = pd.to_datetime(
-            companies_df.loc[:, "date_registered"], dayfirst=True)
+            companies_df.loc[:, "date_registered"], dayfirst=True, utc=True)
         companies_df.loc[:, "date_removed"] = pd.to_datetime(
-            companies_df.loc[:, "date_removed"], dayfirst=True)
+            companies_df.loc[:, "date_removed"], dayfirst=True, utc=True)
 
         return companies_df
 
@@ -511,7 +511,7 @@ class MergeCompanyAndCharityDetails(DataPreparationStage):
         orgid_df = orgid_df[~orgid_df.index.duplicated(keep='first')]
 
         # create some extra fields
-        orgid_df.loc[:, "age"] = datetime.datetime.now() - orgid_df["date_registered"]
+        orgid_df.loc[:, "age"] = datetime.datetime.now() - orgid_df["date_registered"].dt.tz_localize(None)
         orgid_df.loc[:, "latest_income"] = orgid_df["latest_income"].astype(float)
 
         # merge org details into main dataframe
