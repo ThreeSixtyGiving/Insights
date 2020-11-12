@@ -117,7 +117,7 @@ def test_check_column_types():
     cache = DummyCache()
     stage = CheckColumnTypes(df, cache, None)
     result_df = stage.run()
-    assert result_df.dtypes["Award Date"] == "datetime64[ns]"
+    assert result_df.dtypes["Award Date"] == "datetime64[ns, UTC]"
     assert result_df.dtypes["Amount Awarded"] == "float64"
     assert result_df["Funding Org:0:Name"][0] == "abcd"
     assert result_df["Funding Org:0:Identifier"][0] == "abcd"
