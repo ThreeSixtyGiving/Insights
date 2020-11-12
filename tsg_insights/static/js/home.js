@@ -184,6 +184,29 @@ const track_job = function(jobid){
 
 }
 
+const dataFromURL = function (url) {
+     // open the fetch file dialogue
+    document.getElementById('upload-progress-modal').classList.remove("hidden");
+    document.getElementById('upload-dataset-modal').classList.add("hidden");
+
+    var formData = new FormData();
+    formData.append('url', url);
+
+    fetch('/fetch/url', {
+        method: 'POST',
+        body: formData
+    }).then(function (response) {
+        return response.json();
+    }).then( function (jobJson) {
+        const jobid = jobJson['job'];
+        track_job(jobid);
+    });
+}
+
+if (urlParams.has("url")) {
+    dataFromURL(urlParams.get("url"));
+}
+
 const sendFile = function (file) {
 
     // open the fetch file dialogue
