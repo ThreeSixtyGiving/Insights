@@ -146,6 +146,8 @@ def download_file(fileid, format):
         elif format == 'xlsx':
             output = io.BytesIO()
             writer = pd.ExcelWriter(output, engine='xlsxwriter')
+            for col in df.select_dtypes(['datetimetz']).columns:
+                df[col] = df[col].astype(str).str[:-6]
             csvdata = df.to_excel(
                 writer, sheet_name='grants', index=False)
             writer.save()
