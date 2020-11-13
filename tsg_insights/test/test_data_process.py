@@ -12,13 +12,13 @@ from tsg_insights.data.process import *
 def m():
     urls = [
         ("sample_external_apis/ftc/GB-CHC-225922.json",
-         'https://findthatcharity.uk/orgid/GB-CHC-225922.json'),
+         'https://findthatcharity.uk/orgid/GB-CHC-225922/canonical.json'),
         ('sample_external_apis/ftc/GB-SC-SC003558.json',
-         'https://findthatcharity.uk/orgid/GB-SC-SC003558.json'),
+         'https://findthatcharity.uk/orgid/GB-SC-SC003558/canonical.json'),
         ('sample_external_apis/ftc/GB-NIC-100012.json',
-         'https://findthatcharity.uk/orgid/GB-NIC-100012.json'),
+         'https://findthatcharity.uk/orgid/GB-NIC-100012/canonical.json'),
         ('sample_external_apis/ftc/GB-COH-04325234.json',
-         'https://findthatcharity.uk/orgid/GB-COH-04325234.json'),
+         'https://findthatcharity.uk/orgid/GB-COH-04325234/canonical.json'),
         ('sample_external_apis/ch/04325234.json',
          'http://data.companieshouse.gov.uk/doc/company/04325234.json'),
         ('sample_external_apis/ch/09668396.json',
