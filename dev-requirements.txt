@@ -28,6 +28,7 @@ flask-compress==1.8.0     # via -r requirements.txt, dash
 flask==1.1.2              # via -r requirements.txt, dash, flask-compress
 flattentool==0.5.0        # via -r requirements.txt, threesixtygiving
 future==0.18.2            # via -r requirements.txt, dash
+gunicorn==20.0.4          # via -r requirements.txt
 humanize==3.1.0           # via -r requirements.txt
 idna==2.8                 # via -r requirements.txt, requests
 inflect==4.1.0            # via -r requirements.txt

@@ -14,4 +14,5 @@ Babel
 rq
 tqdm
 xlsxwriter
+gunicorn
 git+https://github.com/drkane/threesixty-parser.git@0bce04c4b9d36575e3d2c2b326c445b665e5447d#egg=threesixtygiving
