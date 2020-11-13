@@ -15,14 +15,19 @@ from .cache import get_cache, get_from_cache, save_to_cache, get_metadata_from_c
 from .utils import get_fileid, charity_number_to_org_id
 from .registry import fetch_reg_file, get_reg_file_from_url
 
-FTC_URL = 'https://findthatcharity.uk/orgid/{}.json'
+FTC_URL = 'https://findthatcharity.uk/orgid/{}/canonical.json'
 CH_URL = 'http://data.companieshouse.gov.uk/doc/company/{}.json'
 PC_URL = 'https://findthatpostcode.uk/postcodes/{}.json'
 PC_NAMES_URL = 'https://findthatpostcode.uk/areas/names.csv'
 
 # config
 # schemes with data on findthatcharity
-FTC_SCHEMES = ["GB-CHC", "GB-NIC", "GB-SC", "GB-COH"]
+FTC_SCHEMES = [
+    "GB-CHC", "GB-NIC", "GB-SC", "GB-COH", "GB-GOR", "GB-LANI",
+    "GB-EDU", "GB-UKPRN", "GB-LAESTAB", "XI-GRID", "GB-MPR", "GB-HESA",
+    "GB-CASC", "GB-LAE", "GB-SHPE", "GB-NHS", "GB-NIEDU", "GB-SCOTEDU",
+    "GB-LAS", "GB-WALEDU", "GB-PLA",
+]
 POSTCODE_FIELDS = ['ctry', 'cty', 'laua', 'pcon', 'rgn', 'imd', 'ru11ind',
                    'oac11', 'lat', 'long']  # fields to care about from the postcodes)
 
@@ -278,7 +283,7 @@ class CheckColumnTypes(DataPreparationStage):
         "Funding Org:0:Name": lambda x: x.str.strip(),
         "Recipient Org:0:Name": lambda x: x.str.strip(),
         "Recipient Org:0:Identifier": lambda x: x.str.strip(),
-        "Award Date": lambda x: pd.to_datetime(x),
+        "Award Date": lambda x: pd.to_datetime(x, utc=True),
     }
 
     def run(self):
@@ -410,12 +415,14 @@ class MergeCompanyAndCharityDetails(DataPreparationStage):
 
     org_prefix = "__org_"
 
-    def _get_org_type(self, id):
+    def _get_org_type(self, id, org_type_primary):
         if id.startswith("S") or id.startswith("GB-SC-"):
             return "Registered Charity (Scotland)"
         elif id.startswith("N") or id.startswith("GB-NIC-"):
             return "Registered Charity (NI)"
-        return "Registered Charity (E&W)"
+        elif id.startswith("GB-CHC-"):
+            return "Registered Charity (E&W)"
+        return org_type_primary
 
     def _create_orgid_df(self):
 
@@ -426,13 +433,16 @@ class MergeCompanyAndCharityDetails(DataPreparationStage):
                 c = json.loads(c)
                 charity_rows.append({
                     "orgid": k.decode("utf8"),
-                    "charity_number": c.get('id'),
-                    "company_number": c.get("company_number")[0].get("number") if c.get("company_number") else None,
-                    "date_registered": c.get("date_registered"),
-                    "date_removed": c.get("date_removed"),
-                    "postcode": c.get("geo", {}).get("postcode"),
-                    "latest_income": c.get("latest_income"),
-                    "org_type": self._get_org_type(c.get("id")),
+                    "charity_number": c.get('charityNumber'),
+                    "company_number": c.get("companyNumber") if c.get("companyNumber") else None,
+                    "date_registered": c.get("dateRegistered"),
+                    "date_removed": c.get("dateRemoved"),
+                    "postcode": c.get("address", {}).get("postalCode"),
+                    "latest_income": c.get("latestIncome"),
+                    "org_type": self._get_org_type(
+                        c.get("id"),
+                        c.get("organisationTypePrimary")
+                    ),
                 })
 
         if not charity_rows:
@@ -441,9 +451,9 @@ class MergeCompanyAndCharityDetails(DataPreparationStage):
         orgid_df = pd.DataFrame(charity_rows).set_index("orgid")
 
         orgid_df.loc[:, "date_registered"] = pd.to_datetime(
-            orgid_df.loc[:, "date_registered"])
+            orgid_df.loc[:, "date_registered"], utc=True)
         orgid_df.loc[:, "date_removed"] = pd.to_datetime(
-            orgid_df.loc[:, "date_removed"])
+            orgid_df.loc[:, "date_removed"], utc=True)
 
         return orgid_df
 
@@ -475,9 +485,9 @@ class MergeCompanyAndCharityDetails(DataPreparationStage):
 
         companies_df = pd.DataFrame(company_rows).set_index("orgid")
         companies_df.loc[:, "date_registered"] = pd.to_datetime(
-            companies_df.loc[:, "date_registered"], dayfirst=True)
+            companies_df.loc[:, "date_registered"], dayfirst=True, utc=True)
         companies_df.loc[:, "date_removed"] = pd.to_datetime(
-            companies_df.loc[:, "date_removed"], dayfirst=True)
+            companies_df.loc[:, "date_removed"], dayfirst=True, utc=True)
 
         return companies_df
 
@@ -511,7 +521,7 @@ class MergeCompanyAndCharityDetails(DataPreparationStage):
         orgid_df = orgid_df[~orgid_df.index.duplicated(keep='first')]
 
         # create some extra fields
-        orgid_df.loc[:, "age"] = datetime.datetime.now() - orgid_df["date_registered"]
+        orgid_df.loc[:, "age"] = datetime.datetime.now() - orgid_df["date_registered"].dt.tz_localize(None)
         orgid_df.loc[:, "latest_income"] = orgid_df["latest_income"].astype(float)
 
         # merge org details into main dataframe

@@ -6,7 +6,7 @@ import pandas as pd
 
 from .data.registry import THREESIXTY_STATUS_JSON
 from .blueprints import home, fetch, job, data, cache
-from .commands import registry, worker, datafile
+from .commands import registry, worker, datafile, additional_data
 from .data.cache import get_cache
 from .data.utils import CustomJSONEncoder
 
@@ -84,6 +84,7 @@ def create_app(test_config=None):
     app.cli.add_command(registry.cli)
     app.cli.add_command(worker.cli)
     app.cli.add_command(datafile.cli)
+    app.cli.add_command(additional_data.cli)
 
     # where to serve images from
     @app.route('/images/<path:path>')

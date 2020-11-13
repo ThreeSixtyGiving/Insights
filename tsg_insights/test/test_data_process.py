@@ -12,13 +12,13 @@ from tsg_insights.data.process import *
 def m():
     urls = [
         ("sample_external_apis/ftc/GB-CHC-225922.json",
-         'https://findthatcharity.uk/orgid/GB-CHC-225922.json'),
+         'https://findthatcharity.uk/orgid/GB-CHC-225922/canonical.json'),
         ('sample_external_apis/ftc/GB-SC-SC003558.json',
-         'https://findthatcharity.uk/orgid/GB-SC-SC003558.json'),
+         'https://findthatcharity.uk/orgid/GB-SC-SC003558/canonical.json'),
         ('sample_external_apis/ftc/GB-NIC-100012.json',
-         'https://findthatcharity.uk/orgid/GB-NIC-100012.json'),
+         'https://findthatcharity.uk/orgid/GB-NIC-100012/canonical.json'),
         ('sample_external_apis/ftc/GB-COH-04325234.json',
-         'https://findthatcharity.uk/orgid/GB-COH-04325234.json'),
+         'https://findthatcharity.uk/orgid/GB-COH-04325234/canonical.json'),
         ('sample_external_apis/ch/04325234.json',
          'http://data.companieshouse.gov.uk/doc/company/04325234.json'),
         ('sample_external_apis/ch/09668396.json',
@@ -117,7 +117,7 @@ def test_check_column_types():
     cache = DummyCache()
     stage = CheckColumnTypes(df, cache, None)
     result_df = stage.run()
-    assert result_df.dtypes["Award Date"] == "datetime64[ns]"
+    assert result_df.dtypes["Award Date"] == "datetime64[ns, UTC]"
     assert result_df.dtypes["Amount Awarded"] == "float64"
     assert result_df["Funding Org:0:Name"][0] == "abcd"
     assert result_df["Funding Org:0:Identifier"][0] == "abcd"
@@ -182,10 +182,10 @@ def test_charity_lookup(m):
     stage = LookupCharityDetails(df, cache, None)
     result_df = stage.run()
     assert len(cache["charity"]) == 4
-    assert json.loads(cache["charity"]["GB-CHC-225922"])["ccew_number"] == "225922"
-    assert json.loads(cache["charity"]["GB-COH-04325234"])["ccew_number"] == "1089464"
-    assert json.loads(cache["charity"]["GB-NIC-100012"])["ccni_number"] == "100012"
-    assert json.loads(cache["charity"]["GB-SC-SC003558"])["oscr_number"] == "SC003558"
+    assert json.loads(cache["charity"]["GB-CHC-225922"])["charityNumber"] == "225922"
+    assert json.loads(cache["charity"]["GB-COH-04325234"])["charityNumber"] == "1089464"
+    assert json.loads(cache["charity"]["GB-NIC-100012"])["charityNumber"] == "100012"
+    assert json.loads(cache["charity"]["GB-SC-SC003558"])["charityNumber"] == "SC003558"
 
 def test_company_lookup(m):
     df = pd.DataFrame({

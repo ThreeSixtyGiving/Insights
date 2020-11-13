@@ -1,0 +1,7 @@
+-r requirements.txt
+pytest
+black
+isort
+requests_mock
+python-dotenv
+git+https://github.com/michaelbrooks/rq-win.git@3fbadf762d3ad3cdf4822a599626354567e1f1aa#egg=rq_win
