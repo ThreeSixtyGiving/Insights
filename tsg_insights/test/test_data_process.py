@@ -182,10 +182,10 @@ def test_charity_lookup(m):
     stage = LookupCharityDetails(df, cache, None)
     result_df = stage.run()
     assert len(cache["charity"]) == 4
-    assert json.loads(cache["charity"]["GB-CHC-225922"])["ccew_number"] == "225922"
-    assert json.loads(cache["charity"]["GB-COH-04325234"])["ccew_number"] == "1089464"
-    assert json.loads(cache["charity"]["GB-NIC-100012"])["ccni_number"] == "100012"
-    assert json.loads(cache["charity"]["GB-SC-SC003558"])["oscr_number"] == "SC003558"
+    assert json.loads(cache["charity"]["GB-CHC-225922"])["charityNumber"] == "225922"
+    assert json.loads(cache["charity"]["GB-COH-04325234"])["charityNumber"] == "1089464"
+    assert json.loads(cache["charity"]["GB-NIC-100012"])["charityNumber"] == "100012"
+    assert json.loads(cache["charity"]["GB-SC-SC003558"])["charityNumber"] == "SC003558"
 
 def test_company_lookup(m):
     df = pd.DataFrame({
