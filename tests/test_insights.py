@@ -14,7 +14,7 @@ def test_version():
 
 @pytest.fixture
 def test_app():
-    app = create_app("")
+    app = create_app()
     db_fd, db_path = tempfile.mkstemp()
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///{}".format(db_path)
     app.config["TESTING"] = True
@@ -30,7 +30,7 @@ def test_app():
 
 @pytest.fixture
 def client():
-    app = create_app("")
+    app = create_app()
     db_fd, db_path = tempfile.mkstemp()
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///{}".format(db_path)
     app.config["TESTING"] = True

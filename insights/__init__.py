@@ -13,7 +13,7 @@ from insights.utils import list_to_string
 __version__ = "0.1.0"
 
 
-def create_app(config_filename):
+def create_app():
     app = Flask(__name__)
     app.config.from_mapping(
         DATASTORE_URL=os.environ.get("DATASTORE_URL"),
