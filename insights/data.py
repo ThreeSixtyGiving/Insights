@@ -5,7 +5,7 @@ from insights.db import GeoName, Grant, Publisher
 from insights.settings import DEFAULT_DATASET
 
 
-def get_frontpage_options(dataset=DEFAULT_DATASET):
+def get_frontpage_options(dataset=DEFAULT_DATASET, with_url=True):
 
     publishers = Publisher.query.all()
     publisher_counts = get_field_counts(Grant.publisher_id)
@@ -26,7 +26,7 @@ def get_frontpage_options(dataset=DEFAULT_DATASET):
                 {
                     "id": p.prefix,
                     "name": p.name,
-                    "url": url_for("data", data_type="publisher", data_id=p.prefix),
+                    "url": url_for("data", data_type="publisher", data_id=p.prefix) if with_url else None,
                     **publisher_counts.get(p.prefix),
                 }
                 for p in publishers
@@ -37,7 +37,7 @@ def get_frontpage_options(dataset=DEFAULT_DATASET):
             {
                 "id": "all",
                 "name": "All grants",
-                "url": url_for("data"),
+                "url": url_for("data") if with_url else None,
                 **all_grants[dataset],
             }
         ]
@@ -46,7 +46,7 @@ def get_frontpage_options(dataset=DEFAULT_DATASET):
                 {
                     "id": k,
                     "name": k,
-                    "url": url_for("data", data_type="funder_type", data_id=k),
+                    "url": url_for("data", data_type="funder_type", data_id=k) if with_url else None,
                     **v,
                 }
                 for k, v in funder_types.items()
@@ -58,7 +58,7 @@ def get_frontpage_options(dataset=DEFAULT_DATASET):
                 {
                     "id": k,
                     "name": funder_names.get(k, k),
-                    "url": url_for("data", data_type="funder", data_id=k),
+                    "url": url_for("data", data_type="funder", data_id=k) if with_url else None,
                     **v,
                 }
                 for k, v in funders.items()
@@ -70,7 +70,7 @@ def get_frontpage_options(dataset=DEFAULT_DATASET):
                 {
                     "id": k,
                     "name": area_names.get(k, k),
-                    "url": url_for("data", data_type="area", data_id=k),
+                    "url": url_for("data", data_type="area", data_id=k) if with_url else None,
                     **v,
                 }
                 for k, v in countries.items()
@@ -82,7 +82,7 @@ def get_frontpage_options(dataset=DEFAULT_DATASET):
                 {
                     "id": k,
                     "name": area_names.get(k, k),
-                    "url": url_for("data", data_type="area", data_id=k),
+                    "url": url_for("data", data_type="area", data_id=k) if with_url else None,
                     **v,
                 }
                 for k, v in regions.items()
@@ -94,7 +94,7 @@ def get_frontpage_options(dataset=DEFAULT_DATASET):
                 {
                     "id": k,
                     "name": area_names.get(k, k),
-                    "url": url_for("data", data_type="area", data_id=k),
+                    "url": url_for("data", data_type="area", data_id=k) if with_url else None,
                     **v,
                 }
                 for k, v in local_authorities.items()

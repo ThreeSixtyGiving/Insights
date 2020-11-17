@@ -234,7 +234,7 @@ def fetch_data(dataset, bulk_limit):
 )
 @with_appcontext
 def fetch_data(url_template):
-    opts = get_frontpage_options()
+    opts = get_frontpage_options(with_url=False)
     click.echo("Fetching geonames")
     for i in ["countries", "regions", "local_authorities"]:
         count = 0
