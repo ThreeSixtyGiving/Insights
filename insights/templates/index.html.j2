@@ -1,0 +1,104 @@
+{% extends 'base.html.j2' %}
+{% from 'components/funder-card.html.j2' import funder_card %}
+
+{% block headscripts %}
+{{ super() }}
+
+  {% if config.ENV == 'development' %}
+  <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+  {% else %}
+  <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+  {% endif %}
+{% endblock %}
+
+{% block bodyscripts %}
+  {{ super() }}
+  <script>
+    const DATASET_SELECT = {{ dataset_select|tojson }};
+    const DATASET_SELECT_SECTIONS = {
+      funder_types: "",
+      funders: "Funders",
+      // publishers: "Publishers",
+      countries: "Countries",
+      regions: "Regions",
+      local_authorities: "Local authorities",
+    };
+  </script>
+  <script type="module" src="{{ url_for('static', filename='js/homepage.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+
+  <header class="layout__header">
+    
+<div class="hero-section">
+  <div class="wrapper">
+    <div class="hero hero--orange">
+      <!-- .hero--orange, .hero--yellow, .hero--red -->
+      <div class="hero__column hero__logo">
+        <a href="/"><img src="https://cdn.threesixtygiving.org/images/360-logos/insights/360insights-color.svg" alt="360 "></a>
+      </div>
+      <div class="hero__column hero__lead">
+        <h2 class="hero__title">See your grantmaking in new ways</h2>
+        <p class="hero__blurb">Combine and visualise 360Giving, charity and other data to answer questions about your grantmaking</p>
+      </div>  
+    </div>
+  </div>
+</div>
+
+  </header>
+  <main class="layout__content" id="app">
+    <div class="layout__content-inner">
+      <div class="accordian" v-bind:class="{ datasetModal: 'accordian--expanded' }">
+    <div class="intro-section">
+      <h2>Select a 360Giving dataset <br>or <a href="#upload-data">upload a file</a> that meets the 360Giving Standard.</h2>
+      <div class="spacer-3"></div>
+      <input id="search" type="search" class="search-field" v-model="datasetSearch" placeholder="Search for a funder or area">
+
+      
+    </div>
+    <ul class="card-list">
+      <li class="card-list__item" v-for="(title, index) in datasetSelectSections" v-if="getDatasetOptions(index).length > 0">
+        <article class="media-card media-card--teal">
+          <div class="media-card__content">
+            <header class="media-card__header">
+              <h3 class="media-card__heading"><% title %></h3>
+            </header>
+            <ul class="dataset-select">
+              <li v-for="item in getDatasetOptions(index)">
+                <a v-bind:href="item.url"><% item.name %> (<% item.grant_count|formatNumber %>)</a>
+              </li>
+            </ul>
+            <div class="media-card__byline" v-if="getDatasetOptionsOtherN(index)">
+                ...plus <% getDatasetOptionsOtherN(index) | formatNumber %> other <% title.toLowerCase() %>
+            </div>
+          </div>
+        </article>
+      </li>
+      <li class="card-list__item">
+  <article class="media-card media-card--red media-card--self-contained" id="upload-data">
+    <div class="media-card__content">
+      <header class="media-card__header">
+        <h3 class="media-card__heading">Upload your own file</h3>
+      </header>
+      <p>Upload a file that meets the <a href="https://standard.threesixtygiving.org/" >360Giving Data Standard</a>.</p>
+      <button class="button button--red modal__trigger" v-on:click.stop="uploadModal = !uploadModal" data-id="modal-01">Upload Dataset</button>
+    </div>
+  </article>
+      </li>
+      <li class="card-list__item">
+  <article class="media-card media-card--orange media-card--self-contained">
+    <div class="media-card__content">
+      <header class="media-card__header">
+        <h3 class="media-card__heading">Data Sources</h3>
+      </header>
+      <p>Charity data is sourced from <a href="https://findthatcharity.uk/" target="_blank" rel="noreferrer">findthatcharity.uk</a> and postcode data from <a href="https://findthatpostcode.uk/" target="_blank" rel="noreferrer">postcodes.findthatcharity.uk</a>. Company data is fetched using Companies House URIs. All external data is used under the <a href="http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/" target="_blank" rel="noreferrer">Open Government Licence</a>.</p>
+      <p><a href="https://insights.threesixtygiving.org/about#data-sources">More about data sources</a></p>
+    </div>
+  </article>
+      </li>
+    </ul>
+  </div>
+  {% include 'components/upload-modal.html.j2' %}
+  </main>
+{% endblock content %}

@@ -1,0 +1,56 @@
+{% extends 'base.html.j2' %}
+{% from 'components/filter-item.html.j2' import filter_item %}
+{% from 'components/chart-card.html.j2' import chart_card, chart_card_header %}
+
+{% block headscripts %}
+  {{ super() }}
+
+  <link href='https://api.mapbox.com/mapbox.js/v3.3.1/mapbox.css' rel='stylesheet' />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/map.css') }}" />
+  <link rel="stylesheet" href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css">
+
+  {% if config.ENV == 'development' %}
+  <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.bundle.js"></script>
+  <script src="https://unpkg.com/vue-chartjs/dist/vue-chartjs.js"></script>
+  {% else %}
+  <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.bundle.min.js"></script>
+  <script src="https://unpkg.com/vue-chartjs/dist/vue-chartjs.min.js"></script>
+  {% endif %}
+  <script src='https://api.mapbox.com/mapbox.js/v3.3.1/mapbox.js'></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.4.1/leaflet.markercluster.js" 
+          integrity="sha256-WL6HHfYfbFEkZOFdsJQeY7lJG/E5airjvqbznghUzRw=" crossorigin="anonymous"></script>
+  <script src="{{ url_for('static', filename='js/lib/leaflet.groupedlayercontrol.js') }}"></script>
+
+  <script src="https://unpkg.com/vue-multiselect@2.1.0"></script>
+{% endblock headscripts %}
+
+{% block bodyscripts %}
+  {{ super() }}
+  <script>
+    const GRAPHQL_ENDPOINT = {{ url_for('graphql' )|tojson }};
+    const BIN_LABELS = {{ bin_labels|tojson }};
+    const DATASET = {{ dataset|tojson }};
+    const BASE_FILTERS = {{ base_filters|tojson }};
+    const MAPBOX_ACCESS_TOKEN = {{ config.MAPBOX_ACCESS_TOKEN|tojson }};
+    const FULL_PAGE_MAP = true;
+    const TITLE = {{ title|tojson }};
+    const SUBTITLE = {{ subtitle|tojson }};
+  </script>
+  <script type="module" src="{{ url_for('static', filename='js/insights.js') }}"></script>
+{% endblock bodyscripts %}
+
+{% block content %}
+<div id="data-display" style="width: 100%;">
+  <div style="width: 100%;">
+    <mapbox-map container="grants-map" height="100vh" :markers="geoGrants"></mapbox-map>
+  </div>
+</div>
+{% endblock content %}
+
+{% block header %}
+{% endblock header %}
+
+{% block footer %}
+{% endblock footer %}

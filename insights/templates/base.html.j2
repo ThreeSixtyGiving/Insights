@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <title>{% block title %}360Insights{% endblock %}</title>
+  <link rel="stylesheet" href="https://cdn.threesixtygiving.org/css/global.css" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+    rel="stylesheet">
+  <link rel="shortcut icon" href="https://cdn.threesixtygiving.org/images/favicon/favicon.ico"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}" />
+  {% block headscripts %}
+  {% endblock headscripts %}
+</head>
+<body>
+  <div class="layout layout--single-column">
+    {% block header %}
+    {% include 'components/nav.html.j2' %}
+    {% endblock header %}
+
+    {% block content %}
+    {% endblock content %}
+
+    {% block footer %}
+    {% include 'components/footer.html.j2' %}
+    {% endblock footer %}
+  </div>
+  {% block bodyscripts %}
+  {% endblock bodyscripts %}
+</body>
+</html>

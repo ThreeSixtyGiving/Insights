@@ -1,0 +1,373 @@
+{% extends 'base.html.j2' %}
+
+{% block content %}
+
+  <header class="layout__header">
+    
+    <div class="hero-section">
+      <div class="wrapper">
+        <div class="hero hero--orange">
+          <!-- .hero--orange, .hero--yellow, .hero--red -->
+          <div class="hero__column hero__logo">
+            <a href="/"><img src="https://cdn.threesixtygiving.org/images/360-logos/insights/360insights-color.svg" alt="360 "></a>
+          </div>
+          <div class="hero__column hero__lead">
+            <h2 class="hero__title">About 360Insights</h2>
+            <p class="hero__blurb"></p>
+          </div>  
+        </div>
+      </div>
+    </div>
+
+  </header>
+  <main class="layout__content" id="app">
+    <div class="layout__content-inner">
+      <div class="prose">
+
+        <section class="prose__section">
+          <h2>About 360Insights</h2>
+          <p>
+            360Insights is a free tool to help you understand funders better. 
+            You can combine and visualise 360Giving and charity data, and 
+            explore funding across seven different areas – from grant dates 
+            to types of recipients.
+          </p>
+          <p>
+            360Giving commissioned <a href="https://dkane.net/" rel="noopener" target="_blank">David Kane</a> to build 360Insights
+            and <a href="https://www.ccmdesign.ca/" rel="noopener" target="_blank">ccm.design</a> to design it.
+          </p>
+      <p>
+        360Insights is completely free to use, and is built on open source technology and openly-licenced data.
+      </p>
+      <p>
+        You can <a href="https://github.com/ThreeSixtyGiving/Insights" rel="noopener" target="_blank">view the site code on Github</a>. 
+        The tool makes use of Open Source tools, such as <a href="http://flask.pocoo.org/">Flask</a>.
+      </p>
+      <p>
+          <a href="#data-sources">Data sources</a><br>
+          <a href="#data-upload">What happens to data I upload?</a><br>
+          <a href="#cookies">Cookies</a><br>
+          <a href="#privacy">Privacy</a><br>
+          <a href="#terms">Terms and conditions</a><br>
+          <a href="#disclaimer">Disclaimer</a><br>
+      </p>
+        </section>
+
+        <section class="prose__section" id="data-sources">
+          <h2>Data sources</h2>
+        <h3>
+          Grantmakers
+        </h3>
+        <p>
+          360Insights uses the <a href="https://www.threesixtygiving.org/data/360giving-datastore/">360Giving datastore</a> to retrieve grants data
+          published by grantmakers to the 360Giving data Standard.
+        </p>
+        <p>
+          Each of the files has been published by a grantmaker, usually on their own website,
+          under a licence that allows the data to be reused and shared. 
+          They have used a common format - the 
+          <a href="http://www.threesixtygiving.org/support/standard/" rel="noopener" target="_blank">360Giving data standard</a>
+           - to make files in a consistent way.
+        </p>
+        <p>
+          Data shown on 360Insights has been fetched from the publisher's website by the 360Giving datastore. The datastore checks
+          that it fits the data Standard and adds some additional data about the geography and organisations include, if possible.
+        </p>
+        <h3>
+          When will I see my data?
+        </h3>
+        <p>
+          If you've published data in the 360Giving Data Standard, your data should be available on 360Insights
+          a day or two after it is shown on the <a href="http://data.threesixtygiving.org/">360Giving registry</a>.
+        </p>
+        <p>
+          If you don't want to wait, you can upload your 360Giving format file instead. This file will be checked against the 360Giving
+          Data Standard, and additional data on geography and organisations will be added where possible.
+        </p>
+        <h3>
+          Other data
+        </h3>
+        <p>
+          360Insights uses the 360Giving datastore, which adds external data from the following sources.
+        </p>
+        <p>
+          <a href="https://findthatcharity.uk/">Find that Charity</a> is used to bring in data about charities 
+          and other data sources. 
+          <a href="https://findthatcharity.uk/about#data-sources">More information on the data sources used by Find that Charity</a>
+        </p>
+        <p>
+          Data on postcode comes from
+          ONS, and is used under <a href="http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/">Open Government Licence</a>.
+        </p>
+        <ul>
+        <li>
+          Contains OS data © Crown copyright and database right 2019 
+        </li>
+        <li>
+          Contains Royal Mail data © Royal Mail copyright and database right 2019 
+        </li>
+        <li>
+          Contains National Statistics data © Crown copyright and database right 2019
+        </li>
+        </ul>
+        </section>
+
+        <section class="prose__section" id="data-upload">
+          <h2>What happens to data I upload?</h2>
+          <h3>
+            360Giving publishers
+          </h3>
+          <p>
+              360Insights is designed to enable you to submit files for the application to process and
+              then display information from them. It also generates files in CSV and Microsoft Excel
+              formats that combine the original data with the charity or company data. You can then
+              download these files.
+          </p>
+          <p class="box box--red">
+              Please ensure that you have the appropriate permissions to upload data to 360Insights. 
+          </p>
+          <p class="box box--red">
+              Do not submit confidential or non-public personal data to this tool.
+          </p>
+          <p>
+            Any data you upload will be available at the URL created and can be accessed by anyone 
+            with that link. If your data is not suitable for sharing publicly then you should treat 
+            this URL with care, and only share it with people who have permission to access to the data. 
+          </p>
+          <p>
+            We do not make use of any of the data for purposes other than to create visualisations
+            for the data you have submitted and to review the operation and output of the application.
+          </p>
+          <p>
+            We do create and store metadata about your use of the application, and about the files/data
+            that you have uploaded in order to monitor how the application is being used.
+          </p>
+          <p>
+            <a href="#privacy">Read the 360Insights privacy notice for further information</a>
+          </p>
+        </section>
+
+        <section class="prose__section" id="cookies">
+          <h2>Cookies</h2>
+          <p>
+            A cookie is a small file which asks permission to be placed on your computer's hard drive.
+            Once you agree, the file is added and the cookie helps analyse web traffic or lets you know
+            when you visit a particular site.
+          </p>
+          <p>
+            Cookies allow web applications to respond to you as an individual. The web application can
+            tailor its operations to your needs, likes and dislikes by gathering and remembering information
+            about your preferences. A cookie in no way gives us access to your computer or any information
+            about you, other than the data you choose to share with us.
+          </p>
+          <p>
+            You can choose to accept or decline cookies. Most web browsers automatically accept cookies,
+            but you can usually modify your browser setting to decline cookies if you prefer. This may
+            prevent you from taking full advantage of the website.
+          </p>
+          <p>
+            <a href="https://cookiesandyou.com/" rel="noopener" target="_blank">More about cookies</a>
+          </p>
+          <p>
+            In this website we use cookies to help us analyse how our website is used. We use cookies
+            from <a href="https://developers.google.com/analytics/devguides/collection/analyticsjs/cookie-usage">Google Analytics</a>
+            to measure use of the site. If you choose to opt out of Google Analytics cookies, we save a
+            cookie to remember this choice.
+          </p>
+        </section>
+
+        <section class="prose__section" id="privacy">
+          <h2>Privacy</h2>
+          <p>
+            360Giving is committed to ensuring that your privacy is protected.
+            This privacy notice sets out how we collect and process any personal
+            data when you use this website.
+          </p>
+          <p>
+            We may change this notice from time to time by updating this page. This notice is effective from 26th February 2019.
+          </p>
+          <p>
+            <strong>Data controller:</strong>
+            360Giving, King's Place, 90 York Way, N1 9AG, London. 
+          </p>
+          <p>
+            Contact us if would like a copy of the information held on you or if you believe that any
+            information we are holding on you is incorrect or incomplete. You can contact us by
+            email at: <a href="mailto:info@threesixtygiving.org">info@threesixtygiving.org</a>
+          </p>
+          <p>
+            You have the following rights concerning this data:
+          </p>
+          <ul>
+            <li>Right to be informed, which is the purpose of this privacy notice</li>
+            <li>Right to Access, Rectification, Erasure, and to Restrict Processing.
+            Note that the right to Erasure and Restrict Processing are balanced against
+            our legitimate interests. Where relevant, you need to provide information to
+            re-identify yourself from our pseudonymised data, see GDPR Article 11</li>
+            <li>Right to object to our processing</li>
+          </ul>
+          <p>
+            Our supervisory authority is the ICO in the UK. You have the right to lodge a complaint with them.
+          </p>
+          <p>
+            We process personal data for the following purposes:
+          </p>
+          <ul>
+            <li>Understanding website visitor and traffic patterns</li>
+            <li>Understanding server behaviour</li>
+          </ul>
+          <p>
+            We rely on legitimate interests (GDPR Article 6(1)(f)) as the lawful basis for this processing.
+            Details about the type of data, the purpose of the processing and legitimate interests, and
+            the storage and retention of the data are set out below.
+          </p>
+          <h3>Understanding website visitor and traffic patterns</h3>
+          <p>
+            We use Google Analytics to analyse usage of this website. This uses cookies to identify you (anonymously)
+            as the same user, so that we can analyse our web traffic better. E.g. it allows us to count how many users
+            we have, instead of just total page views or analyse what pages people commonly visit together.
+          </p>
+          <p>
+            If you do allow cookies to be used, Google Analytics uses 1st party cookies, set on the domain of this
+            website (threesixtygiving).
+          </p>
+          <p>
+            Cookies created by Google Analytics start with:
+          </p>
+          <ul>
+            <li>_ga</li>
+            <li>_gali</li>
+            <li>_gat_gtag_UA_#</li>
+            <li>_gid</li>
+          </ul>
+          <p>
+            See <a href="https://support.google.com/analytics/answer/6004245">support.google.com/analytics/answer/6004245</a>
+            for more information and how to opt out.
+          </p>
+          <h3>Understanding server behaviour</h3>
+          <p>
+            We collect data about your visits to the website in server logs. This is for
+            the purpose of debugging network issues, monitoring server usage, and identifying
+            malicious usage.
+          </p>  
+          <p>
+            Personal data we collect:
+          </p>
+          <ul>
+            <li>Your IP address</li>
+            <li>User agent (information about the OS and browser that you use)</li>
+            <li>Referrer (what page you arrived at one of our web pages from)</li>
+          </ul>
+          <p>
+            We do not use this data to personally identify individuals, but it is
+            possible that it could be used to do so, particularly if combined with other datasets.
+          </p>
+          <p>
+            Data processors: DigitalOcean.
+          </p>
+          <p>
+            No data is transferred to third countries or international organisations.
+          </p>
+          <p>
+            This server data is kept indefinitely.
+          </p>
+          <h3>
+            Deleting our copies of the files
+          </h3>
+          <p>
+            When you provide data to the application we store the data you have provided in order to
+            process it for you. We also enable derived versions of the data to be downloaded. Those
+            derived versions and the original data are stored on our server.
+          </p>
+          <p>
+            After 2 months we will delete those files from our server, meaning they are no-longer
+            available for download.
+          </p>
+          </p>
+          <p>
+            360Insights is covered by the <a href="http://www.threesixtygiving.org/take-down-policy/">360Giving Take Down policy</a>
+            for requests to remove data that is published to the 360Giving Data Standard.
+          <h3>
+            Security
+          </h3>
+          <p>
+            We are committed to ensuring that your information is secure. In order to prevent
+            unauthorised access or disclosure, we have put in place suitable physical, electronic
+            and managerial procedures to safeguard and secure the information we collect online.
+          </p>
+        </section>
+
+        <section class="prose__section" id="terms">
+          <h2>Terms and conditions</h2>
+          <p>
+            360Insights was developed to help explore grantmaking data published to the
+            360Giving data Standard. It is offered as service <strong>without any warranty</strong>; without
+            even the implied warranty of <strong>merchantability</strong> or <strong>fitness for a particular purpose</strong>.
+          </p>
+          <p>
+            If you continue to browse and use this website, you are agreeing to comply with
+            and be bound by the following terms and conditions of use, which together with
+            our privacy notice govern 360Giving's relationship with you in relation to this
+            website. If you disagree with any part of these terms and conditions, please do
+            not use our website.
+          </p>
+          <p>
+            The term ‘360Giving’ or ‘us’ or ‘we’ refers to the owner of the website. 
+          </p>
+          <p>
+            Our company registration number is 09668396.
+          </p>
+          <p>
+            Our registered address is King's Place, 90 York Way, N1 9AG, London. You can contact us by email info@threesixtygiving.org.
+          </p>
+          <h3>Terms of use</h3>
+          <p>
+            The content of the pages of this website is for your general information and use only.
+            It is subject to change without notice.
+          </p>
+          <p>
+            Neither we nor any third parties provide any warranty or guarantee as to the accuracy, timeliness,
+            performance, completeness or suitability of the information and materials found or offered on this
+            website for any particular purpose. You acknowledge that such information and materials may contain
+            inaccuracies or errors and we expressly exclude liability for any such inaccuracies or errors to the
+            fullest extent permitted by law. Your use of any information or materials on this website is entirely
+            at your own risk, for which we shall not be liable. It shall be your own responsibility to ensure
+            that any products, services or information available through this website meet your specific requirements.
+            This website contains material which is owned by or licensed to us. This material includes, but is not
+            limited to, the design, layout, look, appearance and graphics. Reproduction is prohibited other than
+            in accordance with the copyright notice, which forms part of these terms and conditions. All trademarks
+            reproduced in this website which are not the property of, or licensed to, the operator are acknowledged
+            on the website. Unauthorised use of this website may give rise to a claim for damages and/or be a
+            criminal offence. From time to time this website may also include links to other websites. These
+            links are provided for your convenience to provide further information. They do not signify that
+            we endorse the website(s). We have no responsibility for the content of the linked website(s).
+            Your use of this website and any dispute arising out of such use of the website is subject to the
+            laws of England, Northern Ireland, Scotland and Wales.
+          </p>
+        </section>
+
+        <section class="prose__section" id="disclaimer">
+          <h2>Website disclaimer</h2>
+          <p>
+            The information contained in this website is for general information purposes only.
+            The information is provided by us and while we endeavour to keep the information up
+            to date and correct, we make no representations or warranties of any kind, express
+            or implied, about the completeness, accuracy, reliability, suitability or availability
+            with respect to the website or the information, products, services, or related graphics
+            contained on the website for any purpose. Any reliance you place on such information is
+            therefore strictly at your own risk. In no event will we be liable for any loss or damage
+            including without limitation, indirect or consequential loss or damage, or any loss or
+            damage whatsoever arising from loss of data or profits arising out of, or in connection
+            with, the use of this website. Through this website you are able to link to other websites
+            which are not under the control of us. We have no control over the nature, content and
+            availability of those sites. The inclusion of any links does not necessarily imply a
+            recommendation or endorse the views expressed within them. Every effort is made to keep
+            the website up and running smoothly. However, we take no responsibility for, and will
+            not be liable for, the website being temporarily unavailable due to technical issues
+            beyond our control.
+          </p>
+        </section>
+      </div>
+    </div>
+  </main>
+{% endblock content %}

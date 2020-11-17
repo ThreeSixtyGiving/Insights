@@ -1,0 +1,438 @@
+{% extends 'base.html.j2' %}
+{% from 'components/filter-item.html.j2' import filter_item %}
+{% from 'components/chart-card.html.j2' import chart_card, chart_card_header %}
+
+{% block headscripts %}
+  {{ super() }}
+
+  <link href='https://api.mapbox.com/mapbox.js/v3.3.1/mapbox.css' rel='stylesheet' />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/map.css') }}" />
+  <link rel="stylesheet" href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css">
+
+  {% if config.ENV == 'development' %}
+  <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.bundle.js"></script>
+  <script src="https://unpkg.com/vue-chartjs/dist/vue-chartjs.js"></script>
+  {% else %}
+  <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.bundle.min.js"></script>
+  <script src="https://unpkg.com/vue-chartjs/dist/vue-chartjs.min.js"></script>
+  {% endif %}
+  <script src='https://api.mapbox.com/mapbox.js/v3.3.1/mapbox.js'></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.4.1/leaflet.markercluster.js" 
+          integrity="sha256-WL6HHfYfbFEkZOFdsJQeY7lJG/E5airjvqbznghUzRw=" crossorigin="anonymous"></script>
+  <script src="{{ url_for('static', filename='js/lib/leaflet.groupedlayercontrol.js') }}"></script>
+
+  <script src="https://unpkg.com/vue-multiselect@2.1.0"></script>
+{% endblock headscripts %}
+
+{% block bodyscripts %}
+  {{ super() }}
+  <script>
+    const GRAPHQL_ENDPOINT = {{ url_for('graphql' )|tojson }};
+    const BIN_LABELS = {{ bin_labels|tojson }};
+    const DATASET = {{ dataset|tojson }};
+    const BASE_FILTERS = {{ base_filters|tojson }};
+    const MAPBOX_ACCESS_TOKEN = {{ config.MAPBOX_ACCESS_TOKEN|tojson }};
+  </script>
+  <script type="module" src="{{ url_for('static', filename='js/insights.js') }}"></script>
+{% endblock bodyscripts %}
+
+{% block content %}
+<div id="data-display">
+    <header class="layout__header wrapper" v-if="summary">
+        
+      <div class="base-section">
+        <div class="grid grid--single-column">
+          <hgroup class="header-group">
+              <a href="/"><img style="max-width: 140px;" src="https://cdn.threesixtygiving.org/images/360-logos/insights/360insights-color.svg" alt="360 "></a>
+            <h3 class="header-group__brow">{{ subtitle }}</h3>
+            <h2 class="header-group__title">
+              {{ title }}
+              <template v-if="summary.minDate">
+                <template v-if="summary.minDate.slice(0,7) == summary.maxDate.slice(0,7)">
+                  <small>in</small> <% summary.minDate | formatDate('month') %>
+                </template>
+                <template v-else-if="summary.minDate.slice(0,4) == summary.maxDate.slice(0,4)">
+                  <small>between</small> <% summary.minDate | formatDate('month') %> <small>and</small> <% summary.maxDate | formatDate('month') %>
+                </template>
+                <template v-else>
+                  <small>between</small> <% summary.minDate | formatDate('year') %> <small>and</small> <% summary.maxDate | formatDate('year') %>
+                </template>
+              </template>
+            </h2>
+            {% include 'components/loading.html.j2' %}
+          </hgroup>
+          <p class="header-group__excerpt" v-if="summary.currencies">
+            <template v-if="summary.currencies.length > 1">
+              This data contains grants made in <% summary.currencies.length %> different currencies.
+              Only showing grants made in <% currencyUsed %>.
+            </template>
+            {% if dataset == 'main' %}
+            <strong>From the <a href="https://data.threesixtygiving.org/">360Giving data registry</a></strong>
+            {% endif %}
+            
+            <template v-if="sources.length == 1"> | <a v-bind:href="sources[0].distribution[0].downloadURL">Download original file</a><br>
+            Published by <a v-bind:href="sources[0].publisher.website"><% sources[0].publisher.name %></a> with a <a v-bind:href="sources[0].license"><% sources[0].licenseName %></a> licence.</template>
+          </p>
+          <template v-if="sources.length > 1">
+            <details class="header-group__excerpt">
+              <summary>Data sources</summary>
+              <table class="table table--zebra">
+                <thead>
+                  <tr>
+                    <th>Publisher</th>
+                    <th>Source file</th>
+                    <th>Licence</th>
+                  </tr>
+                </thead>
+                <tbody>
+                <tr v-for="source in sources" :key="source.id">
+                  <td><a v-bind:href="source.publisher.website"><% source.publisher.name %></a></td>
+                  <td>
+                    <a v-bind:href="source.distribution[0].accessURL"><% source.title %></a><br>
+                    [<a v-bind:href="source.distribution[0].downloadURL">Download original file</a>]
+                  </td>
+                  <td><a v-bind:href="source.license"><% source.licenseName %></a></td>
+                </tr>
+                </tbody>
+              </table>
+            </details>
+          </template>
+        </div>
+        
+        <div class="spacer-3"></div>
+
+        <div class="grid grid--four-columns" v-if="summary.currencies">
+          <div class="grid__1">
+            <div class="base-card base-card--orange">
+              {% include 'components/loading.html.j2' %}
+              <div class="base-card__content">
+                <h2 class="base-card__title"><% summary.grants | formatNumberSuffix %><% summary.grants | getAmountSuffix(true) %></h2>
+                <p class="base-card__text">Grants</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid__1">
+            <div class="base-card base-card--teal">
+              {% include 'components/loading.html.j2' %}
+              <div class="base-card__content">
+                <h2 class="base-card__title"><% summary.recipients | formatNumberSuffix %><% summary.recipients | getAmountSuffix(true) %></h2>
+                <p class="base-card__text">Recipients</p>
+              </div>
+            </div>
+          </div>
+
+          <template v-for="currency in summary.currencies" v-if="currency.currency == currencyUsed">
+            <div class="grid__1">
+              <div class="base-card base-card--yellow">
+                <div class="base-card__content">
+                  <h2 class="base-card__title"><% currency.total | formatCurrency(currency.currency) %></h2>
+                  <p class="base-card__text"><% currency.total | getAmountSuffix %> total</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="grid__1">
+              <div class="base-card base-card--yellow">
+                <div class="base-card__content">
+                  <h2 class="base-card__title"><% currency.mean | formatCurrency(currency.currency) %><% currency.mean | getAmountSuffix(true) %></h2>
+                  <p class="base-card__text">Average Grant*</p>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+
+      </header>
+
+<div class="filter-panel">
+  <div class="accordion wrapper" v-bind:class="{ 'accordion--expanded': showFilters }">
+    <div class="grid">
+      <div class="grid__1">
+        <button class="button accordion__trigger" v-on:click.prevent="showFilters = !showFilters">Filters</button>
+        <div class="tags" v-if="initialData">
+          <span v-if="filters.awardAmount.min & filters.awardAmount.max" class="tag tag--teal">
+            <% filters.awardAmount.min | formatCurrency(currencyUsed, false) %> - 
+            <% filters.awardAmount.max | formatCurrency(currencyUsed, false) %>
+            <a v-on:click.prevent="filters.awardAmount = {min: null, max: null}" title="Remove filter" class="tag-remove">&times;</a>
+          </span>
+          <span v-else-if="filters.awardAmount.min" class="tag tag--teal">
+            <% filters.awardAmount.min | formatCurrency(currencyUsed, false) %>+
+            <a v-on:click.prevent="filters.awardAmount.min = null" title="Remove filter" class="tag-remove">&times;</a>
+          </span>
+          <span v-else-if="filters.awardAmount.max" class="tag tag--teal">
+            0 - 
+            <% filters.awardAmount.max | formatCurrency(currencyUsed, false) %>
+            <a v-on:click.prevent="filters.awardAmount.max = null" title="Remove filter" class="tag-remove">&times;</a>
+          </span>
+          <span v-if="filters.awardDates.min" class="tag tag--teal">Award date after <% filters.awardDates.min %> <a v-on:click.prevent="filters.awardDates.min = null" href="#" title="Remove filter" class="tag-remove">&times;</a></span>
+          <span v-if="filters.awardDates.max" class="tag tag--teal">Award date before <% filters.awardDates.max %> <a v-on:click.prevent="filters.awardDates.max = null" href="#" title="Remove filter" class="tag-remove">&times;</a></span>
+          <span v-if="filters.search" class="tag tag--teal">Search for: <% filters.search %> <a v-on:click.prevent="filters.search = ''" href="#" title="Remove filter" class="tag-remove">&times;</a></span>
+          <span v-if="computedFilters.byFunderType" class="tag tag--teal" v-for="f in computedFilters.byFunderType">Funder type: <% f %> <a v-on:click.prevent="filters.search = ''" href="#" title="Remove filter" class="tag-remove">&times;</a></span>
+        </div>
+      </div>
+    </div>
+    <div class="accordion__extra" v-if="initialData">
+      {% call filter_item("Amount awarded") %}
+        <label for="amount-awarded-min">Between</label>
+        <input id="amount-awarded-min" type="number" class="filter-input" placeholder="Minimum" v-model="filters.awardAmount.min">
+        <label for="amount-awarded-max">and</label>
+        <input id="amount-awarded-max" type="number" class="filter-input" placeholder="Maximum" v-model="filters.awardAmount.max">
+      {% endcall %}
+
+      {% call filter_item("Award date") %}
+        <label for="award-date-min">From</label>
+        <input id="award-date-min" type="date" class="filter-input" v-model="filters.awardDates.min">
+        <label for="award-date-max">to</label>
+        <input id="award-date-max" type="date" class="filter-input" v-model="filters.awardDates.max">
+      {% endcall %}
+
+      {% call filter_item("Search") %}
+        <input id="search" type="search" class="search-field" v-model="filters.search">
+      {% endcall %}
+
+      <template v-if="initialData.byFunderType.length > 1">
+      {% call filter_item("Funder type") %}
+        <multi-select v-model="filters.funderTypes" :options="getOptions('byFunderType')"  label="label" track-by="value" :multiple="true" :searchable="false" :close-on-select="false" :show-labels="false" placeholder="Funder type"></multi-select>
+      {% endcall %}
+      </template>
+
+      <template v-if="initialData.byFunder.length > 1">
+      {% call filter_item("Funder") %}
+        <multi-select v-model="filters.funders" :options="getOptions('byFunder')"  label="label" track-by="value" :multiple="true" :searchable="false" :close-on-select="false" :show-labels="false" placeholder="Funder"></multi-select>
+      {% endcall %}
+      </template>
+
+      <template v-if="initialData.byGrantProgramme.length > 1">
+      {% call filter_item("Grant programme") %}
+        <multi-select v-model="filters.grantProgrammes" :options="getOptions('byGrantProgramme')"  label="label" track-by="value" :multiple="true" :searchable="true" :close-on-select="false" :show-labels="false" placeholder="Grant Programme"></multi-select>
+      {% endcall %}
+      </template>
+
+      <template v-if="getOptions('byCountryRegion').length > 1">
+      {% call filter_item("Region") %}
+        <multi-select v-model="filters.area" :options="getOptions('byCountryRegion')"  label="label" track-by="value" :multiple="true" :searchable="true" :close-on-select="false" :show-labels="false" placeholder="Country"></multi-select>
+      {% endcall %}
+      </template>
+
+      <template v-if="initialData.byOrgType.length > 1">
+      {% call filter_item("Recipient type") %}
+        <multi-select v-model="filters.orgtype" :options="getOptions('byOrgType')" label="label" track-by="value" :multiple="true" :searchable="true" :close-on-select="false" :show-labels="false" placeholder="Recipient type"></multi-select>
+      {% endcall %}
+      </template>
+
+      {% call filter_item("Recipient size") %}
+        <label for="org-size-min">Between</label>
+        <input id="org-size-min" type="number" class="filter-input" v-model="filters.orgSize.min">
+        <label for="org-size-max">and</label>
+        <input id="org-size-max" type="number" class="filter-input" v-model="filters.orgSize.max">
+      {% endcall %}
+
+      {% call filter_item("Recipient age") %}
+        <label for="org-age-min">Between</label>
+        <input id="org-age-min" type="number" class="filter-input" v-model="filters.orgAge.min">
+        <label for="org-age-max">and</label>
+        <input id="org-age-max" type="number" class="filter-input" v-model="filters.orgAge.max">
+      {% endcall %}
+    </div>
+  </div>
+</div>
+      <main class="layout__content">
+
+        <div class="layout__content-inner">
+          <div class="grid grid--two-columns">
+
+            {% call chart_card("all", colour="orange") %}
+              {% call chart_card_header("Award amount") %}
+                (number of grants)
+              {% endcall %}
+                <ul class="bar-chart" v-if="chartData.byAmountAwarded">
+                  <li class="bar-chart__item" v-for="group in chartBars('byAmountAwarded', 'grants', 1)" :style="group.style">
+                    <div class="bar-chart__label"><% group.label %></div>
+                    <div class="bar-chart__bar"><span></span></div>
+                  </li>
+                </ul>
+            {% endcall %}
+
+            {% call chart_card("all", colour="orange") %}
+              {% call chart_card_header("Award date") %}
+                (number of grants)
+              {% endcall %}
+                <bar-chart :chart-data="lineChartData('byAwardDate', 'grants', 0, 'month')" v-if="chartData.byAwardDate" v-bind:height="100" v-bind:hide-legend="true"></line-chart>
+            {% endcall %}
+
+            {% call chart_card("all", colour="orange") %}
+              {% call chart_card_header("Funder types") %}
+                (number of grants)
+              {% endcall %}
+                <ul class="bar-chart" v-if="chartData.byFunderType">
+                  <li class="bar-chart__item" v-for="(group, index) in chartBars('byFunderType')" v-if="index < 10" :style="group.style">
+                    <div class="bar-chart__label small"><% group.label %></div>
+                    <div class="bar-chart__bar"><span></span></div>
+                  </li>
+                </ul>
+                <div class="base-card__note">
+                  <p>Based on <% chartN('byFunderType') | formatNumber %> grants.</p>
+                  <p v-if="chartMissing('byFunderType')">
+                  <% chartMissing('byFunderType') | formatNumber %> grants not found.
+                  </p>
+                </div>
+            {% endcall %}
+
+            {% call chart_card("all", colour="orange") %}
+              {% call chart_card_header("Funders") %}
+                (number of grants)
+              {% endcall %}
+                <ul class="bar-chart" v-if="chartData.byFunder">
+                  <li class="bar-chart__item" v-for="(group, index) in chartBars('byFunder')" v-if="index < 10" :style="group.style">
+                    <div class="bar-chart__label small"><% group.label %></div>
+                    <div class="bar-chart__bar"><span></span></div>
+                  </li>
+                </ul>
+                <div class="base-card__note">
+                  <p>Based on <% chartN('byFunder') | formatNumber %> grants.</p>
+                  <p v-if="chartMissing('byFunder')">
+                  <% chartMissing('byFunder') | formatNumber %> grants not found.
+                  </p>
+                </div>
+            {% endcall %}
+
+            {% call chart_card("all", colour="orange") %}
+              {% call chart_card_header("Grant Programmes") %}
+                (number of grants)
+              {% endcall %}
+                <ul class="bar-chart" v-if="chartData.byGrantProgramme">
+                  <li class="bar-chart__item" v-for="(group, index) in chartBars('byGrantProgramme')" v-if="index < 10" :style="group.style">
+                    <div class="bar-chart__label small"><% group.label %></div>
+                    <div class="bar-chart__bar"><span></span></div>
+                  </li>
+                </ul>
+                <div class="base-card__note">
+                  <p>Based on <% chartN('byGrantProgramme') | formatNumber %> grants.</p>
+                  <p v-if="chartMissing('byGrantProgramme')">
+                  <% chartMissing('byGrantProgramme') | formatNumber %> grants did not have a grant programme.
+                  </p>
+                </div>
+            {% endcall %}
+
+          </div>
+          <div class="spacer-3"></div>
+          <div class="grid grid--two-columns">
+
+            <div class="grid__all">
+              <h3>Geography</h3>
+            </div>
+
+            {% call chart_card("all", colour="red") %}
+              {% call chart_card_header("UK region and country") %}
+                (number of grants)
+              {% endcall %}
+                <ul class="bar-chart" v-if="chartData.byCountryRegion">
+                  <li class="bar-chart__item" v-for="(group, index) in chartBars('byCountryRegion', 'grants', 1, false)" :style="group.style">
+                    <div class="bar-chart__label small">England - <% group.label %></div>
+                    <div class="bar-chart__bar"><span></span></div>
+                  </li>
+                  <li class="bar-chart__item" v-for="(group, index) in chartBars('byCountryRegion', 'grants', 0, false)" v-if="group.label != 'England'" :style="group.style">
+                    <div class="bar-chart__label small"><% group.label %></div>
+                    <div class="bar-chart__bar"><span></span></div>
+                  </li>
+                </ul>
+                <div class="base-card__note">
+                  <p>Based on <% chartN('byCountryRegion') | formatNumber %> grants.</p>
+                  <p v-if="chartMissing('byCountryRegion')">
+                  <% chartMissing('byCountryRegion') | formatNumber %> grants did not have a region or country.
+                  </p>
+                </div>
+            {% endcall %}
+
+            <div class="grid__all">
+                <div class="base-card base-card--red base-card--left">
+                    <div style="padding-left: 4px">
+                      <mapbox-map container="grants-map" height="500px" :markers="geoGrants"></mapbox-map>
+                    </div>
+                    <div class="base-card__content">
+                      {% call chart_card_header("Grant Locations") %}
+                        (number of grants)
+                      {% endcall %}
+                      <div class="base-card__note" v-if="geoGrants">
+                        <p>Based on <% geoGrants.length | formatNumber %> grants.</p>
+                        <p v-if="chartMissing('byCountryRegion')">
+                        <% chartMissing('byCountryRegion') | formatNumber %> grants did not have a region or country.
+                        </p>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+          </div>
+          <div class="spacer-3"></div>
+          <div class="grid grid--two-columns">
+
+            <div class="grid__all">
+              <h3>Grant recipients</h3>
+            </div>
+
+            {% call chart_card(colour="teal") %}
+              {% call chart_card_header("Recipient type") %}
+                (number of grants)
+              {% endcall %}
+                <ul class="bar-chart" v-if="chartData.byOrgType">
+                  <li class="bar-chart__item" v-for="(group, index) in chartBars('byOrgType')" v-if="index < 10" :style="group.style">
+                    <div class="bar-chart__label small"><% group.label %></div>
+                    <div class="bar-chart__bar"><span></span></div>
+                  </li>
+                </ul>
+                <div class="base-card__note">
+                  <p>Based on <% chartN('byOrgType') | formatNumber %> grants.</p>
+                  <p v-if="chartMissing('byOrgType')">
+                  <% chartMissing('byOrgType') | formatNumber %> values are not found.
+                  </p>
+                  <p class="">Organisation type is based on official organisation identifiers, such as registered charity or company numbers, found in the data.</p>
+                </div>
+            {% endcall %}
+
+            {% call chart_card(colour="teal") %}
+              {% call chart_card_header("Latest income of charity recipients") %}
+                (number of grants)
+              {% endcall %}
+                <ul class="bar-chart" v-if="chartData.byOrgSize">
+                  <li class="bar-chart__item" v-for="(group, index) in chartBars('byOrgSize')" v-if="index < 10" :style="group.style">
+                    <div class="bar-chart__label"><% group.label %></div>
+                    <div class="bar-chart__bar"><span></span></div>
+                  </li>
+                </ul>
+                <div class="base-card__note">
+                  <p>Based on <% chartN('byOrgSize') | formatNumber %> grants.</p>
+                  <p>Organisation age at the time of the grant award, based on the registration date of that organisation. Only available for recipients with charity or company numbers.</p>
+                  <p v-if="chartMissing('byOrgSize')">
+                  Organisation size is not available for <% chartMissing('byOrgSize') | formatNumber %> grants.
+                  </p>
+                </div>
+            {% endcall %}
+
+            {% call chart_card(colour="teal") %}
+              {% call chart_card_header("Age of recipient organisations") %}
+                (number of grants)
+              {% endcall %}
+                <ul class="bar-chart" v-if="chartData.byOrgAge">
+                  <li class="bar-chart__item" v-for="(group, index) in chartBars('byOrgAge')" v-if="index < 10" :style="group.style">
+                    <div class="bar-chart__label"><% group.label %></div>
+                    <div class="bar-chart__bar"><span></span></div>
+                  </li>
+                </ul>
+                <div class="base-card__note">
+                  <p>Based on <% chartN('byOrgAge') | formatNumber %> grants.</p>
+                  <p v-if="chartMissing('byOrgAge')">
+                  Organisation age is not available for <% chartMissing('byOrgSize') | formatNumber %> grants.
+                  </p>
+                </div>
+            {% endcall %}
+
+          </div>
+        </div>
+      </main>
+</div>
+{% endblock content %}

@@ -1,0 +1,19 @@
+{% macro chart_card(size='1', colour='yellow') %}
+<div class="grid__{{ size }}">
+    <div class="base-card base-card--{{colour}} base-card--left">
+        <div class="base-card__content">
+            {{ caller() }}
+            {% include 'components/loading.html.j2' %}
+        </div>
+    </div>
+</div>
+{% endmacro %}
+
+{% macro chart_card_header(title) %}
+<header class="base-card__header">
+    <h3 class="base-card__heading">{{ title }}</h3>
+    <h4 class="base-card__subheading">
+        {{ caller() }}
+    </h4>
+</header>
+{% endmacro %}

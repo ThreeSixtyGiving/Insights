@@ -1,0 +1,56 @@
+{% macro funder_card(record) %}<li class="card-list__item">
+<article class="insights-card" title="{{ record.name }}">
+    <div class="insights-card__pub-logo">
+        <a href="{{ record.website }}" target="_blank">
+        
+        <img src="{{ record.logo }}" alt="{{ record.name }}">
+        
+        <span class="screen-reader-only">(opens in a new tab)</span></a>
+    </div>
+    <div class="insights-card__content">
+    <h3 class="insights-card__pub-name">
+        <a href="{{ url_for('data', data_type='publisher', data_id=record.prefix) }}">{{ record.name }}</a>
+    </h3>
+    
+    <ul class="insights-card__list">
+        
+        <li class="insights-card__item ">
+        <a href="{{ url_for('data', data_type='publisher', data_id=record.prefix) }}">
+            <table class="grant">
+            <tbody><tr class="grant__line grant--title-line">
+                <td class="grant__title" colspan="3">
+                    {{ "{:,.0f}".format(record.grant_count) }}
+                    {% if record.min_date.year == record.max_date.year %}
+                    grants made in {{ record.min_date.year }}
+                    {% else %}
+                    grants made between {{ record.min_date.year }} and {{ record.max_date.year }}
+                    {% endif %}
+                </td>
+            </tr>
+
+            {# <tr class="grant__line grant--amounts-line">
+                <td class="grant__pub-date">
+                    {% if record.min_date.year == record.max_date.year %}
+                    Grants made in {{ record.min_date.year }}
+                    {% else %}
+                    Grants made between {{ record.min_date.year }} and {{ record.max_date.year }}
+                    {% endif %}
+                </td>
+
+                <td class="grant__records">Records
+                <span class="grant__grant-n">{{ "{:,.0f}".format(record.grant_count) }}</span>
+                </td>
+                <td class="grant__amount">
+                £ <span class="grant__amount-n">8.5M</span>
+                </td>
+            </tr> #}
+            </tbody></table>
+        </a>
+        </li>
+        
+    </ul>
+    </div>
+</article>
+</li>
+
+{% endmacro %}

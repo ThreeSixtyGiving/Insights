@@ -1,0 +1,267 @@
+.filter-input {
+    padding: 2px 4px;
+    border: 1px solid rgba(21, 54, 52, 0.2);
+    color: rgba(21, 54, 52, 0.7);
+    background-color: transparent;
+}
+
+.base-card.base-card--left {
+    text-align: left;
+}
+
+.base-card__note {
+    color: #555;
+    font-size: 0.9rem;
+    font-weight: 200;
+    margin-top: 1.65ex;
+}
+
+.base-card__note p {
+    margin-top: 1.65ex;
+    margin-bottom: 0;
+}
+
+.accordion--expanded .accordion__extra {
+    overflow: initial;
+}
+
+.multiselect__tag {
+    background: var(--color-teal);
+}
+
+.filter-panel .accordion--expanded .accordion__extra {
+    margin-top: 12px;
+}
+
+.filter-panel__item .multiselect__tags {
+    border-radius: 0px;
+    border: 1px solid rgba(21, 54, 52, 0.2);
+}
+
+details>summary {
+    cursor: pointer;
+}
+
+/* Front page data selection */
+
+ul.dataset-select {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+ul.dataset-select>li {
+    float: left;
+    display: block;
+    margin-left: 0;
+    margin-top: 0;
+    margin-right: 0.8rem;
+    margin-bottom: 0.8rem;
+    padding: 0;
+}
+
+/* bar charts */
+
+.base-card--yellow .bar-chart__bar>span {
+    background-color: var(--color-yellow);
+}
+
+.base-card--red .bar-chart__bar>span {
+    background-color: var(--color-red);
+}
+
+.base-card--teal .bar-chart__bar>span {
+    background-color: var(--color-teal);
+}
+
+.base-card--orange .bar-chart__bar>span {
+    background-color: var(--color-orange);
+}
+
+.base-card__header {
+    padding-left: 0px;
+}
+
+.grid__all .base-card .bar-chart__label {
+    min-width: 196px;
+}
+
+.bar-chart__bar {
+    max-height: 25px;
+    min-height: 25px;
+}
+
+.bar-chart__label.small {
+    font-size: 0.9rem;
+    line-height: 1.3;
+    min-height: 25px;
+}
+
+/* tags */
+
+.tags {
+    display: inline;
+}
+
+.tags > .tag {
+    margin-left: 8px;
+    margin-bottom: 8px;
+    padding: 2px 8px 2px 12px;
+}
+
+.tags > .tag > .tag-remove {
+    margin-left: 4px;
+    cursor: pointer;
+}
+
+.tag--red {
+    color: var(--color-red);
+    border-color: var(--color-red);
+}
+
+.tag--orange {
+    color: var(--color-orange);
+    border-color: var(--color-orange);
+}
+
+.tag--yellow {
+    color: var(--color-yellow);
+    border-color: var(--color-yellow);
+}
+
+.tag--teal {
+    color: var(--color-teal);
+    border-color: var(--color-teal);
+}
+
+/* 360Giving loading animation */
+
+.loading360g {
+    --logo-size: 80px;
+    --small-circle: 9%;
+    --medium-circle: 14%;
+    --large-circle: 20%;
+    --center-circle: 50%;
+    --diagonals: 21.7%;
+    --colour-red: #BC2C26;
+    --colour-yellow: #EFC329;
+    --colour-orange: var(--color-orange);
+    --colour-teal: #4DACB6;
+    --colour-dark: #153634;
+    display: inline-block;
+    position: relative;
+    width: var(--logo-size);
+    height: var(--logo-size);
+    animation: loading360g-rotate 2s forwards infinite;
+}
+
+.loading360g>div.circle-yellow {
+    background: var(--colour-yellow);
+}
+
+.loading360g>div.circle-red {
+    background: var(--colour-red);
+}
+
+.loading360g>div.circle-orange {
+    background: var(--colour-orange);
+}
+
+.loading360g>div.circle-teal {
+    background: var(--colour-teal);
+}
+
+.loading360g>div.circle-small {
+    --circle-size: var(--small-circle);
+}
+
+.loading360g>div.circle-medium {
+    --circle-size: var(--medium-circle);
+}
+
+.loading360g>div.circle-large {
+    --circle-size: var(--large-circle);
+}
+
+.loading360g>div {
+    position: absolute;
+    width: var(--circle-size);
+    height: var(--circle-size);
+    background: #000;
+    border-radius: 50%;
+    animation: loading360g-grow 1.6s ease-in-out infinite;
+}
+
+.loading360g>div.center-circle {
+    --circle-size: var(--center-circle);
+    top: calc(50% - calc(var(--circle-size) / 2));
+    left: calc(50% - calc(var(--circle-size) / 2));
+    background: var(--colour-dark);
+    animation: none;
+}
+
+.loading360g>div.circle-1 {
+    animation-delay: 0s;
+    top: calc(12.5% - calc(var(--circle-size) / 2));
+    left: calc(50% - calc(var(--circle-size) / 2));
+}
+
+.loading360g>div.circle-2 {
+    animation-delay: -0.2s;
+    top: calc(var(--diagonals) - calc(var(--circle-size) / 2));
+    left: calc(var(--diagonals) - calc(var(--circle-size) / 2));
+}
+
+.loading360g>div.circle-3 {
+    animation-delay: -0.4s;
+    top: calc(50% - calc(var(--circle-size) / 2));
+    left: calc(12.5% - calc(var(--circle-size) / 2));
+}
+
+.loading360g>div.circle-4 {
+    animation-delay: -0.6s;
+    bottom: calc(var(--diagonals) - calc(var(--circle-size) / 2));
+    left: calc(var(--diagonals) - calc(var(--circle-size) / 2));
+}
+
+.loading360g>div.circle-5 {
+    animation-delay: -0.8s;
+    bottom: calc(12.5% - calc(var(--circle-size) / 2));
+    left: calc(50% - calc(var(--circle-size) / 2));
+}
+
+.loading360g>div.circle-6 {
+    animation-delay: -1s;
+    bottom: calc(var(--diagonals) - calc(var(--circle-size) / 2));
+    right: calc(var(--diagonals) - calc(var(--circle-size) / 2));
+}
+
+.loading360g>div.circle-7 {
+    animation-delay: -1.2s;
+    bottom: calc(50% - calc(var(--circle-size) / 2));
+    right: calc(12.5% - calc(var(--circle-size) / 2));
+}
+
+.loading360g>div.circle-8 {
+    animation-delay: -1.4s;
+    top: calc(var(--diagonals) - calc(var(--circle-size) / 2));
+    right: calc(var(--diagonals) - calc(var(--circle-size) / 2));
+}
+
+@keyframes loading360g-grow {
+    0%, 20%, 80%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.75);
+    }
+}
+
+@keyframes loading360g-rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}

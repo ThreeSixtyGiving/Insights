@@ -1,3 +1,0 @@
-[submodule "tsg_insights/test/sample-data"]
-	path = tsg_insights/test/sample-data
-	url = https://github.com/drkane/sample-data

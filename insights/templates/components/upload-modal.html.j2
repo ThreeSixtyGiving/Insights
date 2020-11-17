@@ -1,0 +1,18 @@
+<div id="modal-01" class="modal" v-bind:class="{ 'modal--shown': uploadModal }" v-if="uploadModal">
+  <div class="modal__overlay modal__trigger" data-id="modal-01"></div>
+  <div class="modal__window">
+    <button class="modal__close modal__trigger" data-id="modal-01" v-on:click.stop="uploadModal = !uploadModal"></button>
+    <div class="modal__content">
+      <div class="upload-file drag-drop">
+  <h3>Drop your file here</h3>
+
+  <h4>Data Privacy Information</h4>
+  <p>Please ensure that you have the appropriate permissions to upload data into 360Insights.</p>
+  <p>Do not submit confidential or non-public personal data to this tool.</p>
+  <p>Read our <a href="/about#data-upload" target="_blank">privacy notice<span class="screen-reader-only">(opens in a new tab)</span></a> for further information.</p>
+  <p>&nbsp;</p>
+  <p><strong>File size</strong>: Large files (above 10Mb) may not work properly.</p>
+</div>
+    </div>
+  </div>
+</div>

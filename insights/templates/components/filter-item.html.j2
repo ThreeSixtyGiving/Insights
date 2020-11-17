@@ -1,0 +1,10 @@
+{% macro filter_item(title) %}
+<div class="filter-panel__item">
+    <div class="grid grid--four-columns">
+        <div class="grid__1"><h4>{{ title }}</h4></div>
+        <div class="grid__3">
+            {{ caller() }}
+        </div>
+    </div>
+</div>
+{% endmacro %}

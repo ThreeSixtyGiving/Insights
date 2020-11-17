@@ -1,14 +1,2 @@
-env/
-.vscode/
-.ipynb_checkpoints/
-__pycache__/
-*.pbix
-*.ipynb
-*.pkl
-mockups/
-uploads/
-archive/
-
-Thumbs.db
-*.sqlite
-node_modules/
+*.db
+*.db-journal

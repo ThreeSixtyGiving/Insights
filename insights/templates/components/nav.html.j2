@@ -1,0 +1,142 @@
+<div class="top-bar">
+    <button class="top-bar__menu-trigger"><i class="material-icons">menu</i></button>
+
+    <nav class="top-bar__menu contextual-menu">
+        <ul>
+            {% for item_name, item in nav.items() %}
+            {% if item is string %}
+            <li class="contextual-menu__item">
+                <a class="contextual-menu__button" href="{{ item }}" title="{{ item_name }}">{{ item_name }}</a>
+            </li>
+            {% else %}
+            <li class="contextual-menu__item submenu">
+                <a class="contextual-menu__button" href="#" title="{{ item_name }}" target="_blank">
+                    {{ item_name }}
+                </a>
+                <ul class="submenu__list">
+                {% for subitem_name, subitem in item.items() %}
+                    <li class="submenu__item">
+                        <a class="submenu__button" href="{{ subitem }}" title="{{ subitem_name }}">{{ subitem_name }}</a>
+                    </li>
+                {% endfor %}
+                </ul>
+            </li>
+            {% endif %}
+            {% endfor %}
+        </ul>
+    </nav>
+
+    <div class="off-canvas-menu" aria-hidden>
+        <button class="off-canvas-menu__trigger"><i class="material-icons">close</i></button>
+
+        <nav>
+            <ul class="off-canvas-menu__contextual">
+                {% for item_name, item in nav.items() %}
+                {% if item is string %}
+                <li class="off-canvas-menu__item">
+                    <a class="" href="{{ item }}" title="{{ item_name }}">{{ item_name }}</a>
+                </li>
+                {% else %}
+                <li class="off-canvas-menu__item off-canvas-menu__submenu">
+                    <a class="" href="#" title="{{ item_name }}" target="_blank">
+                        {{ item_name }}
+                    </a>
+                    <ul class="submenu__list">
+                    {% for subitem_name, subitem in item.items() %}
+                        <li class="submenu__item">
+                            <a class="submenu__button" href="{{ subitem }}" title="{{ subitem_name }}">{{ subitem_name }}</a>
+                        </li>
+                    {% endfor %}
+                    </ul>
+                </li>
+                {% endif %}
+                {% endfor %}
+            </ul>
+
+            <ul class="off-canvas-menu__list">
+
+
+                <li class="off-canvas-menu__item off-canvas-menu--disabled">
+                    <a href="http://ccm.design">
+                        Test
+
+                    </a>
+
+                </li>
+
+
+
+                <li class="off-canvas-menu__item">
+                    <a href="http://ccm.design" target="_blank">
+                        Test
+                        <span class="screen-reader-only">(opens in a new tab)</span>
+                    </a>
+
+                </li>
+
+
+
+                <li class="off-canvas-menu__item
+          ">
+                    <h3 class="off-canvas-menu__heading">Menu Group Title</h3>
+                </li>
+
+
+
+                <li class="off-canvas-menu__item">
+                    <a href="http://ccm.design">
+                        Test
+
+                    </a>
+
+                    <p>Lorem ipsum dolor sit amet, consectetur <a href="#">adipisicing elit</a>, sed do eiusmod tempor
+                        incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation
+                        ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit
+                        in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat
+                        cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                    </p>
+
+                </li>
+
+
+
+                <li class="off-canvas-menu__item">
+                    <a href="http://ccm.design">
+                        Test
+
+                    </a>
+
+                </li>
+
+
+
+                <li class="off-canvas-menu__item">
+                    <a href="http://ccm.design">
+                        Test
+
+                    </a>
+
+                </li>
+
+
+
+                <li class="off-canvas-menu__item
+          ">
+                    <h3 class="off-canvas-menu__heading">Menu Group Title</h3>
+                </li>
+
+
+
+                <li class="off-canvas-menu__item">
+                    <a href="http://ccm.design">
+                        Test
+
+                    </a>
+
+                </li>
+
+
+            </ul>
+        </nav>
+    </div>
+</div>
