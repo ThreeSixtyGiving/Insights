@@ -20,7 +20,6 @@ def to_band(value, bins, labels):
         return None
     previous_value = bins.pop(0)
     for i, b in enumerate(bins):
-        print(previous_value, b)
         if value > previous_value and value <= b:
             return labels[i]
         previous_value = b

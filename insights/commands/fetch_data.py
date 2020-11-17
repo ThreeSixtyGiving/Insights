@@ -149,7 +149,7 @@ def fetch_data(dataset, bulk_limit):
 
             # sort out organistion type
             orgType = []
-            if row["organisationType"]:
+            if row["organisationType"] is not None:
                 orgType = json.loads(row["organisationType"])
             del row["organisationType"]
 
