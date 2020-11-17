@@ -34,7 +34,6 @@
     const DATASET = {{ dataset|tojson }};
     const BASE_FILTERS = {{ base_filters|tojson }};
     const MAPBOX_ACCESS_TOKEN = {{ config.MAPBOX_ACCESS_TOKEN|tojson }};
-    const FULL_PAGE_MAP = true;
     const TITLE = {{ title|tojson }};
     const SUBTITLE = {{ subtitle|tojson }};
   </script>
@@ -44,7 +43,14 @@
 {% block content %}
 <div id="data-display" style="width: 100%;">
   <div style="width: 100%;">
-    <mapbox-map container="grants-map" height="100vh" :markers="geoGrants"></mapbox-map>
+    <mapbox-map container="grants-map"
+                height="100vh"
+                :markers="geoGrants"
+                :full-page="true"
+                :n-grants="summary.grants"
+                heading={{ title|tojson }}
+                subheading={{ subtitle|tojson }}>
+    </mapbox-map>
   </div>
 </div>
 {% endblock content %}

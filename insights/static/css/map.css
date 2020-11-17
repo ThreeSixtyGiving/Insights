@@ -106,3 +106,26 @@ form.leaflet-control-layers-list {
     font-size: 0.9rem;
     margin-bottom: 0;
 }
+
+.leaflet-container .base-card__subheading {
+    font-size: 1rem;
+    font-weight: 200;
+    margin: 0;
+}
+
+.leaflet-container .base-card__heading {
+    font-size: 1.5rem;
+    font-weight: 400;
+    margin: 0;
+}
+
+.leaflet-container .base-card__title {
+    font-size: 2rem;
+    line-height: 1.3;
+    font-weight: 100;
+    margin: 0;
+}
+.leaflet-container .base-card__text {
+    font-size: 1rem;
+    font-weight: 100;
+}

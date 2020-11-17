@@ -27,7 +27,7 @@ def get_frontpage_options(dataset=DEFAULT_DATASET, with_url=True):
                     "id": p.prefix,
                     "name": p.name,
                     "url": url_for("data", data_type="publisher", data_id=p.prefix) if with_url else None,
-                    **publisher_counts.get(p.prefix),
+                    **publisher_counts.get(p.prefix, {"grant_count": 0}),
                 }
                 for p in publishers
             ],

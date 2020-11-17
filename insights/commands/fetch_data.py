@@ -30,8 +30,15 @@ cli = AppGroup("data")
     help="Number of rows to upload at once in bulk",
     type=int,
 )
+@click.option(
+    "--limit",
+    default=None,
+    show_default=True,
+    help="Do only this many rows (for testing)",
+    type=int,
+)
 @with_appcontext
-def fetch_data(dataset, bulk_limit):
+def fetch_data(dataset, bulk_limit, limit):
     """Import data from 360Giving Data Store into the database"""
     click.echo("Connecting to datastore")
     engine = create_engine(current_app.config["DATASTORE_URL"], echo=True)
@@ -84,8 +91,7 @@ def fetch_data(dataset, bulk_limit):
     count_sql = text("select count(*) from view_latest_grant g")
     row_count = conn.execute(count_sql).fetchone()[0]
 
-    s = text(
-        """
+    s = """
     select g.data->>'id' as "grant_id",
         g.data->>'title' as title,
         g.data->>'description' as description,
@@ -119,13 +125,14 @@ def fetch_data(dataset, bulk_limit):
         g.source_data->'publisher'->>'prefix' as "publisher_id"
     from view_latest_grant g
     """
-    )
+    if limit:
+        s += " LIMIT {}".format(limit)
 
     click.echo("Removing existing grants")
     db.session.query(Grant).filter(Grant.dataset == dataset).delete()
 
     click.echo("Fetching rows")
-    result = conn.execution_options(stream_results=True).execute(s)
+    result = conn.execution_options(stream_results=True).execute(text(s))
     objects = []
     click.echo("Fetched rows")
 

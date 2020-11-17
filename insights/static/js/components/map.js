@@ -1,24 +1,36 @@
-L.Control.Textbox = L.Control.extend({
-    onAdd: function(map) {
-        var div = L.DomUtil.create('div');
-        div.innerText = this.options.heading;
-        div.classList.add("leaflet-control-layers")
+import { formatCurrency } from './filters.js';
 
-        return div;
+L.Control.Textbox = L.Control.extend({
+    onAdd: function (map) {
+        var container = L.DomUtil.create('div', '');
+        container.innerHTML = `
+            <div class="base-card base-card--teal">
+                <div class="base-card__content">
+                    <header class="base-card__header">
+                        <h4 class="base-card__subheading">${L.mapbox.sanitize(this.options.subheading)}</h4>
+                        <h3 class="base-card__heading">${L.mapbox.sanitize(this.options.heading)}</h3>
+                    </header>
+                    <h2 class="base-card__title">${L.mapbox.sanitize(this.options.nGrants)}</h2>
+                    <p class="base-card__text">Grants</p>
+                </div>
+            </div>
+        `;
+
+        return container;
     },
 
-    onRemove: function(map) {
+    onRemove: function (map) {
         // Nothing to do here
     }
 });
 
-L.control.textbox = function(opts) {
+L.control.textbox = function (opts) {
     return new L.Control.Textbox(opts);
 }
 
 
 export const mapboxMap = {
-    props: ['container', 'markers', 'height'],
+    props: ['container', 'markers', 'height', 'fullPage', 'heading', 'subheading', 'nGrants'],
     data: function () {
         return {
             map: null,
@@ -33,7 +45,7 @@ export const mapboxMap = {
 
                 this.marker_layer.clearLayers();
 
-                if(!this.markers){
+                if (!this.markers) {
                     return;
                 }
 
@@ -45,7 +57,7 @@ export const mapboxMap = {
                                 .bindPopup(`
                                 <strong>From</strong> ${L.mapbox.sanitize(g["fundingOrganizationName"])}<br>
                                 <strong>To</strong> ${L.mapbox.sanitize(g["recipientOrganizationName"])}<br>
-                                <strong>Amount</strong> ${L.mapbox.sanitize(g["amountAwarded"])}<br>
+                                <strong>Amount</strong> ${L.mapbox.sanitize(formatCurrency(g["amountAwarded"], g["currency"], false))}<br>
                                 <strong>Awarded</strong> ${L.mapbox.sanitize(g["awardDate"])}
                             `)
                         );
@@ -62,6 +74,7 @@ export const mapboxMap = {
         L.mapbox.accessToken = this.mapbox_access_token;
         var map = L.mapbox.map(this.container, null, {
             attributionControl: { compact: true },
+            zoomControl: false,
         }).setView([-41.2858, 174.78682], 14);
         L.mapbox.styleLayer('mapbox://styles/davidkane/cjvnt2h0007hm1clrbd20bbug').addTo(map)
 
@@ -88,9 +101,16 @@ export const mapboxMap = {
             hideSingleBase: true,
         }).addTo(map);
 
-        if(FULL_PAGE_MAP){
-            L.control.textbox({ position: 'topleft', heading: 'Heading' }).addTo(map);
+        if (this.fullPage) {
+            L.control.textbox({
+                position: 'topleft',
+                heading: this.heading,
+                subheading: this.subheading,
+                nGrants: this.nGrants,
+            }).addTo(map);
         }
+
+        L.control.zoom().addTo(map);
 
         this.map = map;
     },

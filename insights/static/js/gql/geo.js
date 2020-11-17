@@ -6,6 +6,7 @@ ${queryHeader('geoGrants', 'grants')} {
     insightsGeoLong
     amountAwarded
     awardDate
+    currency
     recipientOrganizationName
     fundingOrganizationName
   }
