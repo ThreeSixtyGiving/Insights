@@ -149,8 +149,20 @@ def fetch_data(dataset, bulk_limit):
 
             # sort out organistion type
             orgType = []
-            if row["organisationType"] is not None:
+            try:
                 orgType = json.loads(row["organisationType"])
+            except TypeError:
+                pass
+            except json.decoder.JSONDecodeError:
+                if isinstance(row["organisationType"], str):
+                    orgType = [row["organisationType"]]
+                else:
+                    click.echo(
+                        "Couldn't process organisation type for grant {}: {}".format(
+                            row["grant_id"], row["organisationType"]
+                        ),
+                        err=True,
+                    )
             del row["organisationType"]
 
             if not row["insights_org_id"]:
