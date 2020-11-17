@@ -1,7 +1,7 @@
 {
     "scripts": {
       "dokku": {
-        "postdeploy": "/app/release.sh"
+        "postdeploy": "flask db upgrade"
       }
     }
   }
