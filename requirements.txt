@@ -19,6 +19,7 @@ graphene==2.1.8           # via graphene-sqlalchemy
 graphql-core==2.3.2       # via flask-graphql, graphene, graphql-relay, graphql-server-core
 graphql-relay==2.0.1      # via graphene
 graphql-server-core==1.2.0  # via flask-graphql
+gunicorn==20.0.4          # via -r requirements.in
 humanize==3.1.0           # via -r requirements.in
 idna==2.10                # via requests
 inflect==4.1.0            # via -r requirements.in
