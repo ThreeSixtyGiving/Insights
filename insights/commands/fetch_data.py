@@ -166,7 +166,7 @@ def fetch_data(dataset, bulk_limit):
                 row["insights_org_type"] = settings.IDENTIFIER_MAP.get(
                     org_id_schema, org_id_schema
                 )
-            elif not org_id_schema.startswith("GB-"):
+            elif org_id_schema and not org_id_schema.startswith("GB-"):
                 row["insights_org_type"] = "Overseas organisation"
             elif org_id_schema:
                 row["insights_org_type"] = org_id_schema
