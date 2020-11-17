@@ -111,7 +111,7 @@ def fetch_data(dataset, bulk_limit):
         (g.additional_data->'locationLookup'->0->>'longitude')::float as "insights_geo_long",
         g.additional_data->'locationLookup'->0->>'source' as "insights_geo_source",
         g.additional_data->'recipientOrgInfos'->0->>'id' as "insights_org_id",
-        g.additional_data->>'TSGFundingOrgType', '') as "insights_funding_org_type",
+        g.additional_data->>'TSGFundingOrgType' as "insights_funding_org_type",
         NULLIF(g.additional_data->'recipientOrgInfos'->0->>'dateRegistered', '') as "insights_org_registered_date",
         (NULLIF(g.additional_data->'recipientOrgInfos'->0->>'latestIncome', ''))::float as "insights_org_latest_income",
         g.additional_data->'recipientOrgInfos'->0->>'organisationType' as "organisationType",
