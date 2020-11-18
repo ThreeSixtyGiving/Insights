@@ -42,15 +42,23 @@
 
 {% block content %}
 <div id="data-display" style="width: 100%;">
-  <div style="width: 100%;">
-    <mapbox-map container="grants-map"
-                height="100vh"
-                :markers="geoGrants"
-                :full-page="true"
-                :n-grants="summary.grants"
-                heading={{ title|tojson }}
-                subheading={{ subtitle|tojson }}>
-    </mapbox-map>
+  <mapbox-map container="grants-map"
+              height="100vh"
+              :markers="geoGrants"
+              :full-page="true"
+              :n-grants="summary.grants"
+              heading={{ title|tojson }}
+              subheading={{ subtitle|tojson }}>
+  </mapbox-map>
+  <div class="base-card base-card--teal" style="position: absolute;bottom: 40px;left: 10px;width: 450px;">
+      <div class="base-card__content">
+          <header class="base-card__header">
+              <h4 class="base-card__subheading">{{ subtitle }}</h4>
+              <h3 class="base-card__heading">{{ title }}</h3>
+          </header>
+          <h2 class="base-card__title"><% summary.grants %></h2>
+          <p class="base-card__text">Grants</p>
+      </div>
   </div>
 </div>
 {% endblock content %}
