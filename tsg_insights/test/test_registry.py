@@ -22,9 +22,9 @@ def get_file():
 def m():
     urls = [
         ('sample_external_apis/registry.json',
-         'https://storage.googleapis.com/datagetter-360giving-output/branch/master/status.json'),
+         'https://store.data.threesixtygiving.org/reports/daily_status.json'),
         ('sample_external_apis/registry-broken.json',
-         'https://storage.googleapis.com/datagetter-360giving-output/branch/master/status_broken.json'),
+         'https://store.data.threesixtygiving.org/reports/daily_status_broken.json'),
     ]
 
     m = requests_mock.Mocker()
@@ -73,7 +73,7 @@ def test_process_registry(get_file, m, test_app):
 def test_process_registry_broken(get_file, m, test_app):
     with test_app.app_context():
         reg = get_registry(
-            reg_url='https://storage.googleapis.com/datagetter-360giving-output/branch/master/status_broken.json', skip_cache=True)
+            reg_url='https://store.data.threesixtygiving.org/reports/daily_status_broken.json', skip_cache=True)
         assert len(reg) == 147
         assert reg[0]["datagetter_aggregates"]["count"] == 381
 

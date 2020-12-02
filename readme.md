@@ -33,7 +33,7 @@ NEWSLETTER_FORM_U=216b8b926250184f90c7198e8
 NEWSLETTER_FORM_ID=91870dde44
 
 # file from which the 360Giving registry will be loaded
-THREESIXTY_STATUS_JSON=https://storage.googleapis.com/datagetter-360giving-output/branch/master/status.json
+THREESIXTY_STATUS_JSON=https://store.data.threesixtygiving.org/reports/daily_status.json
 
 # configuration for the mapbox map - an access token is needed for the map to work
 MAPBOX_ACCESS_TOKEN=token_goes_here

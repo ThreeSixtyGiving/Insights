@@ -32,7 +32,7 @@ def m():
         ('sample-data/360-giving-schema.json',
          'https://raw.githubusercontent.com/ThreeSixtyGiving/standard/master/schema/360-giving-schema.json'),
         ('sample_external_apis/registry.json',
-         'https://storage.googleapis.com/datagetter-360giving-output/branch/master/status.json'),
+         'https://store.data.threesixtygiving.org/reports/daily_status.json'),
         ("sample_external_apis/ftc/GB-CHC-225922.json",
          re.compile('https://findthatcharity.uk/orgid/')),
         ("sample_external_apis/ch/04325234.json",
