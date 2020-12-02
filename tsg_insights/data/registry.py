@@ -7,7 +7,7 @@ import requests_cache
 from .cache import get_cache
 from .utils import format_currency, get_fileid
 
-THREESIXTY_STATUS_JSON = 'https://storage.googleapis.com/datagetter-360giving-output/branch/master/status.json'
+THREESIXTY_STATUS_JSON = 'http://store.data.threesixtygiving.org/reports/daily_status.json'
 DEFAULT_CACHE = 60*60*24
 REG_KEY = "threesixty_status"
 
