@@ -33,6 +33,7 @@
     const BIN_LABELS = {{ bin_labels|tojson }};
     const DATASET = {{ dataset|tojson }};
     const BASE_FILTERS = {{ base_filters|tojson }};
+    const PAGE_URLS = {{ page_urls|tojson }};
     const MAPBOX_ACCESS_TOKEN = {{ config.MAPBOX_ACCESS_TOKEN|tojson }};
   </script>
   <script type="module" src="{{ url_for('static', filename='js/insights.js') }}"></script>
@@ -357,6 +358,9 @@
                       {% call chart_card_header("Grant Locations") %}
                         (number of grants)
                       {% endcall %}
+                      <div class="align-left margin-bottom:1">
+                        <a :href="mapUrl" class="button button--small button--red align-left">View this map on its own page</a>
+                      </div>
                       <div class="base-card__note" v-if="geoGrants">
                         <p>Based on <% geoGrants.length | formatNumber %> grants.</p>
                         <p v-if="chartMissing('byCountryRegion')">

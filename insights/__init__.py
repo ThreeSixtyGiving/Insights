@@ -58,6 +58,7 @@ def create_app():
         title="Granty grants",
         subtitle="Grants made by",
         template="data.html.j2",
+        **kwargs
     ):
         return render_template(
             template,
@@ -70,10 +71,12 @@ def create_app():
             },
             title=title,
             subtitle=subtitle,
+            **kwargs,
         )
 
     @app.route("/data")
     @app.route("/data/<dataset>")
+    @app.route("/data/<dataset>/<page>")
     @app.route("/<data_type>/<data_id>")
     @app.route("/<data_type>/<data_id>/<page>")
     def data(
@@ -96,6 +99,17 @@ def create_app():
             "360Giving publishers" if dataset == settings.DEFAULT_DATASET else dataset
         )
         subtitle = "Grants made by"
+        if dataset != settings.DEFAULT_DATASET:
+            page_urls = {
+                "data": url_for('data', data_type=data_type, dataset=dataset),
+                "map": url_for('data', data_type=data_type, page="map", dataset=dataset),
+            }
+        else:
+            page_urls = {
+                "data": url_for('data', data_type=data_type, data_id=data_id),
+                "map": url_for('data', data_type=data_type, page="map", data_id=data_id),
+            }
+
 
         if data_type == "funder":
             funders = data_id.split("+")
@@ -155,6 +169,7 @@ def create_app():
             title=title,
             subtitle=subtitle,
             template=template,
+            page_urls=page_urls,
         )
 
     return app

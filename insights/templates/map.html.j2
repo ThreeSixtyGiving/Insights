@@ -34,6 +34,7 @@
     const DATASET = {{ dataset|tojson }};
     const BASE_FILTERS = {{ base_filters|tojson }};
     const MAPBOX_ACCESS_TOKEN = {{ config.MAPBOX_ACCESS_TOKEN|tojson }};
+    const PAGE_URLS = {{ page_urls|tojson }};
     const TITLE = {{ title|tojson }};
     const SUBTITLE = {{ subtitle|tojson }};
   </script>
@@ -50,14 +51,36 @@
               heading={{ title|tojson }}
               subheading={{ subtitle|tojson }}>
   </mapbox-map>
-  <div class="base-card base-card--teal" style="position: absolute;bottom: 40px;left: 10px;width: 450px;">
+  <div class="base-card base-card--red" style="position: absolute;bottom: 40px;left: 10px;min-width: 250px;">
       <div class="base-card__content">
+          <div class="align-left margin-bottom:1">
+            <a :href="dataUrl" class="button button--small button--red align-left">&lt; Dashboard</a>
+          </div>
           <header class="base-card__header">
               <h4 class="base-card__subheading">{{ subtitle }}</h4>
-              <h3 class="base-card__heading">{{ title }}</h3>
+              <h3 class="base-card__heading">{{ title }}</h4>
+              <h4 class="base-card__subheading" v-if="summary.minDate">
+                <template v-if="summary.minDate.slice(0,7) == summary.maxDate.slice(0,7)">
+                  <small>in</small> <% summary.minDate | formatDate('month') %>
+                </template>
+                <template v-else-if="summary.minDate.slice(0,4) == summary.maxDate.slice(0,4)">
+                  <small>between</small> <% summary.minDate | formatDate('month') %> <small>and</small> <% summary.maxDate | formatDate('month') %>
+                </template>
+                <template v-else>
+                  <small>between</small> <% summary.minDate | formatDate('year') %> <small>and</small> <% summary.maxDate | formatDate('year') %>
+                </template>
+              </h4>
           </header>
           <h2 class="base-card__title"><% summary.grants %></h2>
           <p class="base-card__text">Grants</p>
+          <div class="base-card__note align-left" style="max-width: 300px;" v-if="geoGrants">
+            <p>
+              Markers are shown for <% geoGrants.length | formatNumber %> grants.
+              <template v-if="chartMissing('byCountryRegion')">
+              <% chartMissing('byCountryRegion') | formatNumber %> grants did not have a location.
+              </template>
+            </p>
+          </div>
       </div>
   </div>
 </div>

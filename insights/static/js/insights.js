@@ -73,6 +73,8 @@ var app = new Vue({
             sources: [],
             showFilters: false,
             grants: [],
+            mapUrl: PAGE_URLS['map'],
+            dataUrl: PAGE_URLS['data'],
         }
     },
     computed: {
@@ -83,7 +85,7 @@ var app = new Vue({
                 if (filters[f].max === '') { filters[f].max = null; }
             });
             ['area', 'orgtype', 'grantProgrammes', 'funders', 'funderTypes'].forEach((f) => {
-                filters[f] = filters[f].map((v) => v.value);
+                filters[f] = filters[f].map((v) => typeof v=="string" ? v : v.value );
                 if (Array.isArray(BASE_FILTERS[f])) {
                     filters[f] = filters[f].concat(BASE_FILTERS[f]);
                     filters[f] = [...new Set(filters[f])];
@@ -117,7 +119,7 @@ var app = new Vue({
             var grants = this.grants.filter((g) => (g.insightsGeoLat != null && g.insightsGeoLong != null));
             if (grants.length == 0) { return null; }
             return grants;
-        }
+        },
     },
     watch: {
         'source_ids': function (val, oldVal) {
@@ -144,7 +146,11 @@ var app = new Vue({
                     if (Array.isArray(v)) {
                         v.filter((w) => w && w.length != 0)
                             .forEach((w, i) => {
-                                queryParams.append(k, w.value);
+                                if(typeof w == "string"){
+                                    queryParams.append(k, w);
+                                } else {
+                                    queryParams.append(k, w.value);
+                                }
                             })
                     } else if (typeof v === 'object' && v !== null) {
                         Object.entries(v)
@@ -156,6 +162,13 @@ var app = new Vue({
                         queryParams.append(k, v);
                     }
                 });
+            if(queryParams.toString()){
+                this.mapUrl = PAGE_URLS['map'] + '?' + queryParams.toString();
+                this.dataUrl = PAGE_URLS['data'] + '?' + queryParams.toString();
+            } else {
+                this.mapUrl = PAGE_URLS['map'];
+                this.dataUrl = PAGE_URLS['data'];
+            }
             history.pushState(this.filters, '', "?" + queryParams.toString());
         },
         resetFilters() {
