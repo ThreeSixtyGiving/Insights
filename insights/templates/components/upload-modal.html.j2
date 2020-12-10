@@ -3,16 +3,42 @@
   <div class="modal__window">
     <button class="modal__close modal__trigger" data-id="modal-01" v-on:click.stop="uploadModal = !uploadModal"></button>
     <div class="modal__content">
-      <div class="upload-file drag-drop">
-  <h3>Drop your file here</h3>
+      <template v-if="uploadStatus=='uploading'">
+        <h4>Uploading <% uploadFile.name %></h4>
+        {% include 'components/loading.html.j2' %}
+      </template>
+      <template v-else>
+        <input type="file" v-on:change.prevent="addFile" ref="uploadFileInput" style="display: none" /> 
+        <div class="upload-file drag-drop" v-if="!uploadFile" v-on:click.prevent="openFileDialog" v-on:drop.prevent="addFile" v-on:dragover.prevent="">
+          <h3 class="margin-bottom:05 margin-top:05">Drop your file here</h3>
+        </div>
+        <div class="upload-file drag-drop padding-left:1 padding-right:1 padding-top:1 padding-bottom:1" v-on:click.prevent="openFileDialog" v-on:drop.prevent="addFile" v-on:dragover.prevent="" v-else>
+          <code><% uploadFile.name %></code>
+        </div>
+        <div v-if="uploadFile" class="grid grid--four-columns margin-top:3">
+          <div class="grid__1">
+            <label for="source-title">File title</label>
+          </div>
+          <div class="grid__3">
+            <input class="filter-input search-field" id="source-title"  v-model="uploadSourceTitle" />
+          </div>
+          <div class="grid__all">
+            <button v-on:click.prevent="startUpload" class="button button--orange">Upload file</button>
+            <button v-on:click.prevent="uploadFile = null; uploadSourceTitle = null;" class="button button--small margin-left:2">Choose a different file</button>
+          </div>
+        </div>
+      </template>
 
-  <h4>Data Privacy Information</h4>
-  <p>Please ensure that you have the appropriate permissions to upload data into 360Insights.</p>
-  <p>Do not submit confidential or non-public personal data to this tool.</p>
-  <p>Read our <a href="/about#data-upload" target="_blank">privacy notice<span class="screen-reader-only">(opens in a new tab)</span></a> for further information.</p>
-  <p>&nbsp;</p>
-  <p><strong>File size</strong>: Large files (above 10Mb) may not work properly.</p>
-</div>
+      <div class="box box--red margin-top:2 padding-left:1 padding-right:1 padding-top:1 padding-bottom:1" v-if="uploadError"> 
+        <h3 class="box__heading">Error</h3>
+        <p><% uploadError %></p>
+      </div>
+
+      <h4>Data Privacy Information</h4>
+      <p>Please ensure that you have the appropriate permissions to upload data into 360Insights.</p>
+      <p>Do not submit confidential or non-public personal data to this tool.</p>
+      <p>Read our <a href="/about#data-upload" target="_blank">privacy notice<span class="screen-reader-only">(opens in a new tab)</span></a> for further information.</p>
+      <p><strong>File size</strong>: Large files (above 10Mb) may not work properly.</p>
     </div>
   </div>
 </div>

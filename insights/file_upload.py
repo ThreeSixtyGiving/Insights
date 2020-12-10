@@ -6,7 +6,7 @@ from urllib.parse import urljoin
 import uuid
 import hashlib
 
-from flask import flash, request, redirect
+from flask import flash, request, redirect, url_for
 from libcove.config import LibCoveConfig
 from libcove.lib.converters import convert_spreadsheet, convert_json
 from libcove.lib.exceptions import CoveInputDataError
@@ -112,6 +112,7 @@ def upload_file():
                     return {
                         **fileinfo,
                         "rows_saved": rows_saved,
+                        "data_url": url_for('data', dataset=fileinfo["dataset"]),
                     }
         except CoveInputDataError as e:
             return {
