@@ -10,3 +10,4 @@ babel
 inflect
 humanize
 gunicorn
+libcove

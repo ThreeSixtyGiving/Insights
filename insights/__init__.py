@@ -9,6 +9,7 @@ from insights.data import get_frontpage_options, get_funder_names
 from insights.db import GeoName, Publisher, db, migrate
 from insights.schema import schema
 from insights.utils import list_to_string
+from insights.file_upload import upload_file
 
 __version__ = "0.1.0"
 
@@ -96,9 +97,11 @@ def create_app():
 
         filters = {}
         title = (
-            "360Giving publishers" if dataset == settings.DEFAULT_DATASET else dataset
+            "360Giving publishers" if dataset == settings.DEFAULT_DATASET else "Uploaded dataset"
         )
-        subtitle = "Grants made by"
+        subtitle = (
+            "Grants made by" if dataset == settings.DEFAULT_DATASET else "Grants from"
+        )
         if dataset != settings.DEFAULT_DATASET:
             page_urls = {
                 "data": url_for('data', data_type=data_type, dataset=dataset),
@@ -171,5 +174,7 @@ def create_app():
             template=template,
             page_urls=page_urls,
         )
+    
+    app.add_url_rule("/upload", 'upload', view_func=upload_file, methods=['POST'])
 
     return app

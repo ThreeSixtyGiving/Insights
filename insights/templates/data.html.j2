@@ -73,8 +73,9 @@
             <strong>From the <a href="https://data.threesixtygiving.org/">360Giving data registry</a></strong>
             {% endif %}
             
-            <template v-if="sources.length == 1"> | <a v-bind:href="sources[0].distribution[0].downloadURL">Download original file</a><br>
-            Published by <a v-bind:href="sources[0].publisher.website"><% sources[0].publisher.name %></a> with a <a v-bind:href="sources[0].license"><% sources[0].licenseName %></a> licence.</template>
+            <template v-if="sources.length == 1 && sources[0].distribution[0]"> | <a v-bind:href="sources[0].distribution[0].downloadURL">Download original file</a><br>
+            <template v-if="sources[0].publisher">Published by <a v-bind:href="sources[0].publisher.website"><% sources[0].publisher.name %></a> with a <a v-bind:href="sources[0].license"><% sources[0].licenseName %></a> licence.</template></template>
+            <template v-else-if="sources.length == 1">Original filename: <code><% sources[0].title %></code></template>
           </p>
           <template v-if="sources.length > 1">
             <details class="header-group__excerpt">
