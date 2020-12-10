@@ -106,7 +106,7 @@ def upload_file():
                     db.session.add(source_file)
                     db.session.commit()
 
-                with open(result.get("converted_path")) as a:
+                with open(result.get("converted_path"), 'rb') as a:
                     data = json.load(a)
                     rows_saved = save_json_to_db(data, fileinfo["dataset"], source_file_id)
                     return {
