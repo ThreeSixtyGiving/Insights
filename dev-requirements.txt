@@ -64,12 +64,13 @@ python-dotenv==0.15.0     # via -r requirements.txt
 python-editor==1.0.4      # via -r requirements.txt, alembic
 pytz==2020.4              # via -r requirements.txt, babel, flattentool
 regex==2020.10.28         # via black
-requests==2.24.0          # via -r requirements.txt, libcove
+requests-mock==1.8.0      # via -r dev-requirements.in
+requests==2.24.0          # via -r requirements.txt, libcove, requests-mock
 rfc3987==1.3.8            # via -r requirements.txt, libcove
 rx==1.6.1                 # via -r requirements.txt, graphql-core
 schema==0.7.2             # via -r requirements.txt, flattentool
 singledispatch==3.4.0.3   # via -r requirements.txt, graphene-sqlalchemy
-six==1.15.0               # via -r requirements.txt, graphene, graphene-sqlalchemy, graphql-core, graphql-relay, jsonschema, packaging, promise, python-dateutil, singledispatch
+six==1.15.0               # via -r requirements.txt, graphene, graphene-sqlalchemy, graphql-core, graphql-relay, jsonschema, packaging, promise, python-dateutil, requests-mock, singledispatch
 sqlalchemy==1.3.20        # via -r requirements.txt, alembic, flask-sqlalchemy, graphene-sqlalchemy
 strict-rfc3339==0.7       # via -r requirements.txt, libcove
 toml==0.10.2              # via black, pytest

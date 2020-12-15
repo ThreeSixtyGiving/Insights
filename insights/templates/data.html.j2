@@ -42,6 +42,7 @@
 {% block content %}
 <div id="data-display">
     <header class="layout__header wrapper" v-if="summary">
+      {% include 'components/flash-messages.html.j2' %}
         
       <div class="base-section">
         <div class="grid grid--single-column">

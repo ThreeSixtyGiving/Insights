@@ -1,6 +1,7 @@
 import os
+from urllib.parse import urlparse
 
-from flask import Flask, abort, render_template, url_for
+from flask import Flask, abort, render_template, url_for, request, redirect, flash
 from flask_graphql import GraphQLView
 
 from insights import settings
@@ -9,7 +10,7 @@ from insights.data import get_frontpage_options, get_funder_names
 from insights.db import GeoName, Publisher, db, migrate
 from insights.schema import schema
 from insights.utils import list_to_string
-from insights.file_upload import upload_file
+from insights.file_upload import upload_file, fetch_file_from_url
 
 __version__ = "0.1.0"
 
@@ -21,6 +22,8 @@ def create_app():
         SQLALCHEMY_DATABASE_URI=os.environ.get("DB_URL"),
         SQLALCHEMY_TRACK_MODIFICATIONS=False,
         MAPBOX_ACCESS_TOKEN=os.environ.get("MAPBOX_ACCESS_TOKEN"),
+        URL_FETCH_ALLOW_LIST=settings.URL_FETCH_ALLOW_LIST,
+        SECRET_KEY=os.environ.get("SECRET_KEY", b'\x1b\x07\xbd\xb5\x81J\x9d\xc5\x043\xf5\xca\x83\xf3\xc6<')
     )
 
     db.init_app(app)
@@ -47,6 +50,11 @@ def create_app():
 
     @app.route("/")
     def index():
+        if request.args.get("url"):
+            try:
+                return redirect(fetch_file_from_url(request.args.get("url")))
+            except Exception as e:
+                flash("Could not fetch from URL:" + str(e), "error")
         return render_template("index.html.j2", dataset_select=get_frontpage_options())
 
     @app.route("/about")

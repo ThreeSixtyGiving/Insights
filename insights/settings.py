@@ -105,3 +105,34 @@ IDENTIFIER_MAP = {
 }
 
 FTP_URL = "https://findthatpostcode.uk/areas/{}.json"
+
+COVE_CONFIG = {
+    "app_name": "cove_360",
+    "app_base_template": "cove_360/base.html",
+    "app_verbose_name": "360Giving Data Quality Tool",
+    "app_strapline": "Convert, Validate, Explore 360Giving Data",
+    "schema_name": "360-giving-package-schema.json",
+    "schema_item_name": "360-giving-schema.json",
+    "schema_host": "https://raw.githubusercontent.com/ThreeSixtyGiving/standard/master/schema/",
+    "schema_version": None,
+    "schema_version_choices": None,
+    "root_list_path": "grants",
+    "root_id": "",
+    "convert_titles": True,
+    "input_methods": ["upload", "url", "text"],
+    "support_email": "support@threesixtygiving.org",
+    "hashcomments": True,
+}
+
+CONTENT_TYPE_MAP = {
+    "application/json": "json",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "xlsx",
+    "text/csv": "csv",
+    "application/vnd.oasis.opendocument.spreadsheet": "ods",
+    "application/xml": "xml",
+    "text/xml": "xml",
+}
+
+URL_FETCH_ALLOW_LIST = [
+    "grantnav.threesixtygiving.org",
+]

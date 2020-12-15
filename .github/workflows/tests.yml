@@ -17,6 +17,8 @@ jobs:
       uses: actions/setup-python@v1
       with:
         python-version: ${{ matrix.python-version }}
+    - name: Checkout submodules
+      run: git submodule update --init --recursive
 
     - name: Start Redis
       uses: supercharge/redis-github-action@1.1.0

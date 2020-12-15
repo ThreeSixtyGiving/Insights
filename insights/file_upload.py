@@ -2,47 +2,25 @@ import datetime
 import json
 import os
 from tempfile import mkstemp, TemporaryDirectory
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse
 import uuid
 import hashlib
+from io import BytesIO
 
-from flask import flash, request, redirect, url_for
+from flask import flash, request, redirect, url_for, current_app
 from libcove.config import LibCoveConfig
 from libcove.lib.converters import convert_spreadsheet, convert_json
 from libcove.lib.exceptions import CoveInputDataError
 from libcove.lib.tools import get_file_type
+import requests
 
 from insights import settings
 from insights.db import Grant, db, SourceFile
 from insights.utils import get_org_schema, to_band
 
 
-COVE_CONFIG = {
-    "app_name": "cove_360",
-    "app_base_template": "cove_360/base.html",
-    "app_verbose_name": "360Giving Data Quality Tool",
-    "app_strapline": "Convert, Validate, Explore 360Giving Data",
-    "schema_name": "360-giving-package-schema.json",
-    "schema_item_name": "360-giving-schema.json",
-    "schema_host": "https://raw.githubusercontent.com/ThreeSixtyGiving/standard/master/schema/",
-    "schema_version": None,
-    "schema_version_choices": None,
-    "root_list_path": "grants",
-    "root_id": "",
-    "convert_titles": True,
-    "input_methods": ["upload", "url", "text"],
-    "support_email": "support@threesixtygiving.org",
-    "hashcomments": True,
-}
-
-CONTENT_TYPE_MAP = {
-    "application/json": "json",
-    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "xlsx",
-    "text/csv": "csv",
-    "application/vnd.oasis.opendocument.spreadsheet": "ods",
-    "application/xml": "xml",
-    "text/xml": "xml",
-}
+class FileImportError(Exception):
+    pass
 
 
 def upload_file():
@@ -51,11 +29,6 @@ def upload_file():
             "error": "File not found",
         }
     f = request.files["file"]
-    # dataset = request.values.get(
-    #     "dataset",
-    #     str(uuid.uuid4()),
-    # )
-
     fileinfo = {
         "filename": f.filename,
         "content_type": f.content_type,
@@ -64,31 +37,70 @@ def upload_file():
         "mimetype": f.mimetype,
     }
 
-    if f.mimetype in CONTENT_TYPE_MAP:
-        fileinfo["filetype"] = CONTENT_TYPE_MAP[f.mimetype]
+    result = fetch_file(f, fileinfo)
+    if result.get("error"):
+        return result, 400
+    return result
+
+
+def fetch_file_from_url(url):
+
+    if urlparse(url).netloc not in current_app.config.get("URL_FETCH_ALLOW_LIST"):
+        raise FileImportError("Fetching from that URL is not supported")
+
+    r = requests.get(url)
+    r.raise_for_status()
+    dataset = str(uuid.uuid4())
+    fileinfo = {
+        "filename": dataset,
+        "content_type": r.headers.get("content-type"),
+        "content_length": r.headers.get("content-length"),
+        "headers": dict(r.headers),
+        "mimetype": r.headers.get("content-type"),
+    }
+    result = fetch_file(BytesIO(r.content), fileinfo)
+    if result.get("data_url"):
+        return result["data_url"]
+    raise FileImportError("Could not fetch data from URL. " + result.get("error", ""))
+
+
+def fetch_file(f, fileinfo):
+
+    if fileinfo["mimetype"] in settings.CONTENT_TYPE_MAP:
+        fileinfo["filetype"] = settings.CONTENT_TYPE_MAP[fileinfo["mimetype"]]
     else:
-        fileinfo["filetype"] = get_file_type(f.filename)
+        fileinfo["filetype"] = get_file_type(fileinfo["filename"])
 
     with TemporaryDirectory() as upload_dir:
         lib_cove_config = LibCoveConfig()
-        lib_cove_config.config.update(COVE_CONFIG)
-
-
-        with open(os.path.join(upload_dir, f.filename), "wb") as a:
+        lib_cove_config.config.update(settings.COVE_CONFIG)
+        with open(os.path.join(upload_dir, fileinfo["filename"]), "wb") as a:
             contents = f.read()
             fileinfo["dataset"] = hashlib.md5(contents).hexdigest()
             a.write(contents)
 
         try:
-            result = convert_spreadsheet(
-                upload_dir,
-                "",  # upload_url,
-                os.path.join(upload_dir, f.filename),  # file_name,
-                fileinfo["filetype"],  # file_type,
+            convert_settings = (
                 lib_cove_config,
-                urljoin(COVE_CONFIG["schema_host"], COVE_CONFIG["schema_item_name"]),
-                urljoin(COVE_CONFIG["schema_host"], COVE_CONFIG["schema_name"]),
+                urljoin(settings.COVE_CONFIG["schema_host"], settings.COVE_CONFIG["schema_item_name"]),
+                urljoin(settings.COVE_CONFIG["schema_host"], settings.COVE_CONFIG["schema_name"]),
             )
+            if fileinfo['filetype'] == "json":
+                result = convert_json(
+                    upload_dir,
+                    "",  # upload_url,
+                    os.path.join(upload_dir, fileinfo["filename"]),  # file_name,
+                    *convert_settings
+                )
+                result['converted_path'] = os.path.join(upload_dir, fileinfo["filename"])
+            else:
+                result = convert_spreadsheet(
+                    upload_dir,
+                    "",  # upload_url,
+                    os.path.join(upload_dir, fileinfo["filename"]),  # file_name,
+                    fileinfo["filetype"],  # file_type,
+                    *convert_settings
+                )
             if result.get("converted_path"):
 
                 source_file_id = "uploaded_dataset_" + fileinfo['dataset']
@@ -109,11 +121,21 @@ def upload_file():
                 with open(result.get("converted_path"), 'rb') as a:
                     data = json.load(a)
                     rows_saved = save_json_to_db(data, fileinfo["dataset"], source_file_id)
+
+                    if rows_saved == 0:
+                        return {
+                            **fileinfo,
+                            "error": "No rows imported from file",
+                        }
                     return {
                         **fileinfo,
                         "rows_saved": rows_saved,
                         "data_url": url_for('data', dataset=fileinfo["dataset"]),
                     }
+            return {
+                **fileinfo,
+                "error": "Could not find data to return",
+            }
         except CoveInputDataError as e:
             return {
                 **fileinfo,
@@ -126,6 +148,9 @@ def save_json_to_db(data, dataset, source_file_id):
     rows = 0
     db.session.query(Grant).filter(Grant.dataset == dataset).delete()
 
+    # if any of these fields are missing then we can't include them
+    required_fields = ["id", "title", "description", "currency", "amountAwarded", "awardDate"]
+
     def save_objects(objects):
         if not objects:
             return []
@@ -136,8 +161,8 @@ def save_json_to_db(data, dataset, source_file_id):
         return []
 
     for row in data.get("grants", []):
-        grants.append(
-            dict(
+        try:
+            grant = dict(
                 dataset=dataset,
                 grant_id=row["id"],
                 title=row["title"],
@@ -150,12 +175,8 @@ def save_json_to_db(data, dataset, source_file_id):
                 ),
                 plannedDates_endDate=row.get("plannedDates", [{}])[0].get("endDate"),
                 plannedDates_duration=row.get("plannedDates", [{}])[0].get("duration"),
-                recipientOrganization_id=row.get("recipientOrganization", [{}])[0].get(
-                    "id"
-                ),
-                recipientOrganization_name=row.get("recipientOrganization", [{}])[
-                    0
-                ].get("name"),
+                recipientOrganization_id=row["recipientOrganization"][0]["id"],
+                recipientOrganization_name=row["recipientOrganization"][0]["name"],
                 recipientOrganization_charityNumber=row.get(
                     "recipientOrganization", [{}]
                 )[0].get("charityNumber"),
@@ -165,12 +186,8 @@ def save_json_to_db(data, dataset, source_file_id):
                 recipientOrganization_postalCode=row.get("recipientOrganization", [{}])[
                     0
                 ].get("postalCode"),
-                fundingOrganization_id=row.get("fundingOrganization", [{}])[0].get(
-                    "id"
-                ),
-                fundingOrganization_name=row.get("fundingOrganization", [{}])[0].get(
-                    "name"
-                ),
+                fundingOrganization_id=row["fundingOrganization"][0]["id"],
+                fundingOrganization_name=row["fundingOrganization"][0]["name"],
                 fundingOrganization_department=row.get("fundingOrganization", [{}])[
                     0
                 ].get("department"),
@@ -200,10 +217,17 @@ def save_json_to_db(data, dataset, source_file_id):
                     settings.AMOUNT_BIN_LABELS,
                 ),
             )
-        )
+        except KeyError:
+            print("Could not import grant record")
+            continue
+        for f in ["awardDate", "plannedDates_startDate", "plannedDates_endDate"]:
+            if grant[f] and isinstance(grant[f], str):
+                grant[f] = datetime.datetime.strptime(grant[f][0:10], "%Y-%m-%d")
+        grants.append(grant)
         rows += 1
         if len(grants) > 1000:
             grants = save_objects(grants)
+
     save_objects(grants)
     db.session.commit()
     return rows
