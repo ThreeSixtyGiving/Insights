@@ -225,6 +225,10 @@ var app = new Vue({
                     label: field,
                     data: values.map((d) => d.value),
                     backgroundColor: COLOURS['orange'],
+                    borderColor: COLOURS['orange'],
+                    borderWidth: 0,
+                    categoryPercentage: 1.0,
+                    barPercentage: 1.0,
                 }]
             }
         },
