@@ -1,0 +1,3 @@
+[submodule "sample_data_for_tests"]
+	path = tests/sample-data
+	url = https://github.com/drkane/sample-data
