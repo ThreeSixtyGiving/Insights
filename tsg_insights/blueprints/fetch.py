@@ -26,6 +26,7 @@ def get_registry_file(fileid):
     job = q.enqueue_call(func=get_dataframe_from_url,
                          args=(file_url, ),
                          timeout='15m',
+                         ttl=15 * 60,
                          job_id=job_id)
     return jsonify({"job": job.id})
 
@@ -45,6 +46,7 @@ def get_file_from_url():
     job = q.enqueue_call(func=get_dataframe_from_url,
                          args=(file_url, ),
                          timeout='15m',
+                         ttl=15 * 60,
                          job_id=job_id)
     return jsonify({"job": job.id})
 
