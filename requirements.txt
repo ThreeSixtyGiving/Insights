@@ -31,7 +31,7 @@ jdcal==1.4.1              # via openpyxl
 jinja2==2.11.2            # via flask
 jsonref==0.2              # via flattentool, threesixtygiving
 jsonschema==2.6.0         # via threesixtygiving
-lxml==4.6.1               # via flattentool
+lxml==4.6.2               # via flattentool
 markupsafe==1.1.1         # via jinja2
 numpy==1.19.3             # via -r requirements.in, pandas
 openpyxl==3.0.5           # via flattentool
