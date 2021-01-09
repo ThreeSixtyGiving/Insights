@@ -174,7 +174,11 @@
           <span v-if="filters.awardDates.min" class="tag tag--teal">Award date after <% filters.awardDates.min %> <a v-on:click.prevent="filters.awardDates.min = null" href="#" title="Remove filter" class="tag-remove">&times;</a></span>
           <span v-if="filters.awardDates.max" class="tag tag--teal">Award date before <% filters.awardDates.max %> <a v-on:click.prevent="filters.awardDates.max = null" href="#" title="Remove filter" class="tag-remove">&times;</a></span>
           <span v-if="filters.search" class="tag tag--teal">Search for: <% filters.search %> <a v-on:click.prevent="filters.search = ''" href="#" title="Remove filter" class="tag-remove">&times;</a></span>
-          <span v-if="computedFilters.byFunderType" class="tag tag--teal" v-for="f in computedFilters.byFunderType">Funder type: <% f %> <a v-on:click.prevent="filters.search = ''" href="#" title="Remove filter" class="tag-remove">&times;</a></span>
+          <span v-if="computedFilters.byFunderType" class="tag tag--teal" v-for="f in computedFilters.byFunderType">Funder type: <% f %></span>
+          <span v-if="computedFilters.byFunder" class="tag tag--teal" v-for="f in computedFilters.byFunder">Funder: <% f %></span>
+          <span v-if="computedFilters.byGrantProgramme" class="tag tag--teal" v-for="f in computedFilters.byGrantProgramme">Grant Programme: <% f %></span>
+          <span v-if="computedFilters.byCountryRegion" class="tag tag--teal" v-for="f in computedFilters.byCountryRegion">Country/Region: <% f %></span>
+          <span v-if="computedFilters.byOrgType" class="tag tag--teal" v-for="f in computedFilters.byOrgType">Recipient type: <% f %></span>
         </div>
       </div>
     </div>
@@ -254,26 +258,26 @@
               {% endcall %}
                 <ul class="bar-chart" v-if="chartData.byAmountAwarded">
                   <li class="bar-chart__item" v-for="group in chartBars('byAmountAwarded', 'grants', 1)" :style="group.style">
-                    <div class="bar-chart__label"><% group.label %></div>
+                    <label class="bar-chart__label"><% group.label %></label>
                     <div class="bar-chart__bar"><span></span></div>
                   </li>
                 </ul>
             {% endcall %}
 
-            {% call chart_card("all", colour="orange") %}
+            {% call chart_card("all", colour="orange", v_if="summary.minDate && summary.minDate.slice(0,7) != summary.maxDate.slice(0,7)") %}
               {% call chart_card_header("Award date") %}
                 (number of grants)
               {% endcall %}
                 <bar-chart :chart-data="lineChartData('byAwardDate', 'grants', 0, 'month')" v-if="chartData.byAwardDate" v-bind:height="100" v-bind:hide-legend="true"></line-chart>
             {% endcall %}
 
-            {% call chart_card("all", colour="orange") %}
+            {% call chart_card("all", colour="orange", v_if="chartData.byFunderType && chartData.byFunderType.length > 1") %}
               {% call chart_card_header("Funder types") %}
                 (number of grants)
               {% endcall %}
                 <ul class="bar-chart" v-if="chartData.byFunderType">
                   <li class="bar-chart__item" v-for="(group, index) in chartBars('byFunderType')" v-if="index < 10" :style="group.style">
-                    <div class="bar-chart__label small"><% group.label %></div>
+                    <label class="bar-chart__label small"><% group.label %></label>
                     <div class="bar-chart__bar"><span></span></div>
                   </li>
                 </ul>
@@ -285,13 +289,13 @@
                 </div>
             {% endcall %}
 
-            {% call chart_card("all", colour="orange") %}
+            {% call chart_card("all", colour="orange", v_if="chartData.byFunder && chartData.byFunder.length > 1") %}
               {% call chart_card_header("Funders") %}
                 (number of grants)
               {% endcall %}
                 <ul class="bar-chart" v-if="chartData.byFunder">
                   <li class="bar-chart__item" v-for="(group, index) in chartBars('byFunder')" v-if="index < 10" :style="group.style">
-                    <div class="bar-chart__label small"><% group.label %></div>
+                    <label class="bar-chart__label small"><% group.label %></label>
                     <div class="bar-chart__bar"><span></span></div>
                   </li>
                 </ul>
@@ -303,13 +307,13 @@
                 </div>
             {% endcall %}
 
-            {% call chart_card("all", colour="orange") %}
+            {% call chart_card("all", colour="orange", v_if="chartData.byGrantProgramme && chartN('byGrantProgramme') > 0") %}
               {% call chart_card_header("Grant Programmes") %}
                 (number of grants)
               {% endcall %}
                 <ul class="bar-chart" v-if="chartData.byGrantProgramme">
                   <li class="bar-chart__item" v-for="(group, index) in chartBars('byGrantProgramme')" v-if="index < 10" :style="group.style">
-                    <div class="bar-chart__label small"><% group.label %></div>
+                    <label class="bar-chart__label small"><% group.label %></label>
                     <div class="bar-chart__bar"><span></span></div>
                   </li>
                 </ul>
@@ -326,20 +330,20 @@
           <div class="grid grid--two-columns">
 
             <div class="grid__all">
-              <h3>Geography</h3>
+              <h3>Grants locations</h3>
             </div>
 
-            {% call chart_card("all", colour="red") %}
+            {% call chart_card("all", colour="red", v_if="chartN('byCountryRegion') > 0") %}
               {% call chart_card_header("UK region and country") %}
                 (number of grants)
               {% endcall %}
                 <ul class="bar-chart" v-if="chartData.byCountryRegion">
                   <li class="bar-chart__item" v-for="(group, index) in chartBars('byCountryRegion', 'grants', 1, false)" :style="group.style">
-                    <div class="bar-chart__label small">England - <% group.label %></div>
+                    <label class="bar-chart__label small">England - <% group.label %></label>
                     <div class="bar-chart__bar"><span></span></div>
                   </li>
                   <li class="bar-chart__item" v-for="(group, index) in chartBars('byCountryRegion', 'grants', 0, false)" v-if="group.label != 'England'" :style="group.style">
-                    <div class="bar-chart__label small"><% group.label %></div>
+                    <label class="bar-chart__label small"><% group.label %></label>
                     <div class="bar-chart__bar"><span></span></div>
                   </li>
                 </ul>
@@ -366,12 +370,37 @@
                       <div class="base-card__note" v-if="geoGrants">
                         <p>Based on <% geoGrants.length | formatNumber %> grants.</p>
                         <p v-if="chartMissing('byCountryRegion')">
-                        <% chartMissing('byCountryRegion') | formatNumber %> grants did not have a region or country.
+                        <% chartMissing('byCountryRegion') | formatNumber %> grants did not have a location available.
                         </p>
                       </div>
                     </div>
                 </div>
             </div>
+
+            {% call chart_card("all", colour="red", v_if="chartN('byGeoSource') > 0") %}
+              {% call chart_card_header("Source of location information") %}
+                (number of grants)
+              {% endcall %}
+                <ul class="bar-chart" v-if="chartData.byGeoSource">
+                  <li class="bar-chart__item" v-for="(group, index) in chartBars('byGeoSource')" v-if="index < 10" :style="group.style">
+                    <label class="bar-chart__label small"><% group.label %></label>
+                    <div class="bar-chart__bar"><span></span></div>
+                  </li>
+                </ul>
+                <div class="base-card__note">
+                  <p>Based on <% chartN('byGeoSource') | formatNumber %> grants.</p>
+                  <p v-if="chartMissing('byGeoSource')">
+                    <% chartMissing('byGeoSource') | formatNumber %> grants did not have a location available.
+                  </p>
+                </div>
+            {% endcall %}
+
+            {% call chart_card("all", colour="red", v_if="!geoGrants || geoGrants.length == 0") %}
+              {% call chart_card_header("No location data shown") %}{% endcall %}
+              <p>
+              <% chartMissing('byCountryRegion') | formatNumber %> grants did not have location data available.
+              </p>
+            {% endcall %}
 
           </div>
           <div class="spacer-3"></div>
@@ -381,13 +410,13 @@
               <h3>Grant recipients</h3>
             </div>
 
-            {% call chart_card(colour="teal") %}
+            {% call chart_card("all", colour="teal") %}
               {% call chart_card_header("Recipient type") %}
                 (number of grants)
               {% endcall %}
                 <ul class="bar-chart" v-if="chartData.byOrgType">
                   <li class="bar-chart__item" v-for="(group, index) in chartBars('byOrgType')" v-if="index < 10" :style="group.style">
-                    <div class="bar-chart__label small"><% group.label %></div>
+                    <label class="bar-chart__label small"><% group.label %></label>
                     <div class="bar-chart__bar"><span></span></div>
                   </li>
                 </ul>
@@ -397,44 +426,65 @@
                   <% chartMissing('byOrgType') | formatNumber %> values are not found.
                   </p>
                   <p class="">Organisation type is based on official organisation identifiers, such as registered charity or company numbers, found in the data.</p>
+                  <p class=""> "Identifier not recognised" means either that the organisation does not have an official identifier, for example because it is an unregistered community group, or the publisher has not included official identifiers in the data. .</p>
                 </div>
             {% endcall %}
 
-            {% call chart_card(colour="teal") %}
+            {% call chart_card(colour="teal", v_if="chartN('byOrgSize') > 0") %}
               {% call chart_card_header("Latest income of charity recipients") %}
                 (number of grants)
               {% endcall %}
                 <ul class="bar-chart" v-if="chartData.byOrgSize">
                   <li class="bar-chart__item" v-for="(group, index) in chartBars('byOrgSize')" v-if="index < 10" :style="group.style">
-                    <div class="bar-chart__label"><% group.label %></div>
+                    <label class="bar-chart__label"><% group.label %></label>
                     <div class="bar-chart__bar"><span></span></div>
                   </li>
                 </ul>
                 <div class="base-card__note">
                   <p>Based on <% chartN('byOrgSize') | formatNumber %> grants.</p>
-                  <p>Organisation age at the time of the grant award, based on the registration date of that organisation. Only available for recipients with charity or company numbers.</p>
                   <p v-if="chartMissing('byOrgSize')">
-                  Organisation size is not available for <% chartMissing('byOrgSize') | formatNumber %> grants.
+                  Latest income is not available for <% chartMissing('byOrgSize') | formatNumber %> grants.
                   </p>
                 </div>
             {% endcall %}
 
-            {% call chart_card(colour="teal") %}
+            {% call chart_card(colour="teal", v_if="chartN('byOrgSize') == 0") %}
+              {% call chart_card_header("Latest income of charity recipients") %}{% endcall %}
+                <p>
+                  Latest income is not available for <% chartMissing('byOrgSize') | formatNumber %> grants.
+                </p>
+                <p>
+                  If the recipient organisations are charities then adding recipient identifiers will allow you to see a chart with their latest income.
+                </p>
+            {% endcall %}
+
+            {% call chart_card(colour="teal", v_if="chartN('byOrgAge') > 0") %}
               {% call chart_card_header("Age of recipient organisations") %}
                 (number of grants)
               {% endcall %}
                 <ul class="bar-chart" v-if="chartData.byOrgAge">
                   <li class="bar-chart__item" v-for="(group, index) in chartBars('byOrgAge')" v-if="index < 10" :style="group.style">
-                    <div class="bar-chart__label"><% group.label %></div>
+                    <label class="bar-chart__label"><% group.label %></label>
                     <div class="bar-chart__bar"><span></span></div>
                   </li>
                 </ul>
                 <div class="base-card__note">
                   <p>Based on <% chartN('byOrgAge') | formatNumber %> grants.</p>
+                  <p>Organisation age at the time of the grant award, based on the registration date of that organisation. Only available for recipients with charity or company numbers.</p>
                   <p v-if="chartMissing('byOrgAge')">
-                  Organisation age is not available for <% chartMissing('byOrgSize') | formatNumber %> grants.
+                  Organisation age is not available for <% chartMissing('byOrgAge') | formatNumber %> grants.
                   </p>
                 </div>
+            {% endcall %}
+
+            {% call chart_card(colour="teal", v_if="chartN('byOrgAge') == 0") %}
+              {% call chart_card_header("Age of recipient organisations") %}{% endcall %}
+                <p>
+                  Organisation age is not available for <% chartMissing('byOrgAge') | formatNumber %> grants.
+                </p>
+                <p>
+                  If the recipient organisations are charities or companies then adding recipient identifiers will allow you to see a chart with their age.
+                </p>
             {% endcall %}
 
           </div>

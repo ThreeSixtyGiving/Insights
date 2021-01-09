@@ -78,6 +78,9 @@ ${queryHeader('insightsData', 'grantAggregates')} {
       byCountryRegion {
         ...chartFields
       }
+      byGeoSource {
+        ...chartFields
+      }
     }
   }
   

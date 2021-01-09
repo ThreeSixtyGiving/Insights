@@ -81,6 +81,7 @@ class GrantAggregate(graphene.ObjectType):
     by_amount_awarded = graphene.List(GrantBucket)
     by_country_region = graphene.List(GrantBucket)
     by_local_authority = graphene.List(GrantBucket)
+    by_geo_source = graphene.List(GrantBucket)
     summary = graphene.List(GrantBucket)
 
 
@@ -197,6 +198,7 @@ class Query(graphene.ObjectType):
                 GrantModel.insights_geo_region,
             ],
             "by_local_authority": [GrantModel.insights_geo_la],
+            "by_geo_source": [GrantModel.insights_geo_source],
             "summary": [],
         }
         return_result = {}
@@ -283,6 +285,12 @@ class Query(graphene.ObjectType):
                 if k in ("by_country_region", "by_local_authority"):
                     for b in r["bucket_group"]:
                         b["name"] = geo_labels.get(b["id"], b["id"])
+
+                if k in ("by_geo_source"):
+                    for b in r["bucket_group"]:
+                        if not b["id"]:
+                            continue
+                        b["name"] = ''.join(map(lambda x: x if x.islower() else " "+x, b["id"])).capitalize()
 
             if k == "by_country_region":
                 return_result[k] = sorted(

@@ -40,6 +40,10 @@ export const barChart = {
                         gridLines: {
                             display: false,
                         },
+                        ticks: {
+                            beginAtZero: true,
+                            precision: 0,
+                        },
                     }]
                 }
             }

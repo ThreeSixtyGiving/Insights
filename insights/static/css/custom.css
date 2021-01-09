@@ -65,17 +65,31 @@ ul.dataset-select>li {
 .base-card--yellow .bar-chart__bar>span {
     background-color: var(--color-yellow);
 }
+.base-card--yellow .bar-chart__bar > span:hover {
+    background-color: var(--color-yellow-dark);
+}
 
 .base-card--red .bar-chart__bar>span {
     background-color: var(--color-red);
+    opacity: 0.9;
+}
+.base-card--red .bar-chart__bar:hover > span {
+    background-color: var(--color-red);
+    opacity: 1;
 }
 
 .base-card--teal .bar-chart__bar>span {
     background-color: var(--color-teal);
 }
+.base-card--teal .bar-chart__bar:hover > span {
+    background-color: var(--color-teal-dark);
+}
 
 .base-card--orange .bar-chart__bar>span {
     background-color: var(--color-orange);
+}
+.base-card--orange .bar-chart__bar:hover > span {
+    background-color: var(--color-orange-dark);
 }
 
 .base-card__header {
@@ -95,6 +109,9 @@ ul.dataset-select>li {
     font-size: 0.9rem;
     line-height: 1.3;
     min-height: 25px;
+}
+.bar-chart__label {
+    margin: 0;
 }
 
 /* tags */
