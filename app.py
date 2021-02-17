@@ -68,6 +68,11 @@ app = dash.Dash(
 )
 app.config.suppress_callback_exceptions = True
 
+if server.config.get("DEBUG"):
+    app.enable_dev_tools(
+        debug=True,
+    )
+
 app.index_string = '''
 <!DOCTYPE html>
 <html>
