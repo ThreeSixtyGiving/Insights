@@ -68,7 +68,7 @@
             </header>
             <ul class="dataset-select">
               <li v-for="item in getDatasetOptions(index)">
-                <a v-bind:href="item.url"><% item.name %> (<% item.grant_count|formatNumber %>)</a>
+                <a v-bind:href="item.url" class="filter filter--data-wrangling"><span class=""><% item.name %></span> (<% item.grant_count|formatNumber %>)</a>
               </li>
             </ul>
             <div class="media-card__byline" v-if="getDatasetOptionsOtherN(index)">
