@@ -57,7 +57,7 @@ DEFAULT_CONFIG = {
     'modeBarButtons': [[
         'toImage', 'sendDataToCloud'
     ]],
-    'scrollZoom': 'gl3d',
+    'scrollZoom': False,
 }
 
 def chart_title(title, subtitle=None, description=None):
@@ -713,7 +713,7 @@ def location_map(df, mapbox_access_token=None, mapbox_style=None):
                 'modeBarButtons': [[
                     'toImage', 'sendDataToCloud'
                 ]],
-                'scrollZoom': 'mapbox',
+                'scrollZoom': True,
             }
         ),
         'Location of UK grant recipients',
