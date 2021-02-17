@@ -150,11 +150,12 @@ def get_ctry_rgn(df):
     idx = ctry_rgn.index.tolist()
     new_idx = [i for i in REGION_ORDER if i in idx] + [i for i in idx if i not in REGION_ORDER]
     ctry_rgn = ctry_rgn.reindex(new_idx)
-
     return ctry_rgn
 
 
 def get_org_income_bands(df):
+    if df["__org_latest_income"].isnull().values.all():
+        return df["__org_latest_income"]
     return pd.cut(
         df["__org_latest_income"],
         bins=AddExtraFieldsExternal.INCOME_BINS,

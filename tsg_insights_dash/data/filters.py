@@ -1,9 +1,15 @@
-from .results import get_identifier_schemes, AGE_BAND_CHANGES, AWARD_BAND_CHANGES, INCOME_BAND_CHANGES, get_org_income, get_org_income_bands
+from pandas import NA
+
+from .results import get_identifier_schemes, AGE_BAND_CHANGES, AWARD_BAND_CHANGES, INCOME_BAND_CHANGES, get_org_income, get_org_income_bands, get_ctry_rgn
 from tsg_insights.data.cache import get_from_cache
 
 
 def get_filtered_df(fileid, **filters):
     df = get_from_cache(fileid)
+
+    # fix for region and country being wrongly encoded
+    df.loc[df["__geo_ctry"].isin(["None", "Unknown"]), "__geo_ctry"] = NA
+    df.loc[df["__geo_rgn"].isin(["None", "Unknown"]), "__geo_rgn"] = NA
 
     for filter_id, filter_def in FILTERS.items():
         new_df = filter_def["apply_filter"](
@@ -32,7 +38,7 @@ def apply_area_filter(df, filter_args, filter_def):
     if countries and regions:
         return df[
             (df["__geo_ctry"].isin(countries)) &
-            (df["__geo_rgn"].isin(regions))
+            (df["__geo_rgn"].fillna(df["__geo_ctry"]).isin(regions))
         ]
 
 
@@ -125,11 +131,11 @@ FILTERS = {
             {
                 'label': (
                     '{} ({})'.format(value[0], count)
-                    if value[0].strip() == value[1].strip()
+                    if value[0].strip() == value[1].strip() or value[1] is None or value[1] == "Unknown"
                     else "{} - {} ({})".format(value[0], value[1], count)
                 ),
                 'value': "{}##{}".format(value[0], value[1])
-            } for value, count in df.fillna({"__geo_ctry": "Unknown", "__geo_rgn": "Unknown"}).groupby(["__geo_ctry", "__geo_rgn"]).size().iteritems()
+            } for value, count in get_ctry_rgn(df)["Grants"].iteritems()
         ]),
         "apply_filter": apply_area_filter,
     },
@@ -181,7 +187,7 @@ FILTERS = {
                 'label': '{} ({})'.format(AGE_BAND_CHANGES.get(i[0], i[0]), i[1]),
                 'value': i[0]
             } for i in df["__org_age_bands"].value_counts().sort_index().iteritems()
-        ] if df["__org_age_bands"].value_counts().sum() else []),
+        ] if "__org_age_bands" in df and df["__org_age_bands"].value_counts().sum() else []),
         "field": "__org_age_bands",
         "apply_filter": apply_field_filter,
     },

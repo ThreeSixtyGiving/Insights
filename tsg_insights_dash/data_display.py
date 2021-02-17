@@ -9,7 +9,7 @@ from dash_dangerously_set_inner_html import DangerouslySetInnerHTML as InnerHTML
 from flask import url_for, render_template
 
 from app import app
-from tsg_insights.data.cache import get_from_cache, get_cache, get_metadata_from_cache
+from tsg_insights.data.cache import get_metadata_from_cache
 from .data.charts import *
 from .data.filters import FILTERS, get_filtered_df
 from tsg_insights_components import InsightChecklist, InsightDropdown, InsightFoldable
@@ -335,14 +335,17 @@ def what_next_missing_fields(df, fileid):
 @app.callback(Output('award-dates', 'data'),
               [Input('output-data-id', 'data')])
 def award_dates_change(fileid):
-    df = get_from_cache(fileid)
+    df = get_filtered_df(fileid)
     if df is None:
         return {f: FILTERS[f]["defaults"] for f in FILTERS}
 
-    try:
-        return {f: FILTERS[f]["get_values"](df) for f in FILTERS}
-    except Exception as e:
-        return {f: FILTERS[f]["defaults"] for f in FILTERS}
+    result = {}
+    for f in FILTERS:
+        try:
+            result[f] = FILTERS[f]["get_values"](df)
+        except Exception as e:
+            result[f] = FILTERS[f]["defaults"](df)
+    return result
 
 # ================
 # Functions that return a function to be used in callbacks
@@ -372,7 +375,7 @@ def dropdown_filter(filter_id, filter_def):
 
 
 def slider_filter(filter_id, filter_def):
-    def slider_filter_func(value, n_clicks, existing_value, existing_style):
+    def slider_filter_func(value, n_clicks, existing_value, container):
         value = value if value else {filter_id: filter_def["defaults"]}
 
         # work out the marks
@@ -381,20 +384,21 @@ def slider_filter(filter_id, filter_def):
         min_max = range(value[filter_id]["min"],
                         value[filter_id]["max"] + 1, step)
 
-        # hiding the box
-        existing_style = {} if existing_style is None else existing_style
+        # container style
+        if 'style' not in container:
+            container['style'] = {}
         if value[filter_id]["min"] != value[filter_id]["max"]:
-            if "display" in existing_style:
-                del existing_style["display"]
+            if "display" in container['style']:
+                del container['style']["display"]
         else:
-            existing_style["display"] = 'none'
+            container['style']["display"] = 'none'
 
         return (
             value[filter_id]["min"],
             value[filter_id]["max"],
             {str(i): str(i) for i in min_max},
             [value[filter_id]["min"], value[filter_id]["max"]],
-            existing_style
+            container
         )
 
     return slider_filter_func
@@ -429,12 +433,20 @@ def set_dropdown_value(filter_id, filter_def):
 for filter_id, filter_def in FILTERS.items():
 
     # callback to update the text showing filtered options next to the filter
-    app.callback(Output('df-change-{}-wrapper'.format(filter_id), 'value'),
-                 [Input('df-change-{}'.format(filter_id), 'value')],
-                 [State('df-change-{}'.format(filter_id), 'options'),
+    if filter_def.get("type") in ['rangeslider']:
+        app.callback(Output('df-change-{}-wrapper'.format(filter_id), 'value'),
+                    [Input('df-change-{}'.format(filter_id), 'value')],
+                    [State('df-change-{}'.format(filter_id), 'marks'),
                      State('df-change-{}-wrapper'.format(filter_id), 'value')])(
-        set_dropdown_value(filter_id, filter_def)
-    )
+            set_dropdown_value(filter_id, filter_def)
+        )
+    else:
+        app.callback(Output('df-change-{}-wrapper'.format(filter_id), 'value'),
+                    [Input('df-change-{}'.format(filter_id), 'value')],
+                    [State('df-change-{}'.format(filter_id), 'options'),
+                        State('df-change-{}-wrapper'.format(filter_id), 'value')])(
+            set_dropdown_value(filter_id, filter_def)
+        )
 
     if filter_def.get("type") in ['dropdown', 'multidropdown']:
 
@@ -459,11 +471,11 @@ for filter_id, filter_def in FILTERS.items():
              Output('df-change-{}'.format(filter_id), 'max'),
              Output('df-change-{}'.format(filter_id), 'marks'),
              Output('df-change-{}'.format(filter_id), 'value'),
-             Output('df-change-{}-wrapper'.format(filter_id), 'style'), ],
+             Output('df-change-{}-wrapper'.format(filter_id), 'container'), ],
             [Input('award-dates', 'data'),
              Input('df-reset-filters', 'n_clicks')],
             [State('df-change-{}'.format(filter_id), 'value'),
-             State('df-change-{}-wrapper'.format(filter_id), 'style')]
+             State('df-change-{}-wrapper'.format(filter_id), 'container')]
         )(
             slider_filter(filter_id, filter_def)
         )
