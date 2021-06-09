@@ -4,7 +4,7 @@
 #
 #    pip-compile dev-requirements.in
 #
-alembic==1.4.3
+alembic==1.6.5
     # via
     #   -r requirements.txt
     #   flask-migrate
@@ -16,67 +16,78 @@ appdirs==1.4.4
     # via black
 atomicwrites==1.4.0
     # via pytest
-attrs==20.3.0
+attrs==21.2.0
     # via
     #   -r requirements.txt
     #   jsonschema
     #   pytest
-babel==2.9.0
+babel==2.9.1
     # via -r requirements.txt
-black==20.8b1
+backports-datetime-fromisoformat==1.0.0
+    # via
+    #   -r requirements.txt
+    #   flattentool
+black==21.5b2
     # via -r dev-requirements.in
+btrees==4.9.2
+    # via
+    #   -r requirements.txt
+    #   zodb
 cached-property==1.5.2
     # via
     #   -r requirements.txt
     #   libcove
-certifi==2020.12.5
+certifi==2021.5.30
     # via
     #   -r requirements.txt
     #   requests
+cffi==1.14.5
+    # via
+    #   -r requirements.txt
+    #   persistent
 chardet==4.0.0
     # via
     #   -r requirements.txt
     #   requests
-click==7.1.2
+click==8.0.1
     # via
     #   -r requirements.txt
     #   black
     #   flask
 colorama==0.4.4
-    # via pytest
-commonmark==0.9.1
     # via
     #   -r requirements.txt
-    #   libcove
+    #   click
+    #   pytest
 contextlib2==0.6.0.post1
     # via
     #   -r requirements.txt
     #   schema
-coverage==5.3.1
+coverage==5.5
     # via -r dev-requirements.in
-defusedxml==0.6.0
+defusedxml==0.7.1
     # via
     #   -r requirements.txt
     #   odfpy
-et-xmlfile==1.0.1
+et-xmlfile==1.1.0
     # via
     #   -r requirements.txt
     #   openpyxl
 flask-graphql==2.0.1
     # via -r requirements.txt
-flask-migrate==2.5.3
+flask-migrate==3.0.1
     # via -r requirements.txt
-flask-sqlalchemy==2.4.4
+flask-sqlalchemy==2.5.1
     # via
     #   -r requirements.txt
     #   flask-migrate
-flask==1.1.2
+flask==2.0.1
     # via
     #   -r requirements.txt
     #   flask-graphql
     #   flask-migrate
     #   flask-sqlalchemy
-flattentool==0.15.2
+flattentool==0.17.0
     # via
     #   -r requirements.txt
     #   libcove
@@ -101,36 +112,36 @@ graphql-server-core==1.2.0
     # via
     #   -r requirements.txt
     #   flask-graphql
-gunicorn==20.0.4
+greenlet==1.1.0
+    # via
+    #   -r requirements.txt
+    #   sqlalchemy
+gunicorn==20.1.0
     # via -r requirements.txt
-humanize==3.2.0
+humanize==3.7.1
     # via -r requirements.txt
 idna==2.10
     # via
     #   -r requirements.txt
     #   requests
-inflect==5.0.2
+ijson==3.1.4
+    # via
+    #   -r requirements.txt
+    #   flattentool
+inflect==5.3.0
     # via -r requirements.txt
 iniconfig==1.1.1
     # via pytest
-isort==5.7.0
+isort==5.8.0
     # via -r dev-requirements.in
-itsdangerous==1.1.0
+itsdangerous==2.0.1
     # via
     #   -r requirements.txt
     #   flask
-jdcal==1.4.1
-    # via
-    #   -r requirements.txt
-    #   openpyxl
-jinja2==2.11.2
+jinja2==3.0.1
     # via
     #   -r requirements.txt
     #   flask
-json-merge-patch==0.2
-    # via
-    #   -r requirements.txt
-    #   libcove
 jsonref==0.2
     # via
     #   -r requirements.txt
@@ -140,17 +151,17 @@ jsonschema==3.2.0
     # via
     #   -r requirements.txt
     #   libcove
-libcove==0.20.2
+libcove==0.24.0
     # via -r requirements.txt
-lxml==4.6.2
+lxml==4.6.3
     # via
     #   -r requirements.txt
     #   flattentool
-mako==1.1.3
+mako==1.1.4
     # via
     #   -r requirements.txt
     #   alembic
-markupsafe==1.1.1
+markupsafe==2.0.1
     # via
     #   -r requirements.txt
     #   jinja2
@@ -161,14 +172,19 @@ odfpy==1.4.1
     # via
     #   -r requirements.txt
     #   flattentool
-openpyxl==3.0.5
+openpyxl==3.0.7
     # via
     #   -r requirements.txt
     #   flattentool
-packaging==20.8
+packaging==20.9
     # via pytest
 pathspec==0.8.1
     # via black
+persistent==4.7.0
+    # via
+    #   -r requirements.txt
+    #   btrees
+    #   zodb
 pluggy==0.13.1
     # via pytest
 promise==2.3
@@ -182,32 +198,36 @@ psycopg2==2.8.6
     # via -r requirements.txt
 py==1.10.0
     # via pytest
+pycparser==2.20
+    # via
+    #   -r requirements.txt
+    #   cffi
 pyparsing==2.4.7
     # via packaging
 pyrsistent==0.17.3
     # via
     #   -r requirements.txt
     #   jsonschema
-pytest==6.2.1
+pytest==6.2.4
     # via -r dev-requirements.in
 python-dateutil==2.8.1
     # via
     #   -r requirements.txt
     #   alembic
-python-dotenv==0.15.0
+python-dotenv==0.17.1
     # via -r requirements.txt
 python-editor==1.0.4
     # via
     #   -r requirements.txt
     #   alembic
-pytz==2020.5
+pytz==2021.1
     # via
     #   -r requirements.txt
     #   babel
     #   flattentool
-regex==2020.11.13
+regex==2021.4.4
     # via black
-requests-mock==1.8.0
+requests-mock==1.9.3
     # via -r dev-requirements.in
 requests==2.25.1
     # via
@@ -222,15 +242,15 @@ rx==1.6.1
     # via
     #   -r requirements.txt
     #   graphql-core
-schema==0.7.2
+schema==0.7.4
     # via
     #   -r requirements.txt
     #   flattentool
-singledispatch==3.4.0.3
+singledispatch==3.6.2
     # via
     #   -r requirements.txt
     #   graphene-sqlalchemy
-six==1.15.0
+six==1.16.0
     # via
     #   -r requirements.txt
     #   graphene
@@ -242,7 +262,8 @@ six==1.15.0
     #   python-dateutil
     #   requests-mock
     #   singledispatch
-sqlalchemy==1.3.22
+    #   zodb
+sqlalchemy==1.4.17
     # via
     #   -r requirements.txt
     #   alembic
@@ -256,15 +277,15 @@ toml==0.10.2
     # via
     #   black
     #   pytest
-typed-ast==1.4.2
-    # via black
-typing-extensions==3.7.4.3
-    # via black
-urllib3==1.26.2
+transaction==3.0.1
+    # via
+    #   -r requirements.txt
+    #   zodb
+urllib3==1.26.5
     # via
     #   -r requirements.txt
     #   requests
-werkzeug==1.0.1
+werkzeug==2.0.1
     # via
     #   -r requirements.txt
     #   flask
@@ -272,6 +293,35 @@ xmltodict==0.12.0
     # via
     #   -r requirements.txt
     #   flattentool
+zc.lockfile==2.0
+    # via
+    #   -r requirements.txt
+    #   zodb
+zc.zlibstorage==1.2.0
+    # via
+    #   -r requirements.txt
+    #   flattentool
+zconfig==3.6.0
+    # via
+    #   -r requirements.txt
+    #   zodb
+zodb==5.6.0
+    # via
+    #   -r requirements.txt
+    #   flattentool
+    #   zc.zlibstorage
+zodbpickle==2.0.0
+    # via
+    #   -r requirements.txt
+    #   zodb
+zope.interface==5.4.0
+    # via
+    #   -r requirements.txt
+    #   btrees
+    #   persistent
+    #   transaction
+    #   zc.zlibstorage
+    #   zodb
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
