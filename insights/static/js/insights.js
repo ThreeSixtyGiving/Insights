@@ -5,7 +5,7 @@ import { GQL, graphqlQuery } from './gql/query.js';
 import { SOURCE_GQL } from './gql/sources.js';
 import { GEO_GQL } from './gql/geo.js';
 import { formatCurrency, formatDate, formatNumber, getAmountSuffix, formatNumberSuffix } from './components/filters.js';
-import { debounce } from './components/debounce.js';
+import { debounce } from './lib/debounce.js';
 
 const COLOURS = {
     yellow: "#EFC329",
