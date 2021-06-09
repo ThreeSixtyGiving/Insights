@@ -9,23 +9,22 @@ export const mapboxMap = {
             mapbox_access_token: MAPBOX_ACCESS_TOKEN,
         };
     },
-    watch: {
-        markers: {
-            handler: function () {
-                var component = this;
+    computed: {
+        updateMarkers() {
+            var component = this;
 
-                this.marker_layer.clearLayers();
+            this.marker_layer.clearLayers();
 
-                if (!this.markers) {
-                    return;
-                }
+            if (!this.markers) {
+                return;
+            }
 
-                // add each of the markers
-                this.markers.forEach(function (g, index) {
-                    if (g.insightsGeoLat && g.insightsGeoLong) {
-                        component.marker_layer.addLayer(
-                            L.marker([g.insightsGeoLat, g.insightsGeoLong])
-                                .bindPopup(`
+            // add each of the markers
+            this.markers.forEach(function (g, index) {
+                if (g.insightsGeoLat && g.insightsGeoLong) {
+                    component.marker_layer.addLayer(
+                        L.marker([g.insightsGeoLat, g.insightsGeoLong])
+                            .bindPopup(`
                                 <table style="margin-bottom: 0px;" class="table">
                                     <tr><th style="">From</th><td>${L.mapbox.sanitize(g["fundingOrganizationName"])}</td></tr>
                                     <tr><th style="">To</th><td>${L.mapbox.sanitize(g["recipientOrganizationName"])}</td></tr>
@@ -33,12 +32,18 @@ export const mapboxMap = {
                                     <tr><th style="">Awarded</th><td>${L.mapbox.sanitize(g["awardDate"])}</td></tr>
                                 </table>
                             `)
-                        );
-                    }
-                });
+                    );
+                }
+            });
 
-                // fit the map to the bounds of the marker
-                this.map.fitBounds(this.marker_layer.getBounds(), { maxZoom: 9 });
+            // fit the map to the bounds of the marker
+            this.map.fitBounds(this.marker_layer.getBounds(), { maxZoom: 9 });
+        }
+    },
+    watch: {
+        markers: {
+            handler: function () {
+                this.updateMarkers();
             },
             deep: true,
         },
@@ -48,7 +53,7 @@ export const mapboxMap = {
         var map = L.mapbox.map(this.container, null, {
             attributionControl: { compact: true },
             zoomControl: true,
-        }).setView([-41.2858, 174.78682], 14);
+        }).setView([52.9225, 1.4746], 6);
         L.mapbox.styleLayer('mapbox://styles/davidkane/cjvnt2h0007hm1clrbd20bbug').addTo(map)
 
         // disable scroll when map isn't focused
@@ -75,6 +80,7 @@ export const mapboxMap = {
         }).addTo(map);
 
         this.map = map;
+        this.updateMarkers();
     },
     template: '<div v-bind:id="container" v-bind:style="{ height: height }"></div>'
 }
@@ -140,7 +146,7 @@ function getOverlays(markers, map) {
         "Boundaries": {
             "No boundaries": L.mapbox.featureLayer(null).addTo(map),
             'Country and Region': L.mapbox.featureLayer(null, boundary_options({ weight: 2 }))
-                .loadURL('https://opendata.arcgis.com/datasets/01fd6b2d7600446d8af768005992f76a_4.geojson')
+                .loadURL('/static/geo/country_region.geojson')
                 .bindPopup(boundary_name_field),
             'Local Authorities': L.layerGroup([
                 // Local Authority (lower tier)
@@ -149,7 +155,7 @@ function getOverlays(markers, map) {
                     opacity: 0.3,
                     weight: 1
                 }))
-                    .loadURL('https://opendata.arcgis.com/datasets/910f48f3c4b3400aa9eb0af9f8989bbe_0.geojson')
+                    .loadURL('/static/geo/lalt.geojson')
                     .bindPopup(boundary_name_field),
                 // Local Authority (upper tier)
                 L.mapbox.featureLayer(null, boundary_options({
@@ -158,18 +164,18 @@ function getOverlays(markers, map) {
                     opacity: 1,
                     weight: 1.5
                 }))
-                    .loadURL('https://opendata.arcgis.com/datasets/b216b4c8a4e74f6fb692a1785255d777_0.geojson'),
+                    .loadURL('/static/geo/laut.geojson'),
             ]).bindPopup(boundary_name_field),
             'Parliamentary Constituencies': L.mapbox.featureLayer(null, boundary_options())
-                .loadURL('https://opendata.arcgis.com/datasets/47e59e1e38ee4db0af18d57821bb4709_0.geojson')
+                .loadURL('/static/geo/pcon.geojson')
                 .bindPopup(boundary_name_field),
             'Clinical Commissioning Groups (England)': L.mapbox.featureLayer(null, boundary_options())
-                .loadURL('https://opendata.arcgis.com/datasets/dbfaf69873794690af4acddaf581572f_1.geojson')
+                .loadURL('/static/geo/ccg.geojson')
                 .bindPopup(boundary_name_field),
             'Local Enterprise Partnerships (England)': L.mapbox.featureLayer(null, boundary_options({
                 fillOpacity: 0.3
             }))
-                .loadURL('https://opendata.arcgis.com/datasets/9dfe438dceb142269994a864562fce3b_0.geojson')
+                .loadURL('/static/geo/lep.geojson')
                 .bindPopup(boundary_name_field),
         }
     }

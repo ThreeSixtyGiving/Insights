@@ -33,8 +33,10 @@
     const BIN_LABELS = {{ bin_labels|tojson }};
     const DATASET = {{ dataset|tojson }};
     const BASE_FILTERS = {{ base_filters|tojson }};
-    const PAGE_URLS = {{ page_urls|tojson }};
     const MAPBOX_ACCESS_TOKEN = {{ config.MAPBOX_ACCESS_TOKEN|tojson }};
+    const PAGE_URLS = {{ page_urls|tojson }};
+    const TITLE = {{ title|tojson }};
+    const SUBTITLE = {{ subtitle|tojson }};
   </script>
   <script type="module" src="{{ url_for('static', filename='js/insights.js') }}"></script>
 {% endblock bodyscripts %}
