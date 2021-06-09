@@ -9,7 +9,7 @@ export const mapboxMap = {
             mapbox_access_token: MAPBOX_ACCESS_TOKEN,
         };
     },
-    computed: {
+    methods: {
         updateMarkers() {
             var component = this;
 
