@@ -26,8 +26,12 @@ Vue.filter('formatNumber', formatNumber);
 Vue.filter('getAmountSuffix', getAmountSuffix);
 Vue.filter('formatNumberSuffix', formatNumberSuffix);
 
-function initialFilters() {
-    var params = new URLSearchParams(window.location.search);
+function initialFilters(useQueryParams) {
+    if(useQueryParams){
+        var params = new URLSearchParams(window.location.search);
+    } else {
+        var params = new URLSearchParams();
+    }
     return {
         awardAmount: {
             min: params.get("awardAmount.min"),
@@ -68,7 +72,7 @@ var app = new Vue({
             default_currency: 'GBP',
             funders: [],
             base_filters: BASE_FILTERS,
-            filters: initialFilters(),
+            filters: initialFilters(true),
             source_ids: [],
             sources: [],
             showFilters: false,
@@ -172,7 +176,7 @@ var app = new Vue({
             history.pushState(this.filters, '', "?" + queryParams.toString());
         },
         resetFilters() {
-            this.filters = initialFilters();
+            this.filters = initialFilters(false);
         },
         updateData() {
             var app = this;
@@ -183,9 +187,6 @@ var app = new Vue({
                 ...app.computedFilters,
             }).then((data) => {
                 app.loading = false;
-                if (!app.initialData) {
-                    app.initialData = {};
-                }
                 Object.entries(data.data.grantAggregates).forEach(([key, value]) => {
                     if (key == "summary") {
                         app.summary = value[0];
@@ -193,9 +194,6 @@ var app = new Vue({
                         app.source_ids = value.map((v) => v.bucketGroup[0].id);
                     } else {
                         app.chartData[key] = value;
-                        if (!app.initialData[key]) {
-                            app.initialData[key] = value;
-                        }
                     }
                     if (key == "byFunder") {
                         app.funders = value.map((f) => f.bucketGroup[0].name);
@@ -274,5 +272,20 @@ var app = new Vue({
                     label: d.bucketGroup[0].name,
                 }));
         }
+    },
+    mounted() {
+        var app = this;
+        graphqlQuery(GQL, {
+            dataset: app.dataset,
+            ...initialFilters(false),
+            ...app.base_filters,
+        }).then((data) => {
+            app.initialData = {};
+            Object.entries(data.data.grantAggregates).forEach(([key, value]) => {
+                if (!["summary", "bySource"].includes(key)) {
+                    app.initialData[key] = value;
+                }
+            });
+        });
     }
 })
