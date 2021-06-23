@@ -172,7 +172,7 @@ def get_org_type(df):
 
 def get_identifier_schemes(df):
     identifier_schemes = df["Recipient Org:0:Identifier"].apply(
-        lambda x: "360G" if len(x.split("-"))<3 or x.startswith("360G-") else "-".join(x.split("-")[:2]))
+        lambda x: "360G" if len(x.split("-"))<3 or x.upper().startswith("360G-") else "-".join(x.split("-")[:2]))
     
     if "__org_org_type" in df:
         identifier_schemes = df["__org_org_type"].fillna(
