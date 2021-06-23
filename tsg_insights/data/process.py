@@ -768,7 +768,9 @@ class MergeGeoData(DataPreparationStage):
                 .fillna(postcode_df[c])
             )
             if postcode_df[c].dtype == "object":
-                postcode_df.loc[:, c] = postcode_df[c].str.replace(r"\(pseudo\)", "", regex=True)
+                postcode_df.loc[:, c] = postcode_df[c].str.replace(
+                    r"\(pseudo\)", "", regex=True
+                )
                 postcode_df.loc[
                     postcode_df[c].fillna("") == "N99999999", c
                 ] = "Northern Ireland"
