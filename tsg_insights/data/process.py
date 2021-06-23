@@ -31,6 +31,9 @@ FTC_SCHEMES = [
 POSTCODE_FIELDS = ['ctry', 'cty', 'laua', 'pcon', 'rgn', 'imd', 'ru11ind',
                    'oac11', 'lat', 'long']  # fields to care about from the postcodes)
 
+# column to add to indicate datastore data has been used
+DATASTORE_IS_USED_COL = "__used_additional_data"
+
 
 def get_dataframe_from_file(filename, contents, date=None, expire_days=(2 * (365/12))):
     fileid = get_fileid(contents, filename, date)
@@ -142,6 +145,7 @@ class DataPreparation(object):
             CheckColumnTypes,
             AddExtraColumns,
             CleanRecipientIdentifiers,
+            MapAdditionalDataFields,
             LookupCharityDetails,
             LookupCompanyDetails,
             MergeCompanyAndCharityDetails,
@@ -173,8 +177,11 @@ class DataPreparation(object):
         self._setup_job_meta()
         for k, Stage in enumerate(self.stages):
             stage = Stage(df, self.cache, self.job, **self.attributes)
-            logging.info(stage.name)
-            df = stage.run()
+            if not stage.skip_job():
+                logging.info(stage.name)
+                df = stage.run()
+            else:
+                logging.info(stage.name + " [skipped]")
             self._progress_job(k)
         return df
 
@@ -192,6 +199,10 @@ class DataPreparationStage(object):
             return
         self.job.meta['progress']["progress"] = (item_key, total_items)
         self.job.save_meta()
+    
+    def skip_job(self):
+        # should return true if this step shouldn't be run
+        return False
 
     def run(self):
         # subclasses should implement a `run()` method
@@ -211,6 +222,7 @@ class LoadDatasetFromURL(DataPreparationStage):
         self.df = ThreeSixtyGiving.from_url(url).to_pandas()
 
         return self.df
+
 
 class LoadDatasetFromFile(DataPreparationStage):
 
@@ -262,6 +274,7 @@ class CheckColumnNames(DataPreparationStage):
         self.df = self.df.rename(columns=renames)
         return self.df
 
+
 class CheckColumnsExist(CheckColumnNames):
 
     name = 'Check columns exist'
@@ -273,6 +286,7 @@ class CheckColumnsExist(CheckColumnNames):
                     c, ", ".join(self.df.columns)
                 ))
         return self.df
+
 
 class CheckColumnTypes(DataPreparationStage):
 
@@ -292,6 +306,7 @@ class CheckColumnTypes(DataPreparationStage):
                 self.df.loc[:, c] = func(self.df[c])
         return self.df
 
+
 class AddExtraColumns(DataPreparationStage):
 
     name = 'Add extra columns'
@@ -302,6 +317,7 @@ class AddExtraColumns(DataPreparationStage):
             lambda x: "360G" if x.startswith("360G-") else "-".join(x.split("-")[:2])
         )
         return self.df
+
 
 class CleanRecipientIdentifiers(DataPreparationStage):
 
@@ -341,6 +357,49 @@ class CleanRecipientIdentifiers(DataPreparationStage):
 
         return self.df
 
+
+class MapAdditionalDataFields(DataPreparationStage):
+
+    name = "Map additional data fields from the DataStore to the insights fields"
+
+    DATASTORE_FIELDS = {
+        "additional_data.recipientOrgInfos.0.charityNumber": "__org_charity_number",
+        "additional_data.recipientOrgInfos.0.companyNumber": "__org_company_number",
+        "additional_data.recipientOrgInfos.0.dateRegistered": "__org_date_registered",
+        "additional_data.recipientOrgInfos.0.dateRemoved": "__org_date_removed",
+        "additional_data.recipientOrgInfos.0.postalCode": "__org_postcode",
+        "additional_data.recipientOrgInfos.0.latestIncome": "__org_latest_income",
+        "additional_data.recipientOrgInfos.0.organisationTypePrimary": "__org_org_type",
+        "additional_data.recipientOrganizationLocation.ctry_name": "__geo_ctry",
+        "additional_data.recipientOrganizationLocation.cty_name": "__geo_cty",
+        "additional_data.recipientOrganizationLocation.laua_name": "__geo_laua",
+        "additional_data.recipientOrganizationLocation.pcon_name": "__geo_pcon",
+        "additional_data.recipientOrganizationLocation.rgn_name": "__geo_rgn",
+        "additional_data.recipientOrganizationLocation.imd": "__geo_imd",
+        "additional_data.recipientOrganizationLocation.ru11ind": "__geo_ru11ind",
+        "additional_data.recipientOrganizationLocation.oac11": "__geo_oac11",
+        "additional_data.locationLookup.0.latitude": "__geo_lat",
+        "additional_data.locationLookup.0.longitude": "__geo_long",
+    }
+
+    def run(self):
+
+        for datastore_col, insights_col in self.DATASTORE_FIELDS.items():
+            if datastore_col in self.df.columns:
+                self.df.loc[:, insights_col] = self.df[datastore_col]
+                self.df.loc[:, DATASTORE_IS_USED_COL] = True
+
+                if insights_col in ("__org_date_registered", "__org_date_removed"):
+                    self.df.loc[:, insights_col] = pd.to_datetime(self.df[insights_col])
+        
+        if "__org_date_registered" in self.df.columns and hasattr(self.df["__org_date_registered"], "dt"):
+            self.df.loc[:, "__org_age"] = datetime.datetime.now() - self.df["__org_date_registered"].dt.tz_localize(None)
+        if "__org_latest_income" in self.df.columns:
+            self.df.loc[:, "__org_latest_income"] = pd.to_numeric(self.df["__org_latest_income"], errors='coerce', downcast='float')
+
+        return self.df
+
+
 class LookupCharityDetails(DataPreparationStage):
 
     name = 'Look up charity data'
@@ -351,6 +410,9 @@ class LookupCharityDetails(DataPreparationStage):
         if self.cache.hexists("charity", orgid):
             return json.loads(self.cache.hget("charity", orgid))
         return requests.get(self.ftc_url.format(orgid)).json()
+    
+    def skip_job(self):
+        return DATASTORE_IS_USED_COL in self.df.columns
 
     def run(self):    
         orgids = self.df.loc[
@@ -367,6 +429,7 @@ class LookupCharityDetails(DataPreparationStage):
 
         return self.df
 
+
 class LookupCompanyDetails(DataPreparationStage):
 
     name = 'Look up company data'
@@ -381,8 +444,12 @@ class LookupCompanyDetails(DataPreparationStage):
     def _get_orgid_index(self):
         # find records where the ID has already been found in charity lookup
         return list(self.cache.hkeys("charity"))
+    
+    def skip_job(self):
+        return DATASTORE_IS_USED_COL in self.df.columns
 
     def run(self):
+
         company_orgids = self.df.loc[
             ~self.df["Recipient Org:0:Identifier:Clean"].isin(self._get_orgid_index()) &
             (self.df["Recipient Org:0:Identifier:Scheme"] == "GB-COH"),
@@ -490,6 +557,9 @@ class MergeCompanyAndCharityDetails(DataPreparationStage):
             companies_df.loc[:, "date_removed"], dayfirst=True, utc=True)
 
         return companies_df
+    
+    def skip_job(self):
+        return DATASTORE_IS_USED_COL in self.df.columns
 
     def run(self):
 
@@ -534,6 +604,7 @@ class MergeCompanyAndCharityDetails(DataPreparationStage):
 
         return self.df
 
+
 class FetchPostcodes(DataPreparationStage):
 
     name = 'Look up postcode data'
@@ -544,6 +615,9 @@ class FetchPostcodes(DataPreparationStage):
             return json.loads(self.cache.hget("postcode", pc))
         # @TODO: postcode cleaning and formatting
         return requests.get(self.pc_url.format(pc)).json()
+    
+    def skip_job(self):
+        return DATASTORE_IS_USED_COL in self.df.columns
 
     def run(self):
         # check for recipient org postcode field first
@@ -565,6 +639,7 @@ class FetchPostcodes(DataPreparationStage):
                 continue
 
         return self.df
+
 
 class MergeGeoData(DataPreparationStage):
 
@@ -610,12 +685,16 @@ class MergeGeoData(DataPreparationStage):
                 ] = None
 
         return postcode_df
+    
+    def skip_job(self):
+        return DATASTORE_IS_USED_COL in self.df.columns
 
     def run(self):
         postcode_df = self._create_postcode_df()
         self.df = self.df.join(postcode_df.rename(columns=lambda x: "__geo_" + x),
                         on="Recipient Org:0:Postal Code", how="left")
         return self.df
+
 
 class AddExtraFieldsExternal(DataPreparationStage):
 
