@@ -104,15 +104,14 @@ def test_check_column_names():
     cache = DummyCache()
     stage = CheckColumnNames(df, cache, None)
     result_df = stage.run()
-    assert result_df.columns.all(
-        [
-            "Amount Awarded",
-            "Award Date",
-            "Funding Org:0:Name",
-            "Recipient Org:0:Identifier",
-            "Recipient Org:0:Name",
-        ]
-    )
+    for c in [
+        "Amount Awarded",
+        "Award Date",
+        "Funding Org:0:Name",
+        "Recipient Org:0:Identifier",
+        "Recipient Org:0:Name",
+    ]:
+        assert c in result_df.columns
 
 
 def test_check_columns_exist():
