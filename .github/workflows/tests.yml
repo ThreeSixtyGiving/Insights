@@ -28,6 +28,14 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r dev-requirements.txt
         git submodule update --init --recursive
+    - name: isort
+      run: |
+        isort tsg_insights --check
+        isort tsg_insights_dash --check
+    - name: black
+      run: |
+        black tsg_insights --check
+        black tsg_insights_dash --check
     - name: Test with pytest
       run: |
         pip install pytest

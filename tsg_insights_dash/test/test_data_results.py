@@ -2,13 +2,32 @@ import pandas as pd
 
 from tsg_insights_dash.data.results import *
 
+
 def test_get_ctry_rgn():
-    df = pd.DataFrame({
-        "__geo_ctry": ["England", "England", "England", None, "Scotland", "Northern Ireland", None],
-        "__geo_rgn": ["South East", "South West", "South West", None, "Scotland", None, None],
-        "Title": ["A", "B", "C", "D", "E", "F", "G"],
-        "Amount Awarded": [300, 150, 200, 400, 500, 600, 0]
-    })
+    df = pd.DataFrame(
+        {
+            "__geo_ctry": [
+                "England",
+                "England",
+                "England",
+                None,
+                "Scotland",
+                "Northern Ireland",
+                None,
+            ],
+            "__geo_rgn": [
+                "South East",
+                "South West",
+                "South West",
+                None,
+                "Scotland",
+                None,
+                None,
+            ],
+            "Title": ["A", "B", "C", "D", "E", "F", "G"],
+            "Amount Awarded": [300, 150, 200, 400, 500, 600, 0],
+        }
+    )
 
     # check no results returned if columns not present
     assert get_ctry_rgn(df[["__geo_rgn", "Title", "Amount Awarded"]]) is None
@@ -23,7 +42,7 @@ def test_get_ctry_rgn():
     assert ctry_rgn.loc[("England", "South West"), "Grants"] == 2
     assert ctry_rgn.loc[("England", "South West"), "Amount Awarded"] == 350
     assert len(ctry_rgn) == 5
-    
+
     # check Northern Ireland has been renamed
     assert ("Northern Ireland", "Unknown") not in ctry_rgn.index
     assert ("Northern Ireland", "Northern Ireland") in ctry_rgn.index

@@ -1,5 +1,6 @@
 from tsg_insights.data.utils import *
 
+
 def test_list_to_string():
     lists = [
         (["a"], "a", {}),
@@ -10,11 +11,16 @@ def test_list_to_string():
         (["a", "b", "c", "d"], "a, b, c, and d", {"oxford_comma": True}),
         (["a", "b", "c", "d"], "a, b, c and d", {"oxford_comma": False}),
         (["a", "b", "c", "d"], "a; b; c and d", {"separator": "; "}),
-        (["a", "b", "c", "d"], ["a", ", ", "b", ", ", "c", " and ", "d"], {"as_list": True}),
+        (
+            ["a", "b", "c", "d"],
+            ["a", ", ", "b", ", ", "c", " and ", "d"],
+            {"as_list": True},
+        ),
     ]
     for l in lists:
         assert l[1] == list_to_string(l[0], **l[2])
-         
+
+
 def test_pluralize():
     plurals = [
         ["sheep", "sheep", "sheep"],
@@ -27,6 +33,7 @@ def test_pluralize():
         assert p[1] == pluralize(p[0], 1)
         assert p[2] == pluralize(p[0], 2)
         assert p[2] == pluralize(p[0], 200)
+
 
 def test_unique_list():
     lists = [
@@ -45,19 +52,16 @@ def test_format_currency():
         (10000, ("£10.0", "thousand"), {}),
         (10000000, ("£10.0", "million"), {}),
         (10000000000, ("£10.0", "billion"), {}),
-
         # without humanize
         (10, ("£10", ""), {"humanize_": False}),
         (10000, ("£10,000", ""), {"humanize_": False}),
         (10000000, ("£10,000,000", ""), {"humanize_": False}),
         (10000000000, ("£10,000,000,000", ""), {"humanize_": False}),
-
         # with abbreviations
         (10, ("£10", ""), {"abbreviate": True}),
         (10000, ("£10.0", "k"), {"abbreviate": True}),
         (10000000, ("£10.0", "M"), {"abbreviate": True}),
         (10000000000, ("£10.0", "bn"), {"abbreviate": True}),
-
         # other currencies
         (10, ("US$10", ""), {"currency": "USD"}),
         (10000, ("€10.0", "thousand"), {"currency": "EUR"}),
@@ -66,6 +70,7 @@ def test_format_currency():
     ]
     for c in currencies:
         assert c[1] == format_currency(c[0], **c[2])
+
 
 def test_fileid():
     r = get_fileid(None, "absfsd", "")

@@ -1,14 +1,15 @@
-from flask.json import JSONEncoder
 import hashlib
-import inflect
-import humanize
+
 import babel.numbers
-import pandas as pd
+import humanize
+import inflect
 import numpy as np
+import pandas as pd
+from flask.json import JSONEncoder
 from requests.structures import CaseInsensitiveDict
 
 
-def list_to_string(l, oxford_comma='auto', separator=", ", as_list=False):
+def list_to_string(l, oxford_comma="auto", separator=", ", as_list=False):
     if len(l) == 1:
         return l[0]
     # if oxford_comma == "auto" then if any items contain "and" it is set to true
@@ -30,9 +31,7 @@ def list_to_string(l, oxford_comma='auto', separator=", ", as_list=False):
         return return_list
 
     return "{}{} and {}".format(
-        separator.join(l[0:-1]),
-        separator.strip() if oxford_comma else "",
-        l[-1]
+        separator.join(l[0:-1]), separator.strip() if oxford_comma else "", l[-1]
     )
 
 
@@ -44,21 +43,25 @@ def pluralize(string, count):
 def get_unique_list(l):
     # from https://stackoverflow.com/a/37163210/715621
     used = set()
-    return [x.strip() for x in l if x.strip() not in used and (used.add(x.strip()) or True)]
+    return [
+        x.strip() for x in l if x.strip() not in used and (used.add(x.strip()) or True)
+    ]
 
 
-def format_currency(amount, currency='GBP', humanize_=True, int_format="{:,.0f}", abbreviate=False):
+def format_currency(
+    amount, currency="GBP", humanize_=True, int_format="{:,.0f}", abbreviate=False
+):
     abbreviations = {
-        'million': 'M',
-        'billion': 'bn',
-        'thousand': 'k',
+        "million": "M",
+        "billion": "bn",
+        "thousand": "k",
     }
 
     if humanize_:
         amount_str = humanize.intword(amount).split(" ")
         if amount < 1000000 and amount > 1000:
             chopped = amount / float(1000)
-            amount_str = ['{:,.1f}'.format(chopped), 'thousand']
+            amount_str = ["{:,.1f}".format(chopped), "thousand"]
 
         if len(amount_str) == 2:
             return (
@@ -67,25 +70,22 @@ def format_currency(amount, currency='GBP', humanize_=True, int_format="{:,.0f}"
                     currency,
                     format="¤#,##0.0",
                     currency_digits=False,
-                    locale='en_UK'
+                    locale="en_UK",
                 ),
-                abbreviations.get(
-                    amount_str[1], amount_str[1]) if abbreviate else amount_str[1]
+                abbreviations.get(amount_str[1], amount_str[1])
+                if abbreviate
+                else amount_str[1],
             )
 
     return (
         babel.numbers.format_currency(
-            amount,
-            currency,
-            format="¤#,##0",
-            currency_digits=False,
-            locale='en_UK'
+            amount, currency, format="¤#,##0", currency_digits=False, locale="en_UK"
         ),
-        ""
+        "",
     )
 
 
-def get_currency_name(currency, count=2, locale='en_UK'):
+def get_currency_name(currency, count=2, locale="en_UK"):
     return babel.numbers.get_currency_name(currency, count, locale)
 
 

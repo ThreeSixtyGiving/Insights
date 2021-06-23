@@ -1,15 +1,16 @@
+import datetime
+import json
+import logging
 import os
 import pickle
-import logging
-import json
-import datetime
 
 from flask import current_app
 from redis import StrictRedis, from_url
+
 from .utils import CustomJSONEncoder
 
-REDIS_DEFAULT_URL = 'redis://localhost:6379/0'
-REDIS_ENV_VAR = 'REDIS_URL'
+REDIS_DEFAULT_URL = "redis://localhost:6379/0"
+REDIS_ENV_VAR = "REDIS_URL"
 
 
 def get_cache(strict=False):
@@ -17,6 +18,7 @@ def get_cache(strict=False):
     if strict:
         return StrictRedis.from_url(redis_url)
     return from_url(redis_url)
+
 
 def get_filename(fileid):
     uploads_folder = current_app.config.get("UPLOADS_FOLDER")
@@ -44,7 +46,7 @@ def save_to_cache(fileid, df, metadata=None, cache_type=None):
         "funders": df["Funding Org:0:Name"].unique().tolist(),
         "max_date": df["Award Date"].max().isoformat(),
         "min_date": df["Award Date"].min().isoformat(),
-        **metadata
+        **metadata,
     }
     r.hset("files", fileid, json.dumps(metadata, default=CustomJSONEncoder().default))
     logging.info("Dataframe [{}] metadata saved to redis".format(fileid))
@@ -78,9 +80,13 @@ def get_from_cache(fileid, cache_type=None):
         logging.info("Dataframe [{}] not found".format(fileid))
         return None
     if "expires" in metadata:
-        if datetime.datetime.strptime(metadata["expires"], "%Y-%m-%dT%H:%M:%S.%f") < datetime.datetime.now():
-            logging.info("Dataframe [{}] expired on {}".format(
-                fileid, metadata["expires"]))
+        if (
+            datetime.datetime.strptime(metadata["expires"], "%Y-%m-%dT%H:%M:%S.%f")
+            < datetime.datetime.now()
+        ):
+            logging.info(
+                "Dataframe [{}] expired on {}".format(fileid, metadata["expires"])
+            )
             return None
 
     if cache_type == "redis":
@@ -90,8 +96,7 @@ def get_from_cache(fileid, cache_type=None):
                 logging.info("Retrieved dataframe [{}] from redis".format(fileid))
                 return pickle.loads(df)
             except ImportError as error:
-                logging.info(
-                    "Dataframe [{}] could not be loaded".format(fileid))
+                logging.info("Dataframe [{}] could not be loaded".format(fileid))
                 return None
 
     else:
@@ -101,7 +106,8 @@ def get_from_cache(fileid, cache_type=None):
                 try:
                     df = pickle.load(pkl_file)
                     logging.info(
-                        "Retrieved dataframe [{}] from filesystem".format(fileid))
+                        "Retrieved dataframe [{}] from filesystem".format(fileid)
+                    )
                     return df
                 except ImportError as error:
                     logging.info("Dataframe [{}] could not be loaded".format(fileid))
@@ -109,6 +115,7 @@ def get_from_cache(fileid, cache_type=None):
         logging.info("File [{}] doesn't exist".format(filename))
 
     return None
+
 
 def get_metadata_from_cache(fileid):
     r = get_cache()

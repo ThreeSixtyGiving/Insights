@@ -1,27 +1,28 @@
+import json
 import logging
 import re
-import json
 
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
 from dash_dangerously_set_inner_html import DangerouslySetInnerHTML as InnerHTML
-from flask import url_for, render_template
+from flask import render_template, url_for
 
 from app import app
 from tsg_insights.data.cache import get_metadata_from_cache
+from tsg_insights_components import InsightChecklist, InsightDropdown, InsightFoldable
+
 from .data.charts import *
 from .data.filters import FILTERS, get_filtered_df
-from tsg_insights_components import InsightChecklist, InsightDropdown, InsightFoldable
 
 
 def footer(server):
     with server.app_context():
-        return InnerHTML(render_template('footer.html.j2', footer_class="light"))
+        return InnerHTML(render_template("footer.html.j2", footer_class="light"))
 
 
 def filter_html(filter_id, filter_def):
-    if filter_def.get("type") == 'rangeslider':
+    if filter_def.get("type") == "rangeslider":
         min_ = filter_def["defaults"].get("min", 0)
         max_ = filter_def["defaults"].get("max", 100)
         step_ = filter_def["defaults"].get("step", 1)
@@ -31,18 +32,18 @@ def filter_html(filter_id, filter_def):
             max=max_,
             step=step_,
             value=[min_, max_],
-            marks={str(min_): str(min_), str(max_): str(max_)}
+            marks={str(min_): str(min_), str(max_): str(max_)},
         )
 
-    if filter_def.get("type") == 'multidropdown':
+    if filter_def.get("type") == "multidropdown":
         return InsightChecklist(
             id=filter_id,
             ulClassName="results-page__menu__checkbox",
             options=filter_def["defaults"],
-            value=[filter_def["defaults"][0]["value"]]
+            value=[filter_def["defaults"][0]["value"]],
         )
 
-    if filter_def.get("type") == 'dropdown':
+    if filter_def.get("type") == "dropdown":
         return InsightDropdown(
             id=filter_id,
             options=filter_def["defaults"],
@@ -53,138 +54,217 @@ def filter_html(filter_id, filter_def):
         )
 
 
-layout = html.Div(id="dashboard-container", className='results-page', children=[
-    html.Div(className='results-page__header', children=[
-        html.Div(className='wrapper', children=[
-            html.A(
-                href='/',
-                children=[
-                    # "360",
-                    # html.Span(style={"color": "#BC2C26"}, children="Insights"),
-                    html.Img(src="/static/images/360insights-color.png", width=120),
-                ]
-            )
-        ]),
-    ]),
-    html.Div(className='results-page__app', children=[
-        html.Aside(className='results-page__menu', children=[
-            html.A(
-                className='results-page__menu__back',
-                href='/?file-selection-modal',
-                children=[
-                    html.I(className='material-icons', children='arrow_back'),
-                    " Select another dataset",
-                ]
-            ),
-            html.H3(className='results-page__menu__section-title',
-                    children='Filters'),
-            html.Form(id='filters-form', children=[
-                # @TODO: turn these into new filters
-                html.Div(className="cf", children=[
-                    html.Form(id="dashboard-filter", className='', children=[
-                        InsightFoldable(
-                            id='df-change-{}-wrapper'.format(filter_id),
-                            container=dict(
-                                className='results-page__menu__subsection',
-                            ),
-                            title=dict(
-                                value=filter_def.get('label', filter_id),
-                                className='results-page__menu__subsection-title js-foldable js-foldable-more',
-                                unfoldedClassName='js-foldable-less',
-                            ),
-                            value=dict(
-                                value="",
-                                className='results-page__menu__subsection-value js-foldable-target',
-                                foldedClassName='js-foldable-foldTarget',
-                                style={'maxHeight': '16px'},
-                            ),
-                            child=dict(
-                                className='js-foldable-target',
-                                foldedClassName='js-foldable-foldTarget',
-                            ),
+layout = html.Div(
+    id="dashboard-container",
+    className="results-page",
+    children=[
+        html.Div(
+            className="results-page__header",
+            children=[
+                html.Div(
+                    className="wrapper",
+                    children=[
+                        html.A(
+                            href="/",
                             children=[
-                                filter_html(
-                                    'df-change-{}'.format(filter_id), filter_def),
-                            ]
-                        ) for filter_id, filter_def in FILTERS.items()
-                    ] + [
-                        html.Div(className="results-page__menu__subsection", children=[
-                            html.A(id='df-reset-filters', href='#',
-                                   className='results-page__menu__reset', children='Reset all filters')
-                        ]),
-                        html.Div(className="results-page__menu__subsection", children=[
-                            html.P(className='results-page__menu__feedback', children=[
-                                'Tell us what you think',
-                                html.Br(),
-                                html.A(href='mailto:labs@threesixtygiving.org',
-                                       children='labs@threesixtygiving.org'),
-                            ]),
-                        ])
-                    ]),
-                ]),
-                dcc.Store(id='award-dates',
-                          data={f: FILTERS[f]["defaults"] for f in FILTERS}),
-            ]),
-        ]),
+                                # "360",
+                                # html.Span(style={"color": "#BC2C26"}, children="Insights"),
+                                html.Img(
+                                    src="/static/images/360insights-color.png",
+                                    width=120,
+                                ),
+                            ],
+                        )
+                    ],
+                ),
+            ],
+        ),
+        html.Div(
+            className="results-page__app",
+            children=[
+                html.Aside(
+                    className="results-page__menu",
+                    children=[
+                        html.A(
+                            className="results-page__menu__back",
+                            href="/?file-selection-modal",
+                            children=[
+                                html.I(
+                                    className="material-icons", children="arrow_back"
+                                ),
+                                " Select another dataset",
+                            ],
+                        ),
+                        html.H3(
+                            className="results-page__menu__section-title",
+                            children="Filters",
+                        ),
+                        html.Form(
+                            id="filters-form",
+                            children=[
+                                # @TODO: turn these into new filters
+                                html.Div(
+                                    className="cf",
+                                    children=[
+                                        html.Form(
+                                            id="dashboard-filter",
+                                            className="",
+                                            children=[
+                                                InsightFoldable(
+                                                    id="df-change-{}-wrapper".format(
+                                                        filter_id
+                                                    ),
+                                                    container=dict(
+                                                        className="results-page__menu__subsection",
+                                                    ),
+                                                    title=dict(
+                                                        value=filter_def.get(
+                                                            "label", filter_id
+                                                        ),
+                                                        className="results-page__menu__subsection-title js-foldable js-foldable-more",
+                                                        unfoldedClassName="js-foldable-less",
+                                                    ),
+                                                    value=dict(
+                                                        value="",
+                                                        className="results-page__menu__subsection-value js-foldable-target",
+                                                        foldedClassName="js-foldable-foldTarget",
+                                                        style={"maxHeight": "16px"},
+                                                    ),
+                                                    child=dict(
+                                                        className="js-foldable-target",
+                                                        foldedClassName="js-foldable-foldTarget",
+                                                    ),
+                                                    children=[
+                                                        filter_html(
+                                                            "df-change-{}".format(
+                                                                filter_id
+                                                            ),
+                                                            filter_def,
+                                                        ),
+                                                    ],
+                                                )
+                                                for filter_id, filter_def in FILTERS.items()
+                                            ]
+                                            + [
+                                                html.Div(
+                                                    className="results-page__menu__subsection",
+                                                    children=[
+                                                        html.A(
+                                                            id="df-reset-filters",
+                                                            href="#",
+                                                            className="results-page__menu__reset",
+                                                            children="Reset all filters",
+                                                        )
+                                                    ],
+                                                ),
+                                                html.Div(
+                                                    className="results-page__menu__subsection",
+                                                    children=[
+                                                        html.P(
+                                                            className="results-page__menu__feedback",
+                                                            children=[
+                                                                "Tell us what you think",
+                                                                html.Br(),
+                                                                html.A(
+                                                                    href="mailto:labs@threesixtygiving.org",
+                                                                    children="labs@threesixtygiving.org",
+                                                                ),
+                                                            ],
+                                                        ),
+                                                    ],
+                                                ),
+                                            ],
+                                        ),
+                                    ],
+                                ),
+                                dcc.Store(
+                                    id="award-dates",
+                                    data={f: FILTERS[f]["defaults"] for f in FILTERS},
+                                ),
+                            ],
+                        ),
+                    ],
+                ),
+                html.Div(
+                    className="results-page__body",
+                    children=[
+                        # dcc.Tabs(id="tabs", value='dashboard', children=[
+                        #     dcc.Tab(label='Dashboard', value='dashboard'),
+                        #     dcc.Tab(label='Giving map', value='giving-map'),
+                        # ]),
+                        html.Section(
+                            className="results-page__body__content",
+                            id="dashboard-output",
+                        ),
+                        html.Section(
+                            className="results-page__body__whats-next",
+                            id="whats-next",
+                            children=[],
+                        ),
+                        footer(app.server),
+                    ],
+                ),
+            ],
+        ),
+    ],
+)
 
-        html.Div(className="results-page__body", children=[
-            # dcc.Tabs(id="tabs", value='dashboard', children=[
-            #     dcc.Tab(label='Dashboard', value='dashboard'),
-            #     dcc.Tab(label='Giving map', value='giving-map'),
-            # ]),
-            html.Section(className='results-page__body__content',
-                         id="dashboard-output"),
-            html.Section(
-                className='results-page__body__whats-next',
-                id="whats-next",
-                children=[]
-            ),
-            footer(app.server),
-        ]),
-    ]),
-])
 
-
-@app.callback([Output('dashboard-output', 'children'),
-               Output('whats-next', 'children'), 
-               Output('dashboard-output', 'className'), ],
-              [Input('output-data-id', 'data'),
-            #    Input('tabs', 'value'),
-               ] + [
-                  Input('df-change-{}'.format(f), 'value')
-                  for f in FILTERS
-])
+@app.callback(
+    [
+        Output("dashboard-output", "children"),
+        Output("whats-next", "children"),
+        Output("dashboard-output", "className"),
+    ],
+    [
+        Input("output-data-id", "data"),
+        #    Input('tabs', 'value'),
+    ]
+    + [Input("df-change-{}".format(f), "value") for f in FILTERS],
+)
 def dashboard_output(fileid, *args):
     filter_args = dict(zip(FILTERS.keys(), args))
     df = get_filtered_df(fileid, **filter_args)
 
     metadata = get_metadata_from_cache(fileid)
-    className = 'results-page__body__content'
+    className = "results-page__body__content"
 
     if df is None:
         return (
             [
                 html.H1(
-                    html.Span("Dataset not found",
-                              className="results-page__body__content__date"),
-                    className="results-page__body__content__header"),
-                html.P(([
-                    html.A("Try to fetch this file",
-                           href="/?fetch={}".format(fileid)),
-                    " or "
-                ] if fileid else []) + [
-                    html.A("Go to homepage",
-                           href="/"),
-                ], className="results-page__body__section-description"),
+                    html.Span(
+                        "Dataset not found",
+                        className="results-page__body__content__date",
+                    ),
+                    className="results-page__body__content__header",
+                ),
+                html.P(
+                    (
+                        [
+                            html.A(
+                                "Try to fetch this file",
+                                href="/?fetch={}".format(fileid),
+                            ),
+                            " or ",
+                        ]
+                        if fileid
+                        else []
+                    )
+                    + [
+                        html.A("Go to homepage", href="/"),
+                    ],
+                    className="results-page__body__section-description",
+                ),
             ],
             None,
-            className
+            className,
         )
 
     whatsnext = what_next_missing_fields(df, fileid)
 
     if len(df) == 0:
-        return (html.Div('No grants meet criteria'), whatsnext, className)
+        return (html.Div("No grants meet criteria"), whatsnext, className)
 
     # if tabid == 'giving-map':
     #     return [
@@ -233,107 +313,156 @@ def what_next_missing_fields(df, fileid):
 
     missing = []
     if (df["__geo_ctry"].count() + df["__geo_rgn"].count()) == 0:
-        missing.append(["postcodes or other geo data",
-                        "https://findthatpostcode.uk/"])
+        missing.append(["postcodes or other geo data", "https://findthatpostcode.uk/"])
 
-    org_type = CHARTS['org_type']['get_results'](df)
+    org_type = CHARTS["org_type"]["get_results"](df)
     if "Identifier not recognised" in org_type.index and len(org_type.index) == 1:
-        missing.append(["external organisation identifiers, like charity numbers",
-                        'http://standard.threesixtygiving.org/en/latest/identifiers/#id2'])
+        missing.append(
+            [
+                "external organisation identifiers, like charity numbers",
+                "http://standard.threesixtygiving.org/en/latest/identifiers/#id2",
+            ]
+        )
 
     if not missing:
         missing = [
-            html.P([
-                html.Strong('3. Make the most of your data'),
-                html.Br(),
-                '''Grants data is at its most powerful when it is linked to other datasets.
+            html.P(
+                [
+                    html.Strong("3. Make the most of your data"),
+                    html.Br(),
+                    """Grants data is at its most powerful when it is linked to other datasets.
                 As the data in this case included postcodes and organisation identifiers
                 we've been able to map and link it to other datasets. If you’d like one-to-one
-                guidance on how to use data to support your grantmaking, book an ''',
-                html.A('Office Hour',
-                       href='https://www.threesixtygiving.org/support/officehours/'),
-                '.',
-            ]),
+                guidance on how to use data to support your grantmaking, book an """,
+                    html.A(
+                        "Office Hour",
+                        href="https://www.threesixtygiving.org/support/officehours/",
+                    ),
+                    ".",
+                ]
+            ),
         ]
     else:
         missing = [
-            html.P([
-                html.Strong('3. Make the most of your data'),
-                html.Br(),
-                '''Grants data is at its most powerful when it is linked to other datasets
+            html.P(
+                [
+                    html.Strong("3. Make the most of your data"),
+                    html.Br(),
+                    """Grants data is at its most powerful when it is linked to other datasets
                     There were some pieces missing from the data you selected which meant we couldn't
-                    make the most of it. For linkable data, we suggest adding, wherever possible:''',
-            ]),
-            html.Ul([
-                html.Li([
-                    html.A(m[0], href=m[1])
-                ]) for m in missing
-            ]),
-            html.P([
-                '''If you’d like one-to-one
-                guidance on how to use data to support your grantmaking, book an ''',
-                html.A('Office Hour',
-                       href='https://www.threesixtygiving.org/support/officehours/'),
-                '.',
-            ]),
+                    make the most of it. For linkable data, we suggest adding, wherever possible:""",
+                ]
+            ),
+            html.Ul([html.Li([html.A(m[0], href=m[1])]) for m in missing]),
+            html.P(
+                [
+                    """If you’d like one-to-one
+                guidance on how to use data to support your grantmaking, book an """,
+                    html.A(
+                        "Office Hour",
+                        href="https://www.threesixtygiving.org/support/officehours/",
+                    ),
+                    ".",
+                ]
+            ),
         ]
 
     return [
-        html.H3(className="results-page__body__whats-next__title",
-                children='What next?'),
-        html.Div([
-            html.P([
-                html.Strong('1. Do your own analysis'),
-                html.Br(),
-                '''You can download the data generated by 360Insights to analyse yourself in Excel 
+        html.H3(
+            className="results-page__body__whats-next__title", children="What next?"
+        ),
+        html.Div(
+            [
+                html.P(
+                    [
+                        html.Strong("1. Do your own analysis"),
+                        html.Br(),
+                        """You can download the data generated by 360Insights to analyse yourself in Excel 
                 or using CSV with other software. The download includes all the additional information we've added to the data,
-                            like charity data or geo data from the postcodes.''',
-            ]),
-            html.Ul([
-                html.Li(html.A(href=url_for('data.download_file', fileid=fileid, format='csv'), target="_blank",
-                               children='CSV Download', id='file-download-csv')),
-                html.Li(html.A(href=url_for('data.download_file', fileid=fileid, format='xlsx'), target="_blank",
-                               children='Excel Download', id='file-download-excel')),
-            ]),
-        ]),
-        html.Div([
-            html.P([
-                html.Strong(
-                    '2. Try other tools and get inspired'),
-                html.Br(),
-                '''There are lots of other services you can use to explore and visualise this kind of data. Here are some of our favourites:''',
-            ]),
-            html.Ul([
-                html.Li(
-                    [html.A('Flourish', href='https://flourish.studio/')]),
-                html.Li(
-                    [html.A('Databasic', href='https://databasic.io/')]),
-                html.Li([html.A('Carto', href='https://carto.com/')]),
-                html.Li(
-                    [html.A('360Giving\'s visualisation challenge', href='https://challenge.threesixtygiving.org/')]),
-            ]),
-        ]),
+                            like charity data or geo data from the postcodes.""",
+                    ]
+                ),
+                html.Ul(
+                    [
+                        html.Li(
+                            html.A(
+                                href=url_for(
+                                    "data.download_file", fileid=fileid, format="csv"
+                                ),
+                                target="_blank",
+                                children="CSV Download",
+                                id="file-download-csv",
+                            )
+                        ),
+                        html.Li(
+                            html.A(
+                                href=url_for(
+                                    "data.download_file", fileid=fileid, format="xlsx"
+                                ),
+                                target="_blank",
+                                children="Excel Download",
+                                id="file-download-excel",
+                            )
+                        ),
+                    ]
+                ),
+            ]
+        ),
+        html.Div(
+            [
+                html.P(
+                    [
+                        html.Strong("2. Try other tools and get inspired"),
+                        html.Br(),
+                        """There are lots of other services you can use to explore and visualise this kind of data. Here are some of our favourites:""",
+                    ]
+                ),
+                html.Ul(
+                    [
+                        html.Li([html.A("Flourish", href="https://flourish.studio/")]),
+                        html.Li([html.A("Databasic", href="https://databasic.io/")]),
+                        html.Li([html.A("Carto", href="https://carto.com/")]),
+                        html.Li(
+                            [
+                                html.A(
+                                    "360Giving's visualisation challenge",
+                                    href="https://challenge.threesixtygiving.org/",
+                                )
+                            ]
+                        ),
+                    ]
+                ),
+            ]
+        ),
         html.Div(missing),
-        html.Div([
-            html.P([
-                html.Strong('4. Give us feedback!'),
-                html.Br(),
-                '''If you like 360Insights, found a bug or want to request features, email ''',
-                html.A('labs@threesixtygiving.org',
-                       href='mailto:labs@threesixtygiving.org'),
-                '''.''',
-                html.Br(),
-                '''You could share what you’ve learned with your communities (perhaps including
-                screenshots or the URL) using the hashtag ''',
-                html.A('#360Insights',
-                       href='https://twitter.com/search?f=tweets&vertical=default&q=%23360Insights&src=typd'),
-                ''' on Twitter.''',
-            ]),
-        ]),
+        html.Div(
+            [
+                html.P(
+                    [
+                        html.Strong("4. Give us feedback!"),
+                        html.Br(),
+                        """If you like 360Insights, found a bug or want to request features, email """,
+                        html.A(
+                            "labs@threesixtygiving.org",
+                            href="mailto:labs@threesixtygiving.org",
+                        ),
+                        """.""",
+                        html.Br(),
+                        """You could share what you’ve learned with your communities (perhaps including
+                screenshots or the URL) using the hashtag """,
+                        html.A(
+                            "#360Insights",
+                            href="https://twitter.com/search?f=tweets&vertical=default&q=%23360Insights&src=typd",
+                        ),
+                        """ on Twitter.""",
+                    ]
+                ),
+            ]
+        ),
     ]
 
-@app.callback(Output('award-dates', 'data'),
-              [Input('output-data-id', 'data')])
+
+@app.callback(Output("award-dates", "data"), [Input("output-data-id", "data")])
 def award_dates_change(fileid):
     df = get_filtered_df(fileid)
     if df is None:
@@ -347,6 +476,7 @@ def award_dates_change(fileid):
             result[f] = FILTERS[f]["defaults"](df)
     return result
 
+
 # ================
 # Functions that return a function to be used in callbacks
 # ================
@@ -357,20 +487,21 @@ def dropdown_filter(filter_id, filter_def):
         value = value if value else {filter_id: filter_def["defaults"]}
 
         # container style
-        if 'style' not in container:
-            container['style'] = {}
+        if "style" not in container:
+            container["style"] = {}
         value = value if value else {filter_id: filter_def["defaults"]}
         if len(value[filter_id]) > 1:
-            if "display" in container['style']:
-                del container['style']["display"]
+            if "display" in container["style"]:
+                del container["style"]["display"]
         else:
-            container['style']["display"] = 'none'
+            container["style"]["display"] = "none"
 
         return (
             value[filter_id],
-            (['__all'] if n_clicks else existing_value),
+            (["__all"] if n_clicks else existing_value),
             container,
         )
+
     return dropdown_filter_func
 
 
@@ -379,26 +510,24 @@ def slider_filter(filter_id, filter_def):
         value = value if value else {filter_id: filter_def["defaults"]}
 
         # work out the marks
-        step = 3 if (value[filter_id]["max"] -
-                     value[filter_id]["min"]) > 6 else 1
-        min_max = range(value[filter_id]["min"],
-                        value[filter_id]["max"] + 1, step)
+        step = 3 if (value[filter_id]["max"] - value[filter_id]["min"]) > 6 else 1
+        min_max = range(value[filter_id]["min"], value[filter_id]["max"] + 1, step)
 
         # container style
-        if 'style' not in container:
-            container['style'] = {}
+        if "style" not in container:
+            container["style"] = {}
         if value[filter_id]["min"] != value[filter_id]["max"]:
-            if "display" in container['style']:
-                del container['style']["display"]
+            if "display" in container["style"]:
+                del container["style"]["display"]
         else:
-            container['style']["display"] = 'none'
+            container["style"]["display"] = "none"
 
         return (
             value[filter_id]["min"],
             value[filter_id]["max"],
             {str(i): str(i) for i in min_max},
             [value[filter_id]["min"], value[filter_id]["max"]],
-            container
+            container,
         )
 
     return slider_filter_func
@@ -408,24 +537,26 @@ def set_dropdown_value(filter_id, filter_def):
     def set_dropdown_value_fund(value, options, existingvaluedef):
         if filter_def.get("type") == "rangeslider":
             if value[0] == value[1]:
-                existingvaluedef['value'] = str(value[0])
+                existingvaluedef["value"] = str(value[0])
             else:
-                existingvaluedef['value'] = "{} to {}".format(
-                    value[0], value[1])
+                existingvaluedef["value"] = "{} to {}".format(value[0], value[1])
             return existingvaluedef
 
-        value_labels = [re.sub(r' \([0-9,]+\)$', "", o['label'])
-                        for o in options if o['value'] in value]
+        value_labels = [
+            re.sub(r" \([0-9,]+\)$", "", o["label"])
+            for o in options
+            if o["value"] in value
+        ]
         if len(value_labels) == 0:
-            existingvaluedef['value'] = filter_def.get("defaults", [{}])[
-                0].get("label")
+            existingvaluedef["value"] = filter_def.get("defaults", [{}])[0].get("label")
         elif len(value_labels) == 1:
-            existingvaluedef['value'] = value_labels[0]
+            existingvaluedef["value"] = value_labels[0]
         elif len(value_labels) <= 3:
-            existingvaluedef['value'] = ", ".join(value_labels)
+            existingvaluedef["value"] = ", ".join(value_labels)
         else:
-            existingvaluedef['value'] = "Multiple options selected"
+            existingvaluedef["value"] = "Multiple options selected"
         return existingvaluedef
+
     return set_dropdown_value_fund
 
 
@@ -433,49 +564,55 @@ def set_dropdown_value(filter_id, filter_def):
 for filter_id, filter_def in FILTERS.items():
 
     # callback to update the text showing filtered options next to the filter
-    if filter_def.get("type") in ['rangeslider']:
-        app.callback(Output('df-change-{}-wrapper'.format(filter_id), 'value'),
-                    [Input('df-change-{}'.format(filter_id), 'value')],
-                    [State('df-change-{}'.format(filter_id), 'marks'),
-                     State('df-change-{}-wrapper'.format(filter_id), 'value')])(
-            set_dropdown_value(filter_id, filter_def)
-        )
+    if filter_def.get("type") in ["rangeslider"]:
+        app.callback(
+            Output("df-change-{}-wrapper".format(filter_id), "value"),
+            [Input("df-change-{}".format(filter_id), "value")],
+            [
+                State("df-change-{}".format(filter_id), "marks"),
+                State("df-change-{}-wrapper".format(filter_id), "value"),
+            ],
+        )(set_dropdown_value(filter_id, filter_def))
     else:
-        app.callback(Output('df-change-{}-wrapper'.format(filter_id), 'value'),
-                    [Input('df-change-{}'.format(filter_id), 'value')],
-                    [State('df-change-{}'.format(filter_id), 'options'),
-                        State('df-change-{}-wrapper'.format(filter_id), 'value')])(
-            set_dropdown_value(filter_id, filter_def)
-        )
+        app.callback(
+            Output("df-change-{}-wrapper".format(filter_id), "value"),
+            [Input("df-change-{}".format(filter_id), "value")],
+            [
+                State("df-change-{}".format(filter_id), "options"),
+                State("df-change-{}-wrapper".format(filter_id), "value"),
+            ],
+        )(set_dropdown_value(filter_id, filter_def))
 
-    if filter_def.get("type") in ['dropdown', 'multidropdown']:
+    if filter_def.get("type") in ["dropdown", "multidropdown"]:
 
         # filter callback
         app.callback(
-            [Output('df-change-{}'.format(filter_id), 'options'),
-             Output('df-change-{}'.format(filter_id), 'value'),
-             Output('df-change-{}-wrapper'.format(filter_id), 'container'), ],
-            [Input('award-dates', 'data'),
-             Input('df-reset-filters', 'n_clicks')],
-            [State('df-change-{}'.format(filter_id), 'value'),
-             State('df-change-{}-wrapper'.format(filter_id), 'container')]
-        )(
-            dropdown_filter(filter_id, filter_def)
-        )
+            [
+                Output("df-change-{}".format(filter_id), "options"),
+                Output("df-change-{}".format(filter_id), "value"),
+                Output("df-change-{}-wrapper".format(filter_id), "container"),
+            ],
+            [Input("award-dates", "data"), Input("df-reset-filters", "n_clicks")],
+            [
+                State("df-change-{}".format(filter_id), "value"),
+                State("df-change-{}-wrapper".format(filter_id), "container"),
+            ],
+        )(dropdown_filter(filter_id, filter_def))
 
-    elif filter_def.get("type") in ['rangeslider']:
+    elif filter_def.get("type") in ["rangeslider"]:
 
         # callback setting the minimum value of a slider
         app.callback(
-            [Output('df-change-{}'.format(filter_id), 'min'),
-             Output('df-change-{}'.format(filter_id), 'max'),
-             Output('df-change-{}'.format(filter_id), 'marks'),
-             Output('df-change-{}'.format(filter_id), 'value'),
-             Output('df-change-{}-wrapper'.format(filter_id), 'container'), ],
-            [Input('award-dates', 'data'),
-             Input('df-reset-filters', 'n_clicks')],
-            [State('df-change-{}'.format(filter_id), 'value'),
-             State('df-change-{}-wrapper'.format(filter_id), 'container')]
-        )(
-            slider_filter(filter_id, filter_def)
-        )
+            [
+                Output("df-change-{}".format(filter_id), "min"),
+                Output("df-change-{}".format(filter_id), "max"),
+                Output("df-change-{}".format(filter_id), "marks"),
+                Output("df-change-{}".format(filter_id), "value"),
+                Output("df-change-{}-wrapper".format(filter_id), "container"),
+            ],
+            [Input("award-dates", "data"), Input("df-reset-filters", "n_clicks")],
+            [
+                State("df-change-{}".format(filter_id), "value"),
+                State("df-change-{}-wrapper".format(filter_id), "container"),
+            ],
+        )(slider_filter(filter_id, filter_def))
