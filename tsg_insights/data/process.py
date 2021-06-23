@@ -102,7 +102,8 @@ def get_dataframe_from_url(url, use_cache=True):
 
     # work out the version of the file
     # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Last-Modified
-    last_modified = headers.get("ETag", headers.get("Last-Modified"))
+    if headers:
+        last_modified = headers.get("ETag", headers.get("Last-Modified"))
 
     # 2. Get the registry entry for the file (if available)
     registry = get_reg_file_from_url(url)
