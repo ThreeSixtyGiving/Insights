@@ -11,6 +11,7 @@ redis
 inflect
 humanize
 Babel
+lxml>=4.6.3
 rq==1.6.1
 tqdm
 xlsxwriter

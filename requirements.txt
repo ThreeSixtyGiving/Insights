@@ -66,8 +66,10 @@ jsonref==0.2
     #   threesixtygiving
 jsonschema==2.6.0
     # via threesixtygiving
-lxml==4.6.2
-    # via flattentool
+lxml==4.6.3
+    # via
+    #   -r requirements.in
+    #   flattentool
 markupsafe==2.0.1
     # via jinja2
 numpy==1.19.3

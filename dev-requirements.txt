@@ -14,7 +14,7 @@ attrs==20.3.0
     # via pytest
 babel==2.9.0
     # via -r requirements.txt
-black==20.8b1
+black==21.6b0
     # via -r dev-requirements.in
 brotli==1.0.9
     # via
@@ -118,7 +118,7 @@ jsonschema==2.6.0
     # via
     #   -r requirements.txt
     #   threesixtygiving
-lxml==4.6.2
+lxml==4.6.3
     # via
     #   -r requirements.txt
     #   flattentool
@@ -215,10 +215,6 @@ toml==0.10.2
     #   pytest
 tqdm==4.57.0
     # via -r requirements.txt
-typed-ast==1.4.2
-    # via black
-typing-extensions==3.7.4.3
-    # via black
 urllib3==1.24.3
     # via
     #   -r requirements.txt
