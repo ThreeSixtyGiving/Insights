@@ -102,6 +102,7 @@ def get_dataframe_from_url(url, use_cache=True):
 
     # work out the version of the file
     # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Last-Modified
+    last_modified = None
     if headers:
         last_modified = headers.get("ETag", headers.get("Last-Modified"))
 
