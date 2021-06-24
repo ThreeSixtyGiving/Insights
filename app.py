@@ -6,11 +6,13 @@ from tsg_insights import create_app
 server = create_app()
 
 scripts = []
-analytics_script = ''
+analytics_script = ""
 if server.config.get("GOOGLE_ANALYTICS_TRACKING_ID"):
-    scripts.append("https://www.googletagmanager.com/gtag/js?id={}".format(
-        server.config.get("GOOGLE_ANALYTICS_TRACKING_ID")
-    ))
+    scripts.append(
+        "https://www.googletagmanager.com/gtag/js?id={}".format(
+            server.config.get("GOOGLE_ANALYTICS_TRACKING_ID")
+        )
+    )
     analytics_script = """
         <div id="cookie-consent-container">
             <span>
@@ -47,7 +49,9 @@ if server.config.get("GOOGLE_ANALYTICS_TRACKING_ID"):
             console.log("cookies have been asked");
             document.getElementById('cookie-consent-container').hidden = true;
         }
-        </script>""" % server.config.get("GOOGLE_ANALYTICS_TRACKING_ID")
+        </script>""" % server.config.get(
+        "GOOGLE_ANALYTICS_TRACKING_ID"
+    )
 
 app = dash.Dash(
     __name__,
@@ -64,7 +68,7 @@ app = dash.Dash(
     ],
     external_scripts=scripts,
     server=server,
-    url_base_pathname='/file/'
+    url_base_pathname="/file/",
 )
 app.config.suppress_callback_exceptions = True
 
@@ -73,7 +77,8 @@ if server.config.get("DEBUG"):
         debug=True,
     )
 
-app.index_string = '''
+app.index_string = (
+    """
 <!DOCTYPE html>
 <html>
     <head>
@@ -87,9 +92,12 @@ app.index_string = '''
         {%config%}
         {%scripts%}
         {%renderer%}
-        ''' + analytics_script + '''
+        """
+    + analytics_script
+    + """
     </body>
 </html>
-'''
+"""
+)
 
-app.title = '360Giving Insights'
+app.title = "360Giving Insights"

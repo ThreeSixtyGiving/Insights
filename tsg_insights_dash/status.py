@@ -11,10 +11,10 @@ import dash_resumable_upload
 import dateutil.parser
 import humanize
 import pandas as pd
-from charts import format_currency, message_box, pluralize
 from dash.dependencies import Input, Output, State
 
 from app import app
+from tsg_insights.data.charts import format_currency, message_box, pluralize
 from tsg_insights.data.registry import get_registry, get_registry_by_publisher
 
 FILE_TYPES = {
