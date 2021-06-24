@@ -11,7 +11,7 @@ redis
 inflect
 humanize
 Babel
-rq
+rq==1.6.1
 tqdm
 xlsxwriter
 gunicorn
