@@ -203,8 +203,9 @@ const dataFromURL = function (url) {
     });
 }
 
-if (urlParams.has("url")) {
-    dataFromURL(urlParams.get("url"));
+if (window.location.search.startsWith("?url=")) {
+    var url_to_fetch = window.location.search.replace("?url=", "");
+    dataFromURL(url_to_fetch);
 }
 
 const sendFile = function (file) {
