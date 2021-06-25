@@ -79,11 +79,12 @@ dokku redis:link insightscache insights
 
 # enable domains
 dokku domains:enable insights
-dokku domains:add insights example.com
+dokku domains:set insights example.com
 
 # letsencrypt
+sudo dokku plugin:install https://github.com/dokku/dokku-letsencrypt.git
 dokku config:set --no-restart insights DOKKU_LETSENCRYPT_EMAIL=your@email.tld
-dokku letsencrypt insights
+dokku letsencrypt:enable insights
 
 # create app storage
 mkdir -p /var/lib/dokku/data/storage/insights-uploads
