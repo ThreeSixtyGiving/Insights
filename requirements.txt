@@ -117,7 +117,7 @@ six==1.16.0
     #   url-normalize
 tenacity==8.0.1
     # via plotly
-git+https://github.com/drkane/threesixty-parser.git@0bce04c4b9d36575e3d2c2b326c445b665e5447d#egg=threesixtygiving
+threesixtygiving @ git+https://github.com/drkane/threesixty-parser.git@0bce04c4b9d36575e3d2c2b326c445b665e5447d
     # via -r requirements.in
 tqdm==4.62.2
     # via -r requirements.in
