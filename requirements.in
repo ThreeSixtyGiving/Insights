@@ -1,7 +1,7 @@
 # Process this file using `pip-compile` from the package `pip-tools`
 pandas
 numpy==1.19.3
-dash
+dash<2.0.0
 dash-dangerously-set-inner-html
 dash-resumable-upload
 flask
@@ -16,6 +16,6 @@ rq==1.6.1
 tqdm
 xlsxwriter
 gunicorn
-git+https://github.com/drkane/threesixty-parser.git@0bce04c4b9d36575e3d2c2b326c445b665e5447d#egg=threesixtygiving
+git+https://github.com/drkane/threesixty-parser.git@be3ca81aec835c6d3e4c7a67aa88105c5548bfe6#egg=threesixtygiving
 # Temporarily force version https://github.com/ThreeSixtyGiving/Insights/issues/168
 openpyxl==2.5.8
