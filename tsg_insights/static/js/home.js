@@ -204,8 +204,9 @@ const dataFromURL = function (url) {
 }
 
 if (window.location.search.startsWith("?url=")) {
-    var url_to_fetch = window.location.search.replace("?url=", "");
-    dataFromURL(url_to_fetch);
+    var urlToFetch = window.location.search.replace("?url=", "");
+
+    dataFromURL(decodeURIComponent(urlToFetch));
 }
 
 const sendFile = function (file) {
